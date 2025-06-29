@@ -1,0 +1,111 @@
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser } from "../../features/auth/UserLoginSlice";
+import { RootState } from "@reduxjs/toolkit/query";
+import { useNavigate } from "react-router-dom";
+import Loading from "../../components/Loading";
+
+const Login: React.FC = () => {
+
+const response = useSelector((state : RootState) => state.ErrorModalWindowSlice)
+const {data, isLoading} = useSelector((state : RootState) => state.UserLoginSlice)
+
+const dispatch = useDispatch()
+const navigate = useNavigate()
+
+const [formData, setFormData] = useState<LoginForm>({
+  email: "",
+  password: "",
+});
+
+const handleChange = (
+  e: React.ChangeEvent<HTMLInputElement>
+) => {
+  const { name, value } = e.target;
+  setFormData((prev) => ({ ...prev, [name]: value }));
+};
+
+const login = async (e) =>{
+  e.preventDefault()
+  dispatch(loginUser(formData))
+  setFormData({email : "", password : ""})
+}
+
+useEffect(() =>{
+console.log(response)
+if(data){
+  navigate("/")
+}
+},[data])
+
+if(isLoading){
+  <Loading />
+}
+
+  return (
+    <>
+
+     <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4">
+           <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+                   Login to Shopaxweb
+         </h2>
+         <form onSubmit={login} className="space-y-4">
+           <div>
+             <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors duration-300"
+          >
+            Login
+          </button>
+        </form>
+
+        <p className="text-center text-sm text-gray-600 mt-4">
+          Don't have an account?
+          <a href="/signup" className="text-blue-500 hover:underline ml-1">
+            Sign up
+          </a>
+        </p>
+      </div>
+    </div>
+    </>
+
+  )
+}
+
+export default Login;
