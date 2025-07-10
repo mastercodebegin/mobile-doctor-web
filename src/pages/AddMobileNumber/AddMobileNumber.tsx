@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
+import { AppDispatch, RootState } from "../../redux/store";
 import Loading from "../../components/Loading";
 import { CreateModalNumber, FetchAllModalNumber, FetchBrandIdModalNumber, Remove, restore, Update, UpdateModalNumber } from "./MobileNumberSlice";
 import ConfirmationModal from "../../components/ConfirmationModal";
@@ -27,7 +27,7 @@ const MobileNumberPage = () => {
   const { SubCategoriesData } = useSelector((state: RootState) => state.SubCategorySlice);
   const { BrandData } = useSelector((state: RootState) => state.BrandSlice);
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const usersPerPage = 5;
 
@@ -424,9 +424,6 @@ const handleConfirmSave = async () => {
   useEffect(() => {
     setIsLoaded(true);
         localStorage.setItem("Modal-Numbers", JSON.stringify(AllModalNumberData));
-        // localStorage.setItem("Category", JSON.stringify(data))
-        // localStorage.setItem("Sub-Category", JSON.stringify(SubCategoriesData))
-    // localStorage.setItem("Brand-Modal-Numbers", JSON.stringify(BrandModalNumberData));
     dispatch(GetAllSubCategory());
     dispatch(GetAllBrand());
     dispatch(GetAllCategory());
@@ -537,7 +534,7 @@ useEffect(() => {
   onClick={handleCreateModelClick} // ✅ Changed from setShowModal(true)
   className={`${SubmitButtonClass}`}
 >
-  Create Model Number
+  Add
 </button>
         </div>
 
@@ -658,7 +655,7 @@ useEffect(() => {
                                     ];
 
                                     return variantFields.map((field, i) => (
-                                      <div key={i} className="p-4 bg-white rounded shadow-sm border">
+                                      <div key={i} className="p-4 bg-white rounded shadow-sm border border-gray-200">
                                         <div className="text-sm font-medium text-green-600">{field.label}</div>
                                         <div className="text-sm text-gray-800 mt-1">{field.value}</div>
                                       </div>

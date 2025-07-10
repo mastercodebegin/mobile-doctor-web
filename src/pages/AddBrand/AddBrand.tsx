@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
+import { AppDispatch, RootState } from "../../redux/store";
 import Loading from "../../components/Loading";
 import { CreateBrand, GetAllBrand, Remove, restore, Update, UpdateBrand } from "./BrandSlice";
 import ConfirmationModal from "../../components/ConfirmationModal";
@@ -14,7 +14,7 @@ const AddBrand = () => {
 
   const {BrandData , isLoading , Edit} = useSelector((state : RootState) => state.BrandSlice)
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
   const [showModal , setShowModal] = useState(false)
     const [category, setCategory] = useState("");
     const [isEditMode , setIsEditMode] = useState(false);
@@ -90,7 +90,8 @@ const AddBrand = () => {
           dispatch(restore(null))
         })
         .catch((err : any) =>{
-          toast.error("Brand Creation Failed: " + err)
+          // toast.error("Brand Creation Failed: " + err)
+          console.log("Brand Creation Failed :" + err)
         })    
     };
         

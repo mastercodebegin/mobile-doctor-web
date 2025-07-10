@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { DeleteClass, EditClass, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, ShowVarientButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
 import Pagination from "../../helper/Pagination";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
+import { AppDispatch, RootState } from "../../redux/store";
 import Loading from "../../components/Loading";
 import { FetchAllModalNumber } from "../AddMobileNumber/MobileNumberSlice";
 import { CreateVariant, DeleteVariant, FetchVariantByModalId, Remove, Update, UpdateVariant } from "./VarientSlice";
@@ -25,7 +25,7 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
   const { AllModalNumberData } = useSelector((state: RootState) => state.MobileNumberSlice);
   const { colorData } = useSelector((state: RootState) => state.ColorNameSlice);
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const toggleSpecRow = (id: any) => {
     setOpenSpecRow(openSpecRow === id ? null : id);
@@ -65,7 +65,7 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
   const [editingVariant, setEditingVariant] = useState(null);
 
   // File handling state
-  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [selectedFiles, setSelectedFiles] = useState<any[]>([]);
 
   const usersPerPage = 5;
 
@@ -550,7 +550,7 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
               onClick={handleCreateVariant} 
               className={SubmitButtonClass}
             >
-              Create Variant
+              Add
             </button>
           </div>
         </div>

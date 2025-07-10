@@ -1,19 +1,25 @@
-import { useEffect, useState } from "react";
+import { SetStateAction, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../../features/auth/UserLoginSlice";
-import { RootState } from "@reduxjs/toolkit/query";
 import { useNavigate } from "react-router-dom";
 import Loading from "../../components/Loading";
+import { toast } from "react-toastify";
+import { AppDispatch, RootState } from "../../redux/store";
+import { Dispatch } from "@reduxjs/toolkit";
 
-const Login: React.FC = () => {
+interface LoginPageProps {
+  onLogin: Dispatch<SetStateAction<string>>;
+}
+
+const Login: React.FC<LoginPageProps> = ({onLogin}) => {
 
 const response = useSelector((state : RootState) => state.ErrorModalWindowSlice)
-const {data, isLoading} = useSelector((state : RootState) => state.UserLoginSlice)
+const {isLoading} = useSelector((state : RootState) => state.UserLoginSlice)
 
-const dispatch = useDispatch()
+const dispatch = useDispatch<AppDispatch>()
 const navigate = useNavigate()
 
-const [formData, setFormData] = useState<LoginForm>({
+const [formData, setFormData] = useState<any>({
   email: "",
   password: "",
 });
@@ -22,24 +28,42 @@ const handleChange = (
   e: React.ChangeEvent<HTMLInputElement>
 ) => {
   const { name, value } = e.target;
-  setFormData((prev) => ({ ...prev, [name]: value }));
+  setFormData((prev: any) => ({ ...prev, [name]: value }));
 };
 
-const login = async (e) =>{
-  e.preventDefault()
-  dispatch(loginUser(formData))
-  setFormData({email : "", password : ""})
-}
+const login = async (e) => {
+  e.preventDefault();
 
-useEffect(() =>{
-console.log(response)
-if(data){
-  navigate("/")
-}
-},[data])
+  try {
+    const res = await dispatch(loginUser(formData)).unwrap();
+
+    console.log("FULL LOGIN RESPONSE", res);
+
+    const token = res?.token;
+    const user = res?.user;
+
+    console.log("Token:", token);
+    console.log("User:", user);
+
+    if (token) {
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      onLogin(token)
+      navigate("/", { replace: true });
+      toast.success("Login Successful!");
+    } else {
+      toast.error("Token is missing in response");
+    }
+
+    setFormData({ email: "", password: "" });
+  } catch (error) {
+    console.error("Login failed:", error);
+    // toast.error("Login Failed!");
+  }
+};
 
 if(isLoading){
-  <Loading />
+ return <Loading />
 }
 
   return (
@@ -48,7 +72,7 @@ if(isLoading){
      <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4">
            <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
          <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-                   Login to Shopaxweb
+                   Login 
          </h2>
          <form onSubmit={login} className="space-y-4">
            <div>
@@ -98,7 +122,7 @@ if(isLoading){
         <p className="text-center text-sm text-gray-600 mt-4">
           Don't have an account?
           <a href="/signup" className="text-blue-500 hover:underline ml-1">
-            Sign up
+            forget Password
           </a>
         </p>
       </div>

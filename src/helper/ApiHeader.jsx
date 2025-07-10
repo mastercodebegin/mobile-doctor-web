@@ -12,20 +12,20 @@
 // }:{}
 // }
 
-import {UrlConstants} from "../util/practice/UrlConstants"
+
+
 
 
 
 export const ApiHeader = async () => {
-  const token = localStorage.getItem("jwtToken");
-// console.log(token)
+  const token = localStorage.getItem("authToken");
+
   return token
     ? {
-        jwtToken: JSON.parse(token),
-        "Content-Type": "application/json",
+        jwtToken: token,
+        'Content-Type': 'application/json'
       }
-    :  {
-        jwtToken: UrlConstants.TOKEN,
-        "Content-Type": "application/json",
+    : {
+        'Content-Type': 'application/json'
       };
 };

@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux"
 import Loading from "../../components/Loading"
 import ConfirmationModal from "../../components/ConfirmationModal"
 import Pagination from "../../helper/Pagination"
-import { RootState } from "../../redux/store"
+import { AppDispatch, RootState } from "../../redux/store"
 import { CreateColor, GetAllColors, Remove, restore, Update, UpdateColorName } from "./ColorNameSlice"
 import { toast } from "react-toastify"
 
@@ -14,7 +14,7 @@ const [showConfirmModal , setShowConfirmModal] = useState(false)
 
 const {colorData , isLoading , Edit} = useSelector((state : RootState) => state.ColorNameSlice)
 
-const dispatch = useDispatch()
+const dispatch = useDispatch<AppDispatch>()
 const [showModal , setShowModal] = useState(false)
 const [colorName, setColorName] = useState("")
 const [colorCodeName, setColorCodeName] = useState("")
@@ -24,65 +24,76 @@ const [hoveredRow, setHoveredRow] = useState<number | null>(null);
 const usersPerPage = 5; // You can set 10 or any number you want
 const paginatedUsers = colorData.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 
-const handleSaveClick = async () =>{
-if(!colorCodeName.trim() || !colorCodeName.trim()){
-    alert("Please Enter Full Details!!")
-}
-
-if(isEditMode && Edit.Color?.id){
-    try {
-        dispatch(Update({...Edit.Color, color: colorName, colorCode: colorCodeName}));
-
-        dispatch(UpdateColorName(Edit.Color.id))
-        .unwrap()
-        .then((res : any) =>{
-            console.log("Update Response :--", res);
-            dispatch(GetAllColors());
-            toast.success(res.message || "Color Name Updated Successfully!!");
-            handleCloseModal();
-        })
-        .catch((err : any) =>{
-            console.log("Update Failed :--", err);
-            toast.error("Color Name Update Failed :---", err);
-        })
-    } catch (error) {
-        toast.error("Failed To Update Color")
-        console.log("Update Error :----", error)
+const handleSaveClick = async () => {
+    if (!colorCodeName.trim() || !colorName.trim()) {
+        alert("Please Enter Full Details!!");
+        return;
     }
-} else{
-    setShowConfirmModal(true)
-}
 
-}
+    if (isEditMode && Edit.Color?.id) {
+        try {
+            const originalId = Edit.Color.id;
+            
+            const updateData = {
+                id: originalId,
+                color: colorName,
+                colorCode: colorCodeName
+            };
+            
+            dispatch(Update(updateData));
+            
+            const response = await dispatch(UpdateColorName(originalId)).unwrap();
+            
+            console.log("Update Response :--", response);
+            toast.success("Color Name Updated Successfully!!");
+            handleCloseModal();
+            
+            await dispatch(GetAllColors());
+            
+        } catch (error: any) {
+            console.log("Update Error :----", error);
+            toast.error("Color Name Update Failed");
+        }
+    } else {
+        setShowConfirmModal(true);
+    }
+};
 
 const handleCloseModal = () =>{
     setShowModal(false);
     setIsEditMode(false);
     setColorName("");
     setColorCodeName("");
-    dispatch(restore(null))
+// dispatch(restore(null));
+// dispatch(GetAllColors())
+
 }
 
-const handleConfirmSave = () =>{
-    const newColor = {
-        color : colorName,
-        colorCode : colorCodeName
-    };
-    dispatch(CreateColor(newColor))
+const handleConfirmSave = () => {
+  const newColor = {
+    color: colorName,
+    colorCode: colorCodeName
+  };
+
+  dispatch(CreateColor(newColor))
     .unwrap()
-    .then((res : any) =>{
-        dispatch(GetAllColors());
-        toast.success(res.message || "Color Name Added Successfully!!");
-        setColorName("");
-        setColorCodeName("");
-        setShowModal(false);
-        setShowConfirmModal(false);
-        dispatch(restore(null));
+    .then(async (res: any) => {
+      toast.success(res.message || "Color Name Added Successfully!!");
+
+      // ✅ Important: fetch the updated list again
+      await dispatch(GetAllColors());
+
+      setColorName("");
+      setColorCodeName("");
+      setShowModal(false);
+      setShowConfirmModal(false);
+      dispatch(restore(null));
     })
-    .catch((err : any) =>{
-        toast.error("Color Name Creation Failed :---", err)
-    })
-}
+    .catch((err: any) => {
+      toast.error("Color Name Creation Failed" , err);
+    });
+};
+
 
 const handleEditUser = (user : User) =>{
     console.log("Edit User :--", user)
@@ -90,12 +101,12 @@ const handleEditUser = (user : User) =>{
     setShowModal(true);
     setColorName(user.color);
     setColorCodeName(user.colorCode);
-    // setIsEditMode(true);
+    setIsEditMode(true); // Fixed: was commented out
 }
 
 const handleDeleteUser = async (id : string) =>{
     console.log("Delete user with ID :---", id)
-    const confirmDelete = window.confirm("Are you sure you wnat to delete this color name");
+    const confirmDelete = window.confirm("Are you sure you want to delete this color name");
     if(!confirmDelete) return;
     try {
         await dispatch(Remove(id));
@@ -112,9 +123,10 @@ const handleDeleteUser = async (id : string) =>{
   // Save to localStorage whenever data changes
   useEffect(() => {
     setIsLoaded(true);
-    localStorage.setItem("colores", JSON.stringify(colorData));
-    dispatch(GetAllColors())
-  }, []);
+    if(colorData.length === 0) {
+        dispatch(GetAllColors())
+    }
+  }, [dispatch]);
 
   useEffect(() => {
     if(Edit.isEdit && Edit.Color){
@@ -129,6 +141,12 @@ const handleDeleteUser = async (id : string) =>{
     }
   }, [Edit]);
 
+  // Save to localStorage whenever colorData changes
+  useEffect(() => {
+    if(colorData.length > 0) {
+        localStorage.setItem("colores", JSON.stringify(colorData));
+    }
+  }, [colorData]);
 
   if (isLoading) {
     return <Loading />

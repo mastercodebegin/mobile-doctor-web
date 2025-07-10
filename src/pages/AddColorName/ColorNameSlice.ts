@@ -28,7 +28,7 @@ const ColorNameSlice = createSlice({
     name : "ColorNameSlice",
     initialState,
     reducers : {
-        restore : (state , action) =>{
+        restore : () =>{
             return{
                 isLoading : false,
                 isSuccess : false,
@@ -37,7 +37,6 @@ const ColorNameSlice = createSlice({
             }
         },
         Update : (state, action) =>{
-            //   console.log("Color Edit Payload Local:", action.payload);
             return{
     ...state,
     Edit : {Color : action.payload, isEdit : true}                
@@ -91,15 +90,6 @@ const ColorNameSlice = createSlice({
         .addCase(UpdateColorName.fulfilled , (state , action) =>{
             state.isLoading = false
             state.isSuccess = true
-            // const updatedIndex = state.colorData.findIndex(item => item.id === action.payload.id);
-            // if(updatedIndex !== -1) {
-            //     state.colorData[updatedIndex] = action.payload;
-            // }
-            // state.Edit = {
-            //     color: initialState.Edit.color,
-            //     isEdit: false
-            // };
-
             state.colorData = state.colorData.map((color) => color.id === action.payload?.id ? action.payload : color)
             state.Edit = {isEdit : false, Color : {id : "", color : "", colorCode : ""}}
 
@@ -143,53 +133,41 @@ export const CreateColor = createAsyncThunk("CREATE/COLOR" , async (requestData 
 })
 
 
-// // Update Color Thunk
-// export const UpdateColorName = createAsyncThunk("UPDATE/COLOR", async (id : string, thunkAPI) =>{
-//     try {
-//         const updateData = thunkAPI.getState().ColorNameSlice.Edit.color;
-//         if(!updateData) return thunkAPI.rejectWithValue("No Data To Update");
-
-//         const response = await putRequestMethodWithBodyAndParam(
-//             {color : updateData.color, colorCode : updateData.colorCode                
-//             },
-//             UrlConstants.UPDATE_COLOR,
-//             id
-//         );
-//         console.log("Update Response :--", response)
-//         return response
-
-//     } catch (error : any) {
-//         const message = error.response.data.message || "Failed to Update Color"
-//         return thunkAPI.rejectWithValue(message)
-//     }
-// })
-
-
 // Update Color Thunk
-export const UpdateColorName = createAsyncThunk("UPDATE/COLOR", async (id : string, thunkAPI) =>{
+export const UpdateColorName = createAsyncThunk(
+  "UPDATE/COLOR", 
+  async (id: string, thunkAPI) => {
     try {
-        const updateData = thunkAPI.getState().ColorNameSlice?.Edit?.Color
+      const state = thunkAPI.getState() as any;
+      const updateData = state.ColorNameSlice?.Edit?.Color;
 
-        console.log("Color Update Data:", updateData);
+      if (!updateData || !updateData.color || !updateData.colorCode) {
+        return thunkAPI.rejectWithValue("No Data To Update");
+      }
 
-        if(!updateData || !updateData.color || !updateData.colorCode) return thunkAPI.rejectWithValue("No Data To Update");
+      // ✅ Add ID inside payload too
+      const payload = {
+        id: id, // 👈 Important
+        color: updateData.color,
+        colorCode: updateData.colorCode
+      };
 
-        const payload = {
-            color : updateData.color,
-            colorCode : updateData.colorCode
-        }
-        console.log("Update Payload :--", payload)
+      const response = await postRequestMethodWithBodyAndParam(
+        payload,
+        UrlConstants.UPDATE_COLOR,
+        id
+      );
 
-        const response = await postRequestMethodWithBodyAndParam(
-           payload,
-            UrlConstants.UPDATE_COLOR,
-            id
-        );
-        console.log("Update Response :--", response)
-        return response
+      return {
+        id: id, // keep original ID
+        color: response.color || payload.color,
+        colorCode: response.colorCode || payload.colorCode,
+        is_deleted: response.is_deleted
+      };
 
-    } catch (error : any) {
-        const message = error.response?.data?.message || error.message || "Failed to Update Color"
-        return thunkAPI.rejectWithValue(message)
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || "Failed to Update Color";
+      return thunkAPI.rejectWithValue(message);
     }
-})
+  }
+);

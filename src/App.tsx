@@ -1,5 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import React, { useState } from "react";
+import { HashRouter as Router, Routes, Route } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 import Dashboard from "./pages/Dashboard";
 import UserManagement from "./pages/userManagement/UserManagement";
@@ -14,14 +14,58 @@ import AddVarientColor from "./pages/AddVarientColor/AddVarientColor";
 import { useMediaQuery } from "./hooks/useMediaQuery";
 import { ToastContainer } from "react-toastify";
 import ColorName from "./pages/AddColorName/ColorName";
+import ModalIssues from "./pages/ModalIssues/ModalIssues";
+import RepairCost from "./pages/RepairCost/RepairCost";
+import Login from "./CommonPages/Login/LoginPage";
+import PrivateComponent from "./components/PrivateComponent";
+import ErrorModalWindow from "./ErrorModalWindow/ErrorModalWindow/ErrorModalWindow";
+import { setErrorCallback } from "./util/CommonService";
+import { ShowErrorModal } from "./ErrorModalWindow/ErrorModalWindow/ErrorModalWindowSlice";
+import { useDispatch } from "react-redux";
+import ProductPart from "./pages/ProductPart/ProductPart";
+import Products from "./pages/Products/Products";
 
 function App() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(!isDesktop);
   const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
+  const dispatch = useDispatch()
+  
+  // State for token management
+  const [token, setToken] = useState(localStorage.getItem("token"));
+
+  // Listen for localStorage changes (for logout from other tabs)
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === "token") {
+        setToken(e.newValue);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  // Check token on component mount and set up periodic check
+  useEffect(() => {
+    const checkToken = () => {
+      const currentToken = localStorage.getItem("token");
+      if (currentToken !== token) {
+        setToken(currentToken);
+      }
+    };
+
+    // Check immediately
+    checkToken();
+
+    // Set up periodic check (optional - in case of programmatic logout)
+    const interval = setInterval(checkToken, 1000);
+
+    return () => clearInterval(interval);
+  }, [token]);
 
   // Adjust sidebar state based on screen size
-  React.useEffect(() => {
+  useEffect(() => {
     setSidebarCollapsed(!isDesktop);
     setSidebarMobileOpen(false);
   }, [isDesktop]);
@@ -31,23 +75,37 @@ function App() {
     else setSidebarMobileOpen((prev) => !prev);
   };
 
+      useEffect(() => {
+        // Set the error callback once when app loads
+        setErrorCallback((message: string) => {
+            dispatch(ShowErrorModal(message));
+        });
+    }, [dispatch]);
+
   return (
     <Router>
-      {/* Fixed Navbar */}
-      <div className="fixed top-0 left-0 w-full z-50">
-        <Navbar onToggleSidebar={handleSidebarToggle} />
-      </div>
+      {/* Fixed Navbar - Only show if user is logged in */}
+      {token && (
+        <div className="fixed top-0 left-0 w-full z-50">
+          <Navbar onToggleSidebar={handleSidebarToggle} setToken={setToken} />
+        </div>
+      )}
 
-      <div className="flex pt-16 h-screen">
-        {/* Sidebar */}
-        <Sidebar
-          collapsed={isDesktop ? sidebarCollapsed : !sidebarMobileOpen}
-          onNavigate={() => !isDesktop && setSidebarMobileOpen(false)}
-        />
+      <div className={`flex ${token ? 'pt-16' : ''} h-screen`}>
+        {/* Sidebar - Only show if user is logged in */}
+        {token && (
+          <Sidebar
+            collapsed={isDesktop ? sidebarCollapsed : !sidebarMobileOpen}
+            onNavigate={() => !isDesktop && setSidebarMobileOpen(false)}
+          />
+        )}
+        
         {/* Main Content Area */}
         <div
-          className={`flex-1 overflow-auto transition-all duration-300 bg-gray-50 p-4 ${
-            isDesktop
+          className={`flex-1 overflow-auto transition-all duration-300 bg-gray-50 ${
+            token ? 'p-4' : 'p-0'
+          } ${
+            token && isDesktop
               ? sidebarCollapsed
                 ? "ml-0"
                 : "ml-64"
@@ -55,17 +113,25 @@ function App() {
           }`}
         >
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/user-management" element={<UserManagement />} />
-            <Route path="/category" element={<AddCategory />} />
-            <Route path="/sub-category" element={<AddSubCategory />} />
-            <Route path="/brand" element={<AddBrand />} />
-            <Route path="/mobile-number" element={<AddMobileNumber />} />
-            <Route path="/color-name" element={<ColorName />} />
-            <Route path="/variant" element={<AddVarient />} />
-            <Route path="/variant-color" element={<AddVarientColor />} />
+            <Route path="/login" element={<Login onLogin={setToken} />} />
+            <Route path="/" element={<PrivateComponent />}>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/user-management" element={<UserManagement />} />
+              <Route path="/category" element={<AddCategory />} />
+              <Route path="/sub-category" element={<AddSubCategory />} />
+              <Route path="/brand" element={<AddBrand />} />
+              <Route path="/mobile-number" element={<AddMobileNumber />} />
+              <Route path="/color-name" element={<ColorName />} />
+              <Route path="/variant" element={<AddVarient />} />
+              <Route path="/variant-color" element={<AddVarientColor />} />
+              <Route path="/product-part-label" element={<ModalIssues />} />
+              <Route path="/repair-cost" element={<RepairCost />} />
+              <Route path="/product-part" element={<ProductPart />} />
+              <Route path="/products" element={<Products />} />
+            </Route>
           </Routes>
         </div>
+        <ErrorModalWindow />
       </div>
       <ToastContainer />
     </Router>
@@ -73,16 +139,6 @@ function App() {
 }
 
 export default App;
-
-
-
-
-
-
-
-
-
-
 
 
 

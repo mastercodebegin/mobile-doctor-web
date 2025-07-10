@@ -2,14 +2,10 @@
 
 import {  createSlice } from '@reduxjs/toolkit'
 
-
-//Action
-
-
 const ErrorModalWindowSlice = createSlice({
     name: 'ErrorModalWindowSlice',
     initialState: {
-        data: [1,2,3,4,5],
+        data: [],
         isLoading: false,
         isErrorModalWindow:false,
         message:'you have an error'
@@ -30,5 +26,5 @@ const ErrorModalWindowSlice = createSlice({
 
 })
 
-export default ErrorModalWindowSlice.reducer
 export const { ShowErrorModal,HideErrorModal } = ErrorModalWindowSlice.actions
+export default ErrorModalWindowSlice.reducer

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
+import { AppDispatch, RootState } from "../../redux/store";
 import { CreateCategory, GetAllCategory, Remove, RemoveCategory, restore, Update, UpdateCategory } from "./AddCategorySlice";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import { DeleteClass, EditClass, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
@@ -14,7 +14,7 @@ const AddCategory = () => {
 
   const { data, isLoading, Edit } = useSelector((state: RootState) => state.AddCategorySlice)
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch >()
   const [showModal, setShowModal] = useState(false)
   const [category, setCategory] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
@@ -56,11 +56,11 @@ const AddCategory = () => {
           .catch((err: any) => {
             // ❌ Error toast
             console.error("Update failed:", err); // ❌ error log
-            toast.error("Category update failed: " + err);
+            // toast.error("Category update failed: " + err);
           })
       } catch (error) {
         // Error handling
-        toast.error("Failed to update category");
+        // toast.error("Failed to update category");
         console.error("Update error:", error);
       };
 
@@ -92,7 +92,8 @@ const AddCategory = () => {
         dispatch(restore(null));
       })
       .catch((err: any) => {
-        toast.error("Category creation failed: " + err);
+        // toast.error("Category creation failed: " + err);
+        console.log("Category Creation Failed : " + err)
       });
   };
 
@@ -118,7 +119,7 @@ const AddCategory = () => {
       toast.success("Category deleted successfully!");
     } catch (error) {
       console.error('Delete error:', error);
-      toast.error("Failed to delete category");
+      // toast.error("Failed to delete category");
     }
   };
 

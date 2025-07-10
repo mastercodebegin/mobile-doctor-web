@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
+import { AppDispatch, RootState } from "../../redux/store";
 import Loading from "../../components/Loading";
 import { CreateSubCategory, GetAllSubCategory, Remove, restore, Update, UpdateSubCategory, } from "./SubCategorySlice";
 import ConfirmationModal from "../../components/ConfirmationModal";
@@ -23,7 +23,7 @@ const AddSubCategory = () => {
   const [subCategoryName, setSubCategoryName] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<{ id: string | number; name: string } | null>(null);
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
   const usersPerPage = 5; // You can set 10 or any number you want
   const paginatedUsers = SubCategoriesData.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 

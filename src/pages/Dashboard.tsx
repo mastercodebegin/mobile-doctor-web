@@ -10,7 +10,7 @@ const Dashboard = () => {
   const [userCount, setUserCount] = useState(0);
   
   // Chart data
-  const [productVisitsData] = useState([
+  const [productVisitsData] = useState<any[]>([
     { name: 'Mon', visits: 400 },
     { name: 'Tue', visits: 950 },
     { name: 'Wed', visits: 550 },
@@ -59,7 +59,6 @@ const Dashboard = () => {
     
     return () => clearInterval(timer);
   }, []);
-
 
   return (
     <>

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { DeleteClass, EditClass, SelectClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
 import Pagination from "../../helper/Pagination";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
+import { AppDispatch, RootState } from "../../redux/store";
 import Loading from "../../components/Loading";
 import { GetAllCategory } from "../AddCategory/AddCategorySlice";
 import { GetAllSubCategory } from "../AddSubCategory/SubCategorySlice";
@@ -65,7 +65,7 @@ const AddVarientColor = () => {
   const { colorData } = useSelector((state: RootState) => state.ColorNameSlice);
   const { AllVariantColorData, isLoading } = useSelector((state: RootState) => state.VariantColorSlice);
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const usersPerPage = 5;
   const paginatedUsers = AllVariantColorData.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
@@ -455,7 +455,7 @@ const AddVarientColor = () => {
             onClick={() => setShowModal(true)}
             className={SubmitButtonClass}
           >
-            Create Variant Color
+            Add
           </button>
         </div>
 

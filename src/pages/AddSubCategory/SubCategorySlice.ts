@@ -120,7 +120,7 @@ const SubCategorySlice = createSlice({
       .addCase(CreateSubCategory.rejected, (state, action) => {
         state.isLoading = false
         state.isSuccess = false
-        // console.log("Sub Category Not Created --------------", action.payload)
+        console.log("Sub Category Not Created --------------", action.payload)
       })
 
       // Update
@@ -132,7 +132,7 @@ const SubCategorySlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
 
-        // console.log("Update fulfilled payload:", action.payload);
+        console.log("Update fulfilled payload:", action.payload);
 
         // Get updated data from Edit state
         const updatedId = state.Edit.subCategory?.id;
@@ -160,7 +160,7 @@ const SubCategorySlice = createSlice({
       .addCase(UpdateSubCategory.rejected, (state, action) => {
         state.isLoading = false
         state.isSuccess = false
-        // console.log("Update SubCategory failed : ", action.payload)
+        console.log("Update SubCategory failed : ", action.payload)
       })
   }
 
@@ -175,10 +175,22 @@ export const { Remove, restore, Update } = SubCategorySlice.actions
 export const GetAllSubCategory = createAsyncThunk("FETCH/SUBCATEGORYS", async (_, thunkAPI) => {
   try {
     const response = await getRequestMethod(UrlConstants.GET_ALL_SUB_CATEGORY)
-    // console.log(response)
+    console.log(response)
     return response
   } catch (error: any) {
     const message = error.response.data.message
+    return thunkAPI.rejectWithValue(message)
+  }
+})
+
+// Get All Sub-Category By Category Id Thunk
+export const GetAllSubCategoryById = createAsyncThunk("FETHC/SUBCATEGORY/BY/CATEGORY/ID", async (requestParam, thunkAPI) =>{
+  try {
+    const response = await getRequestMethod(`${UrlConstants.GET_ALL_SUB_CATEGORY_BY_CATEGORY_IDE}${requestParam}`)
+    console.log(response);
+    return response
+  } catch (error: any) {
+     const message = error.response.data.message
     return thunkAPI.rejectWithValue(message)
   }
 })
@@ -189,7 +201,7 @@ export const GetAllSubCategory = createAsyncThunk("FETCH/SUBCATEGORYS", async (_
 export const CreateSubCategory = createAsyncThunk("CREATE/SUBCATEGORY", async (requestData, thunkAPI) => {
   try {
     const response = await postRequestMethod(requestData, UrlConstants.ADD_SUB_CATEGORY)
-    // console.log(response)
+    console.log(response)
     return response
   } catch (error: any) {
     const message = error.response.data.message
@@ -202,7 +214,7 @@ export const CreateSubCategory = createAsyncThunk("CREATE/SUBCATEGORY", async (r
 export const UpdateSubCategory = createAsyncThunk("UPDATE/SUBCATEGORY", async (id: string, thunkAPI) => {
   try {
     const updateData = thunkAPI.getState().SubCategorySlice?.Edit?.subCategory;
-    // console.log(updateData)
+    console.log(updateData)
 
     if (!updateData) return thunkAPI.rejectWithValue("No Data to Update!!")
 
@@ -211,13 +223,13 @@ export const UpdateSubCategory = createAsyncThunk("UPDATE/SUBCATEGORY", async (i
       categoryObj: updateData?.category?.name,
     }
 
-    // console.log(payload)
+    console.log(payload)
     const response = await putRequestMethodWithBodyAndParam(
       payload,
       UrlConstants.UPDATE_SUB_CATEGORIE,
       id
     )
-    // console.log("Update response:", response)
+    console.log("Update response:", response)
     return response
   } catch (error: any) {
     const message = error.response.data.message

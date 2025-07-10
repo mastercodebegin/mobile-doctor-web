@@ -1,24 +1,37 @@
 //@ts-nocheck
 
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-// import { deleteRequestMethodWithParam, getRequestMethod, getRequestMethodWithParam, postRequestMethod, putRequestMethod } from '../../context/service/CommonService';
-
 import { CutomToastSuccess } from "../../component/CustomToastMessage";
 import { navigateTo } from "../../helper/util/Utilities";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { putRequestMethod } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
 
-// interface RemoveProductData {
-//     cartId: string; // Assuming cartId is a string
-// }
 
-//Action
+export const loginUser = createAsyncThunk("loginUser", async (data: any, thunkAPI) => {
+try {
+    console.log("removeProductFromCart 2----------------------");
 
-export const loginUser = createAsyncThunk("loginUser", async (data: any) => {
-  console.log("removeProductFromCart 2----------------------");
   const response = await putRequestMethod(data, UrlConstants.LOGIN);
-  return response;
+console.log(response)
+     const nestedResponse = response?.responseDetails;
+
+    const user = nestedResponse?.responseDetails;
+    const token = nestedResponse?.jwtToken;
+
+    if (!token) {
+      return thunkAPI.rejectWithValue("Login failed: Token missing");
+    }
+
+    // Save both in localStorage
+    localStorage.setItem("authToken", token);
+    localStorage.setItem("authUser", JSON.stringify(user));
+
+    return { user, token };
+
+} catch (error: any) {
+     return thunkAPI.rejectWithValue(error.message || "Login failed");
+}
 });
 
 export const getAllCartItemsByUserId = createAsyncThunk(
@@ -35,7 +48,7 @@ export const getAllCartItemsByUserId = createAsyncThunk(
 const UserLoginSlice = createSlice({
   name: "UserLoginSlice",
   initialState: {
-    data: {},
+    data: localStorage.getItem("authUser") ? JSON.parse(localStorage.getItem("authUser") || "{}") : {},
     isLoading: false,
   },
 
@@ -46,7 +59,7 @@ const UserLoginSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.data = action.payload.responseDetails;
+        state.data = action.payload.user;
       })
       .addCase(loginUser.rejected, (state) => {
         console.log("loginUser rejected------");
@@ -56,11 +69,13 @@ const UserLoginSlice = createSlice({
   
 
   reducers: {
-    clearLoginState: (state, action) => {
+    clearLoginState: (state) => {
       state.data = {};
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
     },
   },
 });
 
-export default UserLoginSlice.reducer;
 export const { clearLoginState } = UserLoginSlice.actions;
+export default UserLoginSlice.reducer;

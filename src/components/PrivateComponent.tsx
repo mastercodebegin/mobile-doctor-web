@@ -9,7 +9,11 @@ const PrivateComponent = () => {
     return <Loading />
   }
 
-  return loggedIn ? <Outlet /> : <Navigate to={"/login"} />
+  if (!loggedIn) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return loggedIn ? <Outlet /> : <Navigate to="/login" replace />
 
 }
 

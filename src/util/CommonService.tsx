@@ -1,21 +1,34 @@
-import Axios from 'axios'
 // import AsyncStorage from '@react-native-async-storage/async-storage'
+import Axios from 'axios'
 import qs from 'qs'
 import {ApiHeader} from "../helper/ApiHeader"
 import { UrlConstants } from './practice/UrlConstants'
-// import { ShowErrorModal } from '../ErrorModalWindow/ErrorModalWindow/ErrorModalWindowSlice'
 
-// const shoErrorModalHandler=(error : any)=>{
-//     // Store.dispatch(ShowErrorModal(error.response.data.message));
-//     Store.dispatch(ShowErrorModal(error.response.data.message));
 
-// }
+// Create a callback function that will be set by the app
+let errorCallback: ((message: string) => void) | null = null;
+
+// Function to set the error callback
+export const setErrorCallback = (callback: (message: string) => void) => {
+    errorCallback = callback;
+};
+
+// Error handler function
+const shoErrorModalHandler = (error: any) => {
+    const errorMessage = error?.response?.data?.message || error?.message || 'Something went wrong';
+    
+    // Use callback instead of direct Store dispatch
+    if (errorCallback) {
+        errorCallback(errorMessage);
+    } else {
+        console.error('Error:', errorMessage);
+        // Fallback: show browser alert
+        alert(errorMessage);
+    }
+};
 
 export const getRequestMethod = async (requestUrl:any) => {
     const headers = await ApiHeader();
-
-        // console.log("Final URL =>", UrlConstants.BASE_URL + requestUrl);
-// console.log("Headers =>", headers);  
 
     try {
         const response = await Axios({
@@ -23,24 +36,15 @@ export const getRequestMethod = async (requestUrl:any) => {
             headers:headers, 
             url: UrlConstants.BASE_URL + requestUrl,
         });
-
-
-    //    console.log('response======',response.data);
         
         return response?.data;
-    } catch (error) {
-        // Axios error object contains response data in error.response
+    } catch (error : any) {
         if (error.response) {
             console.log('error--------------', error.response.data.message);
-
+shoErrorModalHandler(error)
              console.log('Error response Data:', error.response.data);
              console.log('Error response:', error.response);
   throw new Error(error.response.data?.message || "Something went wrong");
-
-
-            // const dispatch = useDispatch()
-            //  dispatch(ShowErrorModal(error.response.data.message))
-            // shoErrorModalHandler(error)
         } else {
             console.log('error--------------', error.message);
             throw new Error(error.response.data.message); // Throwing error to trigger rejection
@@ -68,8 +72,6 @@ console.log("Params ja rahe hain kya:", requestParam);
     if (error.response) {
         console.log('errormsg--------------', error.response.data);
         console.log('errormsg 2--------------', error?.response);
-        // const dispatch = useDispatch()
-        //  dispatch(ShowErrorModal(error.response.data.message))
         shoErrorModalHandler(error)
         throw new Error(error.response.data.message); // Throwing error to trigger rejection
     } else {
@@ -93,15 +95,23 @@ export const postRequestMethod = async (requestData : any, requestUrl : any,) =>
         });
         
         return response?.data;
-    } catch (error : any) {
-        // Axios error object contains response data in error.response
-        if (error.response) {
-            shoErrorModalHandler(error)
-            throw new Error(error.response.data.message); // Throwing error to trigger rejection
-        } else {
-            console.log('error--------------', error.message);
-            throw new Error(error.response.data.message); // Throwing error to trigger rejection
-        }
+    }
+    //  catch (error : any) {
+    //     if (error.response) {
+    //         console.log('error--------------', error.response.data.message);
+    //                     const dispatch = useDispatch()
+    //          dispatch(ShowErrorModal(error.response.data.message))
+    //         shoErrorModalHandler(error)
+    //         throw new Error(error.response.data.message); // Throwing error to trigger rejection
+    //     } else {
+    //         console.log('error--------------', error.message);
+    //         throw new Error(error.response.data.message); // Throwing error to trigger rejection
+    //     }
+    // }
+    catch (error: any) {
+        console.error('POST Request Error:', error);
+        shoErrorModalHandler(error);
+        throw new Error(error?.response?.data?.message || "Something went wrong");
     }
 };
 
@@ -250,8 +260,6 @@ export const putRequestMethod = async (formData:any, requestUrl:any) => {
     }).catch((error)=>
         {if (error.response) {
             console.log('error--------------', error.response.data.message);
-            // const dispatch = useDispatch()
-            //  dispatch(ShowErrorModal(error.response.data.message))
             shoErrorModalHandler(error)
             throw new Error(error.response.data.message); // Throwing error to trigger rejection
         } else {
@@ -340,6 +348,7 @@ export const deleteRequestMethodWithParam = async (requestData: any, requestUrl:
         params: requestData
     }).catch(error => {
         console.log('Delete error:', error);
+        shoErrorModalHandler(error)
         throw error;
     });
     

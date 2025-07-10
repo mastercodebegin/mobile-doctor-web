@@ -7,11 +7,12 @@ const useAuthStatus = () => {
 
     const [loggedIn , setLoggedIn] = useState<boolean>(false)
     const [checkStatus , setCheckStatus] = useState<boolean>(true)
- 
-    useEffect(() =>{
-setLoggedIn(!!data)
-setCheckStatus(false)
-    },[data])
+
+      useEffect(() => {
+const isLoggedIn = data && data.jwtToken || localStorage.getItem("token");
+setLoggedIn(!!isLoggedIn);
+    setCheckStatus(false);
+  }, [data]);
 
     return {loggedIn , checkStatus}
 

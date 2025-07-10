@@ -3,12 +3,6 @@ const UrlConstants = {
   // BASE_URL:'http://104.154.111.15:8080/doctor/', // Old IP
   BASE_URL:'http://34.131.155.169:8080/doctor/', // Old IP
   LOGIN: 'user/login',
-    //Admin Token
-  TOKEN:'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiYWRtaW4iLCJpc3MiOiJzaG9wZXgiLCJleHAiOjE3ODE3MjgwNTIsImlhdCI6MTc1MDE5MjA1MiwidXNlcklkIjoxLCJlbWFpbCI6IkFkbWluQHRlc3QuY29tIiwianRpIjoiZTUwYmI0MTEtMjUwNy00YTZiLWE1OWYtNTEzNTQzNTgzZWJkIn0.zM5o41wgayv6iVyoOh0LAoOHbjpisvMyjZDvizgEDGE',
-  // ADD_CATEGORIE:'category/add',
-  // UPDATE_CATEGORIE:'category/update',
-  // DELETE_CATEGORIE:'category/delete',
-  // GET_ALL_CATEGORIE:'category/getall',
   TEST_API:'user/testapi',
   GET_MY_PROFILE:'user/getMyProfile',
   FORGOT_PASSWORD:'',
@@ -16,14 +10,24 @@ const UrlConstants = {
   GET_ALL_CATEGORY:'category/getAllCategory',
   GET_ALL_BRAND:'brand/getAllBrand',
   GET_ALL_SUB_CATEGORY:'subCategory/getallSubCategories',
+  GET_ALL_SUB_CATEGORY_BY_CATEGORY_IDE: 'subCategory/getallSubCategoriesByCategoryPK/',
   DELETE_CATEGORIE:'category/deleteCategory/',
   UPDATE_CATEGORIE:'category/updateCategory/',
   UPDATE_SUB_CATEGORIE:'subCategory/updateSubCategory/',
   UPDATE_BRAND: 'brand/updateBrand/',
   UPDATE_MODAL_NUMBER: 'ProductModalNumber/updateModelNumber/',
-  UPDATE_COLOR: 'color/updateColorName/',
+  UPDATE_COLOR: 'color/updateColorName',
   UPDATE_VARIANT: 'variant/updateVariant',
   DELETE_VARIANT: 'variant/deleteVariantById',
+  UPDATE_PRODUCT_PART: 'ProductPart/updateProductPart',
+  UPDATE_REPAIR_COST: 'RepairCost/update',
+
+  GET_ALL_PRODUCT_PART: 'ProductPart/getAllProductPart',
+  GET_PRODUCT_PART_BY_SUB_CATEGORY_ID: 'ProductPart/getPartItemBySubCategoryId',
+  ADD_PRODUCT_PART: 'ProductPart/createProductPart',
+  GET_ALL_REPAIR_COST: 'RepairCost/getAllRepairCost',
+  GET_REPAIR_COST_BY_ID: 'RepairCost/getRepairCostByModelNumberAndModelIssueTitleId',
+ADD_REPAIR_COST_: 'RepairCost/add',  
 
 
 
