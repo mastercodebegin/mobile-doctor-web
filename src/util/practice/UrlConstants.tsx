@@ -2,7 +2,7 @@ const UrlConstants = {
   //  BASE_URL:'https://reqres.in/api/users?page=2',
   // BASE_URL:'http://104.154.111.15:8080/doctor/', // Old IP
   BASE_URL:'http://34.131.155.169:8080/doctor/', // Old IP
-// BASE_URL: 'https://1abcbb69cb0b.ngrok-free.app/doctor/',
+  // BASE_URL: 'https://1abcbb69cb0b.ngrok-free.app/doctor/',
   LOGIN: 'user/login',
   TEST_API:'user/testapi',
   GET_MY_PROFILE:'user/getMyProfile',

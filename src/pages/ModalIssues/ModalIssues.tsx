@@ -342,7 +342,7 @@ const ModalIssues = () => {
                 {/* Table Body */}
                 <tbody className="bg-white divide-y divide-gray-200">
                   {paginatedUsers.length > 0 ? (
-                    paginatedUsers.map((user, index) => (
+                    paginatedUsers?.map((user, index) => (
                       <tr
                         key={user?.id || `${user.name}-${index}`}
                         className={`transform transition-all duration-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'

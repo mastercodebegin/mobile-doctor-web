@@ -23,3 +23,31 @@ export const TableHadeClass = `py-4 px-6 text-left text-sm font-medium ${ThemeTe
 export const ShowModalMainClass = "fixed inset-0 z-50 flex items-center justify-center bg-white/30 backdrop-blur-sm"
 
 export const SelectClass = "w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+
+
+// Sidebar Color Tokens
+
+ export const SidebarColors = {
+  dashboard: { bgColor: 'bg-blue-50', color: '#3B82F6' },
+  userManagement: { bgColor: 'bg-green-50', color: '#10B981' },
+  productPartLabel: { bgColor: 'bg-yellow-50', color: '#F59E0B' },
+  repairCost: { bgColor: 'bg-red-50', color: '#EF4444' },
+  addProduct: {
+    category: { bgColor: 'bg-blue-50', color: '#3B82F6' },
+    subCategory: { bgColor: 'bg-green-50', color: '#10B981' },
+    brand: { bgColor: 'bg-yellow-50', color: '#F59E0B' },
+    modelNumber: { bgColor: 'bg-red-50', color: '#EF4444' },
+    colorName: { bgColor: 'bg-purple-50', color: '#8B5CF6' },
+    variant: { bgColor: 'bg-cyan-50', color: '#06B6D4' },
+    variantColor: { bgColor: 'bg-pink-50', color: '#EC4899' },
+  },
+  inventory: {
+    productPart: { bgColor: 'bg-orange-50', color: '#F97316' },
+    products: { bgColor: 'bg-sky-50', color: '#0EA5E9' },
+  },
+  dropdown: {
+    addProduct: { color: '#8B5CF6', bgColor: 'bg-purple-50' },
+    inventory: { color: '#06B6D4', bgColor: 'bg-cyan-50' },
+  },
+};
+
