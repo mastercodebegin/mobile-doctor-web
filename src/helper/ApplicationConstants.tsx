@@ -29,25 +29,25 @@ export const SelectClass = "w-full border border-gray-300 rounded-md px-4 py-2 f
 
  export const SidebarColors = {
   dashboard: { bgColor: 'bg-blue-50', color: '#3B82F6' },
-  userManagement: { bgColor: 'bg-green-50', color: '#10B981' },
-  productPartLabel: { bgColor: 'bg-yellow-50', color: '#F59E0B' },
-  repairCost: { bgColor: 'bg-red-50', color: '#EF4444' },
+  userManagement: { bgColor: 'bg-blue-50', color: '#3B82F6' },
+  productPartLabel: { bgColor: 'bg-blue-50', color: '#3B82F6' },
+  repairCost: { bgColor: 'bg-blue-50', color: '#3B82F6' },
   addProduct: {
     category: { bgColor: 'bg-blue-50', color: '#3B82F6' },
-    subCategory: { bgColor: 'bg-green-50', color: '#10B981' },
-    brand: { bgColor: 'bg-yellow-50', color: '#F59E0B' },
-    modelNumber: { bgColor: 'bg-red-50', color: '#EF4444' },
-    colorName: { bgColor: 'bg-purple-50', color: '#8B5CF6' },
-    variant: { bgColor: 'bg-cyan-50', color: '#06B6D4' },
-    variantColor: { bgColor: 'bg-pink-50', color: '#EC4899' },
+    subCategory: { bgColor: 'bg-blue-50', color: '#3B82F6' },
+    brand: {bgColor: 'bg-blue-50', color: '#3B82F6' },
+    modelNumber: { bgColor: 'bg-blue-50', color: '#3B82F6' },
+    colorName: { bgColor: 'bg-blue-50', color: '#3B82F6' },
+    variant: { bgColor: 'bg-blue-50', color: '#3B82F6' },
+    variantColor: { bgColor: 'bg-blue-50', color: '#3B82F6' },
   },
   inventory: {
-    productPart: { bgColor: 'bg-orange-50', color: '#F97316' },
-    products: { bgColor: 'bg-sky-50', color: '#0EA5E9' },
+    productPart: { bgColor: 'bg-blue-50', color: '#3B82F6' },
+    products: { bgColor: 'bg-blue-50', color: '#3B82F6' },
   },
   dropdown: {
-    addProduct: { color: '#8B5CF6', bgColor: 'bg-purple-50' },
-    inventory: { color: '#06B6D4', bgColor: 'bg-cyan-50' },
+    addProduct: {  bgColor: 'bg-green-50', color: '#10B981' },
+    inventory: {  bgColor: 'bg-green-50', color: '#10B981' },
   },
 };
 

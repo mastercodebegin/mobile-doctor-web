@@ -12,9 +12,9 @@ import {
   Layers,
   Package,
   BookOpen,
-  DollarSign,
   Archive,
   ShoppingCart,
+  IndianRupee,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { SidebarColors } from "../../helper/ApplicationConstants";
@@ -136,7 +136,7 @@ export default function Sidebar({ collapsed, onNavigate }: SidebarProps) {
   return (
     <aside
       className={`
-        bg-white border-r border-gray-200 h-full fixed top-16 left-0 
+        bg-white border-r pb-20 border-gray-200 h-full fixed top-16 left-0 
         transition-all duration-300 ease-in-out z-40 shadow-sm
         ${collapsed ? "w-0 ease-in-out duration-300 hidden" : "w-64"} 
         flex flex-col
@@ -201,7 +201,7 @@ export default function Sidebar({ collapsed, onNavigate }: SidebarProps) {
 
         <SidebarItem
           to="/repair-cost"
-          icon={DollarSign}
+          icon={IndianRupee}
           {...SidebarColors.repairCost}
           isActive={activeLink === "/repair-cost"}
         >
