@@ -1,8 +1,9 @@
 const UrlConstants = {
   //  BASE_URL:'https://reqres.in/api/users?page=2',
   // BASE_URL:'http://104.154.111.15:8080/doctor/', // Old IP
-  // BASE_URL:'http://34.131.155.169:8080/doctor/', // Old IP
-  BASE_URL: 'https://faaziqa123.loca.lt/doctor/',
+  BASE_URL:'http://34.131.155.169:8080/doctor/', // Old IP
+  // BASE_URL: 'https://1abcbb69cb0b.ngrok-free.app/doctor/',
+  // BASE_URL: 'https://faaziqa123.loca.lt/doctor/',
   LOGIN: 'user/login',
   TEST_API:'user/testapi',
   GET_MY_PROFILE:'user/getMyProfile',
@@ -20,15 +21,18 @@ const UrlConstants = {
   UPDATE_COLOR: 'color/updateColorName',
   UPDATE_VARIANT: 'variant/updateVariant',
   DELETE_VARIANT: 'variant/deleteVariantById',
-  UPDATE_PRODUCT_PART: 'ProductPart/updateProductPart',
+  UPDATE_PRODUCT_PART_LABEL: 'ProductPart/updateProductPart',
   UPDATE_REPAIR_COST: 'RepairCost/update',
+  UPDATE_INVENTORY: 'inventory/updateInventory',
 
-  GET_ALL_PRODUCT_PART: 'ProductPart/getAllProductPart',
-  GET_PRODUCT_PART_BY_SUB_CATEGORY_ID: 'ProductPart/getPartItemBySubCategoryId',
-  ADD_PRODUCT_PART: 'ProductPart/createProductPart',
+  GET_ALL_PRODUCT_PART_LABEL: 'ProductPart/getAllProductPart',
+  GET_PRODUCT_PART_LABEL_BY_SUB_CATEGORY_ID: 'ProductPart/getPartItemBySubCategoryId',
+  ADD_PRODUCT_PART_LABEL: 'ProductPart/createProductPart',
   GET_ALL_REPAIR_COST: 'RepairCost/getAllRepairCost',
   GET_REPAIR_COST_BY_ID: 'RepairCost/getRepairCostByModelNumberAndModelIssueTitleId',
 ADD_REPAIR_COST_: 'RepairCost/add',  
+GET_ALL_INVENTORY: 'inventory/getAllInventory',
+ADD_INVENTORY: 'inventory/create',
 
 
 

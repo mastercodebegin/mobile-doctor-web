@@ -627,7 +627,7 @@ useEffect(() => {
                               </svg>
                             </button>
                           </td>
-                          <td className="py-4 px-6 whitespace-nowrap">
+                          <td className={TableDataClass}>
                             <button
                               onClick={() => setShowVariantId(showVariantId === user?.id ? null : user?.id)}
                               className={`${ShowVarientButtonClass}`}

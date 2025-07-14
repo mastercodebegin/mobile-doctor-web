@@ -24,6 +24,7 @@ import { ShowErrorModal } from "./ErrorModalWindow/ErrorModalWindow/ErrorModalWi
 import { useDispatch } from "react-redux";
 import ProductPart from "./pages/ProductPart/ProductPart";
 import Products from "./pages/Products/Products";
+import Order from "./pages/Orders/Order";
 
 function App() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
@@ -128,6 +129,7 @@ function App() {
               <Route path="/repair-cost" element={<RepairCost />} />
               <Route path="/product-part" element={<ProductPart />} />
               <Route path="/products" element={<Products />} />
+              <Route path="/orders" element={<Order />} />
             </Route>
           </Routes>
         </div>

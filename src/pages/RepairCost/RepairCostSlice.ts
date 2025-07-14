@@ -134,7 +134,7 @@ const RepairCostSlice = createSlice({
     },  
 setEditRepairCost: (state, action) => {
   state.Edit.repairCost = action.payload;
-  state.Edit.isEdit = true; // <-- CRITICAL!
+  state.Edit.isEdit = true; 
 }, 
   clearEditRepairCost: (state) => {
       state.Edit.isEdit = false;

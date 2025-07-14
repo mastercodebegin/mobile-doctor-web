@@ -212,7 +212,7 @@ const ModalIssuesSlice = createSlice({
       .addCase(DeleteProductPart.rejected, (state, action) => {
         state.isLoading = false
         state.isSuccess = false
-        console.log("Modal-Issue Data Updation Failed :--", action.payload)
+        console.log("Modal-Issue Data Deleted Failed :--", action.payload)
       })
   }
 })
@@ -225,7 +225,7 @@ export const { restore, Remove, Update, resetEdit } = ModalIssuesSlice.actions
 // Fetch All Modal-Issue's Thunk
 export const GetAllModalIssues = createAsyncThunk("FETCH/MODAL-ISSUE'S", async (_, thunkAPI) => {
   try {
-    const response = await getRequestMethod(UrlConstants.GET_ALL_PRODUCT_PART)
+    const response = await getRequestMethod(UrlConstants.GET_ALL_PRODUCT_PART_LABEL)
     console.log("Response To Fetch All Modal-Issue's", response);
     return response
   } catch (error: any) {
@@ -240,7 +240,7 @@ export const GetAllProductPartsBySubCategory = createAsyncThunk("FETCH/PRODUCT-P
     const param = {
       subCategoryId: requestParam
     }
-    const response = await getRequestMethodWithParam(param, UrlConstants.GET_PRODUCT_PART_BY_SUB_CATEGORY_ID)
+    const response = await getRequestMethodWithParam(param, UrlConstants.GET_PRODUCT_PART_LABEL_BY_SUB_CATEGORY_ID)
     console.log("Response To Fetch All Modal-Issue's By Sub-Category Id", response);
     return response
   } catch (error: any) {
@@ -253,7 +253,7 @@ export const GetAllProductPartsBySubCategory = createAsyncThunk("FETCH/PRODUCT-P
 // Create Modal-Issue Thunk
 export const CreateModalIssue = createAsyncThunk("CREATE/MODAL-ISSUE", async (requestData, thunkAPI) => {
   try {
-    const response = await postRequestMethod(requestData, UrlConstants.ADD_PRODUCT_PART);
+    const response = await postRequestMethod(requestData, UrlConstants.ADD_PRODUCT_PART_LABEL);
     console.log("Response To Create Modal-Issue :", response);
     return response
   } catch (error: any) {
@@ -291,7 +291,7 @@ export const UpdateModalIssue = createAsyncThunk("UPDATE/MODAL-ISSUE", async (id
 
     const response = await putRequestMethod(
       requestBody,
-      UrlConstants.UPDATE_PRODUCT_PART
+      UrlConstants.UPDATE_PRODUCT_PART_LABEL
     );
     console.log("Response To Update Modal-Issue :", response)
     return response;
@@ -323,7 +323,7 @@ export const DeleteProductPart = createAsyncThunk("DELETE/PRODUCT-PART", async (
 
     const response = await putRequestMethod(
       requestBody,
-      UrlConstants.UPDATE_PRODUCT_PART
+      UrlConstants.UPDATE_PRODUCT_PART_LABEL
     );
 
     console.log("Response To Delete Modal-Issue:", response);
