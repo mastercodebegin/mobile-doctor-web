@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { getRequestMethod, getRequestMethodWithParam, postRequestMethod, putRequestMethod } from "../../util/CommonService";
+import { getRequestMethod, getRequestMethodWithParam, postRequestMethod, putRequestMethod, putRequestMethodWithParam } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
 
 const storeData = localStorage.getItem('product-part')
@@ -52,11 +52,16 @@ interface ProductPartRecord {
   deleted: boolean;
 }
 
+interface History {
+  isLoading: boolean;
+  data: []
+}
 
 interface ProductPartInterface {
     isLoading: boolean;
     isSuccess: boolean;
     ProductPartData: ProductPartRecord[];
+    History: History;
     Edit: {inventory: ProductPartRecord, isEdit: boolean};
 }
 
@@ -64,6 +69,10 @@ const initialState: ProductPartInterface = {
     isLoading: false,
     isSuccess: false,
     ProductPartData: storeData ? JSON.parse(storeData) : [],
+    History: {
+  isLoading: false,
+  data: storeData ? JSON.parse(storeData) : [],
+},
     Edit: {
         isEdit: false,
         inventory: {
@@ -221,6 +230,60 @@ state.ProductPartData = [...state.ProductPartData, action.payload]
                 state.isSuccess = false
                 console.log("Inventory Data Updation Failed :--", action.payload)
               })
+
+// Re Fill Inventory
+        .addCase(ReFillInventory.pending, (state, action) =>{
+            state.isLoading = true
+            state.isSuccess = false
+            console.log("Inventory Re-Filling is Pending :--", action.payload)
+        })
+        .addCase(ReFillInventory.fulfilled, (state, action) =>{
+state.isLoading = false
+state.isSuccess = true
+console.log("Re-Fill Data :--", action.payload)
+        })
+        .addCase(ReFillInventory.rejected, (state, action) =>{
+            state.isLoading = false
+            state.isSuccess = false
+            console.log("Inventory Data Re-Filling Failed :--", action.payload)
+        }) 
+
+        // Inventory History
+.addCase(InventoryHistory.pending, (state, action) => {
+    state.History.isLoading = true;
+    state.isSuccess = false;
+    console.log("Inventory History is Pending :--", action.payload);
+})
+.addCase(InventoryHistory.fulfilled, (state, action) => {
+    state.History.isLoading = false; 
+    state.isSuccess = true;
+    state.History.data = action.payload?.content || [];
+    console.log("✅ Inventory History Data Set:", state.History);
+})
+.addCase(InventoryHistory.rejected, (state, action) => {
+    state.History.isLoading = false; 
+    state.isSuccess = false;
+    state.History.data = []; 
+    console.log("Inventory History Data fetched Failed :--", action.payload);
+})
+
+// Order Use Inventory
+        .addCase(OrderInventoryUse.pending, (state, action) =>{
+            state.isLoading = true
+            state.isSuccess = false
+            console.log("Order Inventory Use is Pending :--", action.payload)
+        })
+        .addCase(OrderInventoryUse.fulfilled, (state, action) =>{
+state.isLoading = false
+state.isSuccess = true
+console.log("Order Inventory Used Data :--", action.payload)
+        })
+        .addCase(OrderInventoryUse.rejected, (state, action) =>{
+            state.isLoading = false
+            state.isSuccess = false
+            console.log("Order Inventory Using Data Failed :--", action.payload)
+        }) 
+
     }
 })
 
@@ -354,3 +417,65 @@ export const DeleteInventory = createAsyncThunk("DELETE/INVENTORY", async (id: s
     return thunkAPI.rejectWithValue(message)
     }
 })
+
+// Re-Fill Inventory 
+export const ReFillInventory = createAsyncThunk("CREATE/REFILL/INVENTORY", async (requestData, thunkAPI) =>{
+  try {
+
+      const correctedData = {
+        inventoryId: requestData?.inventoryId,
+        quantity: requestData?.quantity,
+        note: requestData?.notes 
+      };
+      
+      console.log("Corrected Data:", correctedData);
+
+    const response = await putRequestMethodWithParam(correctedData, UrlConstants.ADD_RE_FILL_INVENTORY);
+    console.log("Response Data :--", response);
+    return response
+  } catch (error: any) {
+         const message = error?.response?.data?.message || error.message
+    return thunkAPI.rejectWithValue(message)
+  }
+})
+
+// Inventory History
+export const InventoryHistory = createAsyncThunk(
+  "INVENTORY/HISTORY",
+  async (requestParam, thunkAPI) => {
+    if (!requestParam || !requestParam.id) {
+      console.warn("InventoryHistory thunk called with invalid param:", requestParam);
+      return thunkAPI.rejectWithValue("Invalid params for Inventory History");
+    }
+
+    try {
+      console.log("✅ Params sent:", requestParam);
+      const response = await getRequestMethodWithParam(
+        requestParam,
+        UrlConstants.GET_INVENTORY_HISTORY
+      );
+      return response;
+    } catch (error: any) {
+      const message = error?.response?.data?.message || error.message;
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Order Inventory Use
+export const OrderInventoryUse = createAsyncThunk("ORDER/INVENTORY/USE", async (requestParam, thunkAPI) =>{
+  try {
+    console.log("✅ Data sent:", requestParam);
+    const response = await putRequestMethodWithParam(requestParam, UrlConstants.ORDER_INVENTORY_USE);
+    console.log("Response Data :--", response)
+    return response;
+  } catch (error: any) {
+    const message = error?.response?.data?.message || error.message;
+      return thunkAPI.rejectWithValue(message);  
+  }
+})
+
+
+
+
+

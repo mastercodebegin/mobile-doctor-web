@@ -245,6 +245,16 @@ export default function Sidebar({ collapsed, onNavigate }: SidebarProps) {
         >
           Orders
         </SidebarItem>
+
+
+                <SidebarItem
+          to="/support-ticket"
+          icon={Users}
+          {...SidebarColors.supportTicket}
+          isActive={activeLink === "/support-ticket"}
+        >
+          Support Ticket
+        </SidebarItem>
       </nav>
 
       <style jsx>{`

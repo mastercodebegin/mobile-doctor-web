@@ -12,6 +12,7 @@ import ModalIssuesSlice from "../pages/ModalIssues/ModalIssuesSlice"
 import RepairCostSlice from "../pages/RepairCost/RepairCostSlice"
 import InventorySlice from "../pages/ProductPart/ProductPartSlice"
 import OrderSlice from "../pages/Orders/OrderSlice"
+import SupportTicketSlice from "../pages/SupportTicket/SupportTicketSlice"
 
 const RootReducer = ({
     ErrorModalWindowSlice ,
@@ -28,6 +29,7 @@ ModalIssuesSlice,
 RepairCostSlice,
 InventorySlice,
 OrderSlice,
+SupportTicketSlice,
 })
 
 

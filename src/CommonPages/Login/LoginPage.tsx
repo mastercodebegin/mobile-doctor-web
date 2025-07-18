@@ -6,6 +6,7 @@ import Loading from "../../components/Loading";
 import { toast } from "react-toastify";
 import { AppDispatch, RootState } from "../../redux/store";
 import { Dispatch } from "@reduxjs/toolkit";
+import { SubmitButtonClass, ThemeBackgroundColor, ThemeBackgroundHoverColor } from "../../helper/ApplicationConstants";
 
 interface LoginPageProps {
   onLogin: Dispatch<SetStateAction<string>>;
@@ -113,7 +114,7 @@ if(isLoading){
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors duration-300"
+            className={`w-full ${ThemeBackgroundColor} ${ThemeBackgroundHoverColor} text-white py-2 rounded-md transition-colors duration-300`}
           >
             Login
           </button>

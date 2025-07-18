@@ -1,6 +1,6 @@
-export const ThemeBackgroundColor = 'bg-gray-800'
+export const ThemeBackgroundColor = 'bg-cyan-500'
 
-export const ThemeBackgroundHoverColor = 'hover:bg-gray-700'
+export const ThemeBackgroundHoverColor = 'hover:bg-cyan-700'
 
 export const ThemeTextColor = 'text-gray-800 hover:text-gray-700'
 
@@ -43,6 +43,7 @@ export const DeleteIcon =  <svg xmlns="http://www.w3.org/2000/svg" className="h-
   productPartLabel: { bgColor: 'bg-blue-50', color: '#3B82F6' },
   repairCost: { bgColor: 'bg-blue-50', color: '#3B82F6' },
   orders: {bgColor: 'bg-blue-50', color: '#3B82F6'},
+  supportTicket: {bgColor: 'bg-blue-50', color: '#3B82F6' },
   addProduct: {
     category: { bgColor: 'bg-blue-50', color: '#3B82F6' },
     subCategory: { bgColor: 'bg-blue-50', color: '#3B82F6' },
@@ -62,3 +63,23 @@ export const DeleteIcon =  <svg xmlns="http://www.w3.org/2000/svg" className="h-
   },
 };
 
+
+
+
+export const pageSize = 10;
+
+export const getStatusBadgeClass = (status: string) => {
+  switch (status) {
+    case 'PENDING': return 'bg-cyan-100 text-cyan-800';
+    case 'CANCELLED': return 'bg-red-100 text-red-800';
+    case 'READY_TO_PICK': return 'bg-purple-100 text-purple-800';
+    case 'PICKED_UP_BY_PARTNER': return 'bg-blue-100 text-blue-800';
+    case 'PICKED_UP_BY_USER': return 'bg-indigo-100 text-indigo-800';
+    case 'IN_SERVICE': return 'bg-orange-100 text-orange-800';
+    case 'READY_TO_DISPATCH': return 'bg-teal-100 text-teal-800';
+    case 'DISPATCHED': return 'bg-sky-100 text-sky-800';
+    case 'DELIVERED': return 'bg-green-100 text-green-800';
+    case 'COMPLETED': return 'bg-emerald-100 text-emerald-800';
+    default: return 'bg-gray-100 text-gray-800';
+  }
+};

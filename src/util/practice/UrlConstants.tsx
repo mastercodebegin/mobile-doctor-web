@@ -1,9 +1,7 @@
 const UrlConstants = {
   //  BASE_URL:'https://reqres.in/api/users?page=2',
-  // BASE_URL:'http://104.154.111.15:8080/doctor/', // Old IP
-  BASE_URL:'http://34.131.155.169:8080/doctor/', // Old IP
-  // BASE_URL: 'https://1abcbb69cb0b.ngrok-free.app/doctor/',
-  // BASE_URL: 'https://faaziqa123.loca.lt/doctor/',
+  // BASE_URL: 'https://faaziqa123.loca.lt/doctor-mobile/',
+  BASE_URL: 'http://34.93.130.230:8080/doctor-mobile/',
   LOGIN: 'user/login',
   TEST_API:'user/testapi',
   GET_MY_PROFILE:'user/getMyProfile',
@@ -33,6 +31,11 @@ const UrlConstants = {
 ADD_REPAIR_COST_: 'RepairCost/add',  
 GET_ALL_INVENTORY: 'inventory/getAllInventory',
 ADD_INVENTORY: 'inventory/create',
+GET_ALL_REPAIR_UNIT_ORDER_BY_USER_ID: 'unitRepair/getAllRepairUnitOrderByUserId',
+ADD_RE_FILL_INVENTORY: 'inventory/reFillInventory',
+GET_INVENTORY_HISTORY: 'inventoryUsageHistory/getInventoryHistoryByInventoryId',
+ORDER_INVENTORY_USE: 'inventory/consumeInventoryItem',
+GET_ALL_SUPPORT_TICKET: 'supportTicket/getAll',
 
 
 

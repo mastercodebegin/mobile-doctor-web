@@ -25,6 +25,7 @@ import { useDispatch } from "react-redux";
 import ProductPart from "./pages/ProductPart/ProductPart";
 import Products from "./pages/Products/Products";
 import Order from "./pages/Orders/Order";
+import SupportTicket from "./pages/SupportTicket/SupportTicket";
 
 function App() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
@@ -130,6 +131,7 @@ function App() {
               <Route path="/product-part" element={<ProductPart />} />
               <Route path="/products" element={<Products />} />
               <Route path="/orders" element={<Order />} />
+              <Route path="/support-ticket" element={<SupportTicket />} />
             </Route>
           </Routes>
         </div>
