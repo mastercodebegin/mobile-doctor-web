@@ -40,56 +40,7 @@ const initialState: VariantColor = {
   isLoading: false,
   isSuccess: false,
   error: null,
-  AllVariantColorData: storedData ? JSON.parse(storedData) : [
-    // {
-    //   id: 1,
-    //   name: 'Andrew Mike',
-    // },
-    // {
-    //   id: 2,
-    //   name: 'John Doe',
-    // },
-    // {
-    //   id: 3,
-    //   name: 'Micheal Holz',
-    // },
-    // {
-    //   id: 4,
-    //   name: 'Alex Mike',
-    // },
-    // {
-    //   id: 5,
-    //   name: 'Paula Wilson',
-    // },
-    // {
-    //   id: 6,
-    //   name: 'Martin Sommer',
-    // },
-    // {
-    //   id: 7,
-    //   name: 'Andrew Mike',
-    // },
-    // {
-    //   id: 8,
-    //   name: 'John Doe',
-    // },
-    // {
-    //   id: 9,
-    //   name: 'Micheal Holz',
-    // },
-    // {
-    //   id: 10,
-    //   name: 'Alex Mike',
-    // },
-    // {
-    //   id: 11,
-    //   name: 'Paula Wilson',
-    // },
-    // {
-    //   id: 12,
-    //   name: 'Martin Sommer',
-    // },
-  ]
+  AllVariantColorData: storedData ? JSON.parse(storedData) : []
 };
 
 const VariantColorSlice = createSlice({

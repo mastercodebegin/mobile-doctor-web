@@ -3,14 +3,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import { CreateCategory, GetAllCategory, Remove, RemoveCategory, restore, Update, UpdateCategory } from "./AddCategorySlice";
 import ConfirmationModal from "../../components/ConfirmationModal";
-import { DeleteClass, EditClass, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
+import { DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
 import Loading from "../../components/Loading";
 import Pagination from "../../helper/Pagination";
 import { toast } from "react-toastify";
 
 const AddCategory = () => {
 
-  const [showConfirmModal, setShowConfirmModal] = useState(false); // new state
+  const [showConfirmModal, setShowConfirmModal] = useState(false); 
 
   const { data, isLoading, Edit } = useSelector((state: RootState) => state.AddCategorySlice)
 
@@ -22,7 +22,7 @@ const AddCategory = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
 
-  const usersPerPage = 5; // You can set 10 or any number you want
+  const usersPerPage = 5; 
   const paginatedUsers = data.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 
   const handleSaveClick = async () => {
@@ -34,33 +34,27 @@ const AddCategory = () => {
     if (isEditMode && Edit.category?.id) {
       try {
 
-        // Update existing category
-        // First update the edit state with new name
         dispatch(Update({ ...Edit.category, name: category }));
 
         dispatch(UpdateCategory(Edit.category.id))
           .unwrap()
           .then((res: any) => {
-            // ✅ Update ke baad data fetch karo
-            console.log("Update response:", res); // ✅ response data
+            console.log("Update response:", res);
             dispatch(GetAllCategory());
 
-            // ✅ Success toast
             toast.success(res.message || "Category updated successfully!");
             // Reset form
             setShowModal(false);
             setCategory("");
             setIsEditMode(false);
-            dispatch(restore(null)); // Clear edit state
+            dispatch(restore(null)); 
           })
           .catch((err: any) => {
-            // ❌ Error toast
-            console.error("Update failed:", err); // ❌ error log
-            // toast.error("Category update failed: " + err);
+            console.error("Update failed:", err); 
+            toast.error("Category update failed: " + err);
           })
       } catch (error) {
-        // Error handling
-        // toast.error("Failed to update category");
+        toast.error("Failed to update category");
         console.error("Update error:", error);
       };
 
@@ -74,7 +68,7 @@ const AddCategory = () => {
     setShowModal(false);
     setCategory("");
     setIsEditMode(false);
-    dispatch(restore(null)); // Clear edit state when closing
+    dispatch(restore(null)); 
   };
 
   const handleConfirmSave = () => {
@@ -84,7 +78,7 @@ const AddCategory = () => {
     dispatch(CreateCategory(newCategory))
       .unwrap()
       .then((res: any) => {
-        dispatch(GetAllCategory()); // ✅ Fetch updated list
+        dispatch(GetAllCategory()); 
         toast.success(res.message || "Category added successfully!");
         setCategory("");
         setShowModal(false);
@@ -92,34 +86,32 @@ const AddCategory = () => {
         dispatch(restore(null));
       })
       .catch((err: any) => {
-        // toast.error("Category creation failed: " + err);
+        toast.error("Category creation failed: " + err);
         console.log("Category Creation Failed : " + err)
       });
   };
 
 
-  const handleEditUser = (user: User) => { // Changed parameter type from number to User
+  const handleEditUser = (user: User) => { 
     console.log(`Edit user:`, user);
-    dispatch(Update(user)); // Set edit mode with user data
-    setShowModal(true); // Open modal
-    setCategory(user.name); // Pre-fill form with current name
+    dispatch(Update(user)); 
+    setShowModal(true);
+    setCategory(user.name); 
   };
 
   const handleDeleteUser = async (id: string) => {
     console.log(`Delete user with ID: ${id}`);
 
-    // Confirmation dialog add करें
     const confirmDelete = window.confirm("Are you sure you want to delete this category?");
     if (!confirmDelete) return;
 
     try {
-      // केवल RemoveCategory dispatch करें
       await dispatch(RemoveCategory(id)).unwrap();
       dispatch(Remove(id))
       toast.success("Category deleted successfully!");
     } catch (error) {
       console.error('Delete error:', error);
-      // toast.error("Failed to delete category");
+      toast.error("Failed to delete category");
     }
   };
 
@@ -203,9 +195,7 @@ const AddCategory = () => {
                           onClick={() => handleEditUser(user)}
                           className={EditClass}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                          </svg>
+                         {EditIcon}
                         </button>
                       </td>
                       <td className={TableDataClass}>
@@ -213,9 +203,7 @@ const AddCategory = () => {
                           onClick={() => handleDeleteUser(user?.id)}
                           className={DeleteClass}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                          </svg>
+                      {DeleteIcon}
                         </button>
                       </td>
                     </tr>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { SubmitButtonClass } from '../helper/ApplicationConstants';
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -30,7 +31,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             Cancel
           </button>
           <button
-            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+            className={SubmitButtonClass}
             onClick={onConfirm}
           >
             Confirm

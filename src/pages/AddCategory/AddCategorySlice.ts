@@ -15,7 +15,7 @@ interface AddCategory {
     isError: boolean;
     message: string;
     data: User[];
-    Edit: { category: User | { name: string }, isEdit: boolean }; // Added edit state
+    Edit: { category: User | { name: string }, isEdit: boolean };
 }
 
 const initialState: AddCategory = {
@@ -24,7 +24,7 @@ const initialState: AddCategory = {
     isError: false,
     message: "",
     data: storedData ? JSON.parse(storedData) : [],
-    Edit: { category: { name: "" }, isEdit: false }, // Initialize edit state
+    Edit: { category: { name: "" }, isEdit: false }, 
 }
 
 const AddCategorySlice = createSlice({
@@ -134,7 +134,7 @@ const AddCategorySlice = createSlice({
                 state.data = state.data.map(category =>
                     category.id === action.payload?.id ? action.payload : category
                 );
-                state.Edit = { isEdit: false, category: { name: "" } }; // Clear edit mode
+                state.Edit = { isEdit: false, category: { name: "" } }; 
             })
             .addCase(UpdateCategory.rejected, (state, action) => {
                 state.isLoading = false
@@ -173,19 +173,17 @@ export const CreateCategory = createAsyncThunk('CREATE/CATEGORY', async (newCate
 // Update Category Thunk
 export const UpdateCategory = createAsyncThunk("UPDATE/CATEGORY", async (id: string, thunkAPI) => {
     try {
-        // Get the category data from edit state
         const updateData = thunkAPI.getState().AddCategorySlice?.Edit?.category;
         console.log(updateData);
 
         if (!updateData) return thunkAPI.rejectWithValue("No data to update");
 
-        // Use putRequestMethodWithBodyAndParam with body and path parameter
         const response = await putRequestMethodWithBodyAndParam(
             {
-                name: updateData.name, // Only send the data that needs to be updated
+                name: updateData.name, 
             },
-            UrlConstants.UPDATE_CATEGORIE, // Base URL: 'category/updateCategory/'
-            id // Path parameter: will make URL 'category/updateCategory/1'
+            UrlConstants.UPDATE_CATEGORIE, 
+            id
         );
 
         console.log("Update response:", response);

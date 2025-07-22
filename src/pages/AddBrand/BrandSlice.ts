@@ -62,14 +62,13 @@ const BrandSlice = createSlice({
                 })
                 .addCase(GetAllBrand.fulfilled , (state , action) =>{
                     state.isLoading = false;
-                    // console.log("fulfilled")
                     state.isSuccess = true;
                     state.BrandData = action.payload
                 })
                 .addCase(GetAllBrand.rejected , (state , action) =>{
                     state.isLoading = false;
                     state.isSuccess = false;
-                    // console.log("Add Category fetch Faield ----------", action.payload)
+                    console.log("Add Category fetch Faield ----------", action.payload)
                 })
 
                 .addCase(CreateBrand.pending , (state) =>{
@@ -84,7 +83,7 @@ const BrandSlice = createSlice({
                         .addCase(CreateBrand.rejected , (state , action) =>{
                             state.isLoading = false
                             state.isSuccess = false
-                            // console.log("Category Not Created..." , action.payload)
+                            console.log("Category Not Created..." , action.payload)
                         })
 
                         .addCase(UpdateBrand.pending, (state) =>{
@@ -118,7 +117,7 @@ export const { Remove , Update , restore} = BrandSlice.actions
 export const GetAllBrand = createAsyncThunk('FETCH/BRANDS' , async (_, thunkAPI) =>{
     try {
         const response = await getRequestMethod(UrlConstants.GET_ALL_BRAND)
-        // console.log(response)
+        console.log(response)
         return response
     } catch (error : any ) {
         const message = error.response.data.message
@@ -131,7 +130,7 @@ export const GetAllBrand = createAsyncThunk('FETCH/BRANDS' , async (_, thunkAPI)
 export const CreateBrand = createAsyncThunk("CREATE/BRAND" , async (newCategory, thukAPI) =>{
     try {
         const response = await postRequestMethod(newCategory , UrlConstants.ADD_BRAND)
-        // console.log(response)
+        console.log(response)
         return response
     } catch (error : any) {
         const message = error.response.data.message
@@ -152,7 +151,7 @@ export const UpdateBrand = createAsyncThunk("UPDATE/BRAND" , async (id : string 
                 UrlConstants.UPDATE_BRAND,
                 id
             );
-            // console.log("Update response:" , response)
+            console.log("Update response:" , response)
             return response;
     } catch (error : any) {
         const message = error.response.data.message

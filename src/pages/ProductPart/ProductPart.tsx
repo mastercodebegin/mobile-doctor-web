@@ -8,7 +8,7 @@ import Loading from '../../components/Loading';
 import { GetAllCategory } from '../AddCategory/AddCategorySlice';
 import { GetAllSubCategory, GetAllSubCategoryById } from '../AddSubCategory/SubCategorySlice';
 import { GetAllModalIssues } from '../ModalIssues/ModalIssuesSlice';
-import { CreateInventory, DeleteInventory, GetAllProductPart, GetAllProductPartBySubCategoryId, restore, Update, UpdateInventory, ReFillInventory, InventoryHistory, OrderInventoryUse } from './ProductPartSlice';
+import { CreateInventory, DeleteInventory, GetAllProductPart, GetAllProductPartBySubCategoryId, restore, Update, UpdateInventory, ReFillInventory, InventoryHistory, OrderInventoryUse, clearHistoryCache } from './ProductPartSlice';
 import ConfirmationModal from '../../components/ConfirmationModal';
 
 const ProductPart = () => {
@@ -117,6 +117,8 @@ const ProductPart = () => {
     setQuantity(0);
     setNotes("");
     setUnitRepairOrderId("");
+    setHistory(null);
+    setExpandedHistory({});
   };
 
   // Use functionality
@@ -128,6 +130,8 @@ const ProductPart = () => {
     setQuantity(0);
     setNotes("");
     setUnitRepairOrderId("");
+    setHistory(null);
+    setExpandedHistory({});
   };
 
   const handleSaveClick = () => {
@@ -160,17 +164,14 @@ const ProductPart = () => {
           setSelectedInventoryForReFill(null);
           setIsOrderUseMode(false);
           setShowModal(false);
+          dispatch(clearHistoryCache(selectedInventoryForReFill.id));
           toast.success(res.message || "Inventory Used Successfully!");
           dispatch(GetAllProductPart());
         })
         .catch((err: any) => {
           toast.error("Order Use Failed: " + err);
         });
-    } 
-    // else if (!quantity || !notes.trim()) {
-    //   alert("Please Enter All Input Fields.");
-    //   return;
-    // } 
+    }
     else if (isReFillMode) {
       // ReFill Mode
       if (!selectedInventoryForReFill) {
@@ -194,6 +195,7 @@ const ProductPart = () => {
           setSelectedInventoryForReFill(null);
           setIsReFillMode(false);
           setShowModal(false);
+          dispatch(clearHistoryCache(selectedInventoryForReFill.id))
           toast.success(res.message || "Inventory ReFilled Successfully!");
           dispatch(GetAllProductPart());
         })
@@ -285,7 +287,9 @@ const ProductPart = () => {
     setUnitRepairOrderId("");
     setSelectedProductPartLabel(null);
     setSelectedInventoryForReFill(null);
-    dispatch(restore())
+    if (isEditMode) {
+      dispatch(restore());
+    }
   }
 
   const handleEditUser = (user: any) => {
@@ -334,25 +338,34 @@ const ProductPart = () => {
     if (history === userId) {
       setExpandedHistory({});
       setHistory(null);
-    } else {
-      const historyData = {
-        id: userId,
-        pageSize : pageSize || 10,
-        pageNumber: 0,
-      };
+      return;
+    }
 
-      // ✅ Only dispatch if id is defined
-      if (userId && typeof userId === 'number') {
-        dispatch(InventoryHistory(historyData));
-      } else {
+      // already cached?
+  if (History.data[userId]?.length) {
+    setHistory(userId);
+    setExpandedHistory({ [userId]: false });
+    return;
+  }
+
+    const historyData = {
+      id: userId,
+      pageSize: pageSize || 10,
+      pageNumber: 0,
+    };
+
+    // ✅ Only dispatch if id is defined
+    if (userId && typeof userId === 'number') {
+      dispatch(InventoryHistory(historyData));
+      setHistory(userId);
+      setExpandedHistory({ [userId]: false })
+    } else {
       console.error('Invalid userId for history fetch:', userId);
       toast.error('Invalid user ID for history fetch');
       return;
     }
 
-      setHistory(userId);
-      setExpandedHistory({ [userId]: false });
-    }
+
   };
 
   // Handle view more toggle
@@ -364,183 +377,156 @@ const ProductPart = () => {
   };
 
   // Render history row
-const renderHistoryRow = (user: any) => {
-  const isExpanded = expandedHistory[user.id];
+  const renderHistoryRow = (user: any) => {
+    const isExpanded = expandedHistory[user.id];
 
-  const filteredHistory = Array.isArray(History?.data)
-    ? History.data.filter(
-        (item) => item?.inventory?.productPart?.id === user?.productPart?.id,
-      )
-    : [];
+    const userSpecificHistory = History.data[user.id] || [];
 
-  /* ----------  Summary numbers ---------- */
-  const totalOrders = filteredHistory.filter((r) => r.unitRepair).length;
-  const totalUsed   = filteredHistory
-    .filter((r) => r.unitRepair)
-    .reduce((sum, r) => sum + (r.quantity || 0), 0);
-  const remaining   = user?.productPart?.quantity ?? 0;
+    return (
+      <tr key={`history-${user?.id}`} className="bg-gray-50">
+        <td colSpan={10} className="px-6 py-4">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
 
-  return (
-    <tr key={`history-${user?.id}`} className="bg-gray-50">
-      <td colSpan={10} className="px-6 py-4">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">
-              History for {user.productPart?.name}
-            </h3>
-            <span className="text-sm text-gray-500">
-              Total Records: {filteredHistory.length}
-            </span>
-          </div>
-
-          {/* Summary */}
-          <div className="mb-4 text-sm">
-            <span className="font-semibold">Total Orders:</span> {totalOrders} &nbsp;&nbsp;
-            <span className="font-semibold">Units Used:</span> {totalUsed} &nbsp;&nbsp;
-            <span className="font-semibold">Units Left:</span> {remaining}
-          </div>
-
-          {isHistoryLoading ? (
-            <div className="flex justify-center items-center py-8">
-              <div className="relative">
-                <div
-                  className="w-16 h-16 border border-white rounded-full animate-spin"
-                  style={{ animationDuration: '2s' }}
-                >
+            {isHistoryLoading ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="relative">
                   <div
-                    className="absolute inset-0 border-3 border-transparent border-y-gray-600 border-l-gray-600 rounded-full animate-spin"
+                    className="w-16 h-16 border border-white rounded-full animate-spin"
                     style={{ animationDuration: '2s' }}
-                  />
+                  >
+                    <div
+                      className="absolute inset-0 border-3 border-transparent border-y-cyan-600 border-l-cyan-600 rounded-full animate-spin"
+                      style={{ animationDuration: '2s' }}
+                    />
+                  </div>
+                  <p className="text-center text-gray-600 mt-4">Loading history...</p>
                 </div>
-                <p className="text-center text-gray-600 mt-4">Loading history...</p>
               </div>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              {!filteredHistory.length ? (
-                <div className="text-center text-red-500 py-8">
-                  <p className="text-lg">📋 Inventory History Not Available</p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    No history records found for this product
-                  </p>
-                </div>
-              ) : (
-                (() => {
-                  const displayedHistory = isExpanded
-                    ? filteredHistory
-                    : filteredHistory.slice(0, 5);
+            ) : (
+              <div className="overflow-x-auto">
+                {!userSpecificHistory.length ? (
+                  <div className="text-center text-red-500 py-8">
+                    <p className="text-lg">📋 Inventory History Not Available</p>
+                    <p className="text-sm text-gray-500 mt-2">
+                      No history records found for this product
+                    </p>
+                  </div>
+                ) : (
+                  (() => {
+                    const displayedHistory = isExpanded
+                      ? userSpecificHistory
+                      : userSpecificHistory.slice(0, 5);
 
-                  return (
-                    <>
-                      <table className="min-w-full divide-y divide-gray-200 text-sm">
-                        <thead className="bg-gray-100">
-                          <tr>
-                            <th className="px-4 py-2 text-left">Date</th>
-                            <th className="px-4 py-2 text-left">Time</th>
-                            <th className="px-4 py-2 text-left">Action</th>
-                            <th className="px-4 py-2 text-left">Quantity Change</th>
-                            <th className="px-4 py-2 text-left">Total Qty</th>
-                            <th className="px-4 py-2 text-left">Status</th>
-                            <th className="px-4 py-2 text-left">Customer</th>
-                            <th className="px-4 py-2 text-left">Used By</th>
-                            <th className="px-4 py-2 text-left">Notes</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200 bg-white">
-                          {displayedHistory.map((record) => {
-                            // Date / Time
-                            const date = record.usedOn?.split('T')[0] || record.usedOn || '--';
-                            const time = record.usedOn?.split('T')[1]?.slice(0, 5) || '--';
+                    return (
+                      <>
+                        <table className="min-w-full divide-y divide-gray-200 text-sm">
+                          <thead className="bg-gray-100">
+                            <tr>
+                              <th className="px-4 py-2 text-left">Order ID</th>
+                              <th className="px-4 py-2 text-left">Date</th>
+                              <th className="px-4 py-2 text-left">Qty Change</th>
+                              <th className="px-4 py-2 text-left">Updated Qty</th>
+                              <th className="px-4 py-2 text-left">Status</th>
+                              <th className="px-4 py-2 text-left">Used By</th>
+                              <th className="px-4 py-2 text-left">Notes</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200 bg-white">
+                            {displayedHistory.map((record) => {
+                              const date = record.usedOn?.split('T')[0] || record.usedOn || '--';
 
-                            // Action
-                            let action = 'Updated';
-                            if (record.new && !record.refill) action = 'Added';
-                            if (record.refill) action = 'Re-Filled';
-                            if (record.unitRepair) action = 'Used';
+                              const prevQty = record.previousQuantity ?? 0;
+                              const newQty = record.updatedQuantity ?? 0;
+                              const ReFillQty = record.quantity ?? 0;
+                              const NewReFillQty = record.inventory?.quantity ?? 0;
 
-                            // Quantity Change string
-                            const prevQty = record.previousQuantity ?? 0;
-                            const newQty  = record.updatedQuantity ?? 0;
-                            const diff    = newQty - prevQty;
-                            const qtyText = `${prevQty} → ${newQty} (${diff >= 0 ? '+' : ''}${diff})`;
+                              let qtyChangeDisplay = '';
+                              let qtyChangeColor = '';
+                              let statusBadge = { label: '', color: '' };
+                              let totalQtyDisplay = '';
 
-                            // Status badge
-                            let statusBadge = { label: 'Updated', color: 'bg-gray-100 text-gray-800' };
-                            if (record.unitRepair)
-                              statusBadge = { label: 'Unit Repair', color: 'bg-yellow-100 text-yellow-800' };
-                            else if (record.refill)
-                              statusBadge = { label: 'Re-Filled', color: 'bg-green-100 text-green-800' };
-                            else
-                              statusBadge = { label: 'Utilise', color: 'bg-red-100 text-red-800' };
+                              // Check if it's a new product creation
+                              if (record.new) {
+                                qtyChangeDisplay = `+${newQty}`;
+                                qtyChangeColor = 'text-blue-600';
+                                statusBadge = { label: 'Created', color: 'text-blue-500' };
+                                totalQtyDisplay = newQty;
+                              } else if (record.refill) {
+                                // Refill action
+                                qtyChangeDisplay = `+${ReFillQty}`;
+                                qtyChangeColor = 'text-green-600';
+                                statusBadge = { label: 'Re-Filled', color: 'text-green-500' };
+                                totalQtyDisplay = NewReFillQty;
+                              } else if (record.unitRepair) {
+                                // Use action
+                                qtyChangeDisplay = `${prevQty} - 1`;
+                                qtyChangeColor = 'text-red-600';
+                                statusBadge = { label: 'Utilise', color: 'text-yellow-500' };
+                                totalQtyDisplay = newQty;
+                              } else {
+                                // Default case (should not happen)
+                                qtyChangeDisplay = '--';
+                                qtyChangeColor = 'text-gray-600';
+                                statusBadge = { label: 'Updated', color: 'bg-gray-100 text-gray-500' };
+                                totalQtyDisplay = newQty;
+                              }
 
-                            return (
-                              <tr key={record.id}>
-                                <td className="px-4 py-2">{date}</td>
-                                <td className="px-4 py-2">{time}</td>
-                                <td className="px-4 py-2 font-medium">{action}</td>
-                                <td className={`px-4 py-2 font-medium ${diff >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-  {qtyText}
-</td>
-                                <td className="px-4 py-2">{record.inventory?.quantity ?? '--'}</td>
-                                <td className="px-4 py-2">
-                                  <span
-                                    className={`px-2 py-1 text-xs font-semibold rounded-full ${statusBadge.color}`}
-                                  >
-                                    {statusBadge.label}
-                                  </span>
-                                </td>
-                                <td className="px-4 py-2">
-                                  {record.unitRepair?.user
-                                    ? `${record.unitRepair.user.firstName} ${record.unitRepair.user.lastName}`
-                                    : '--'}
-                                </td>
-                                <td className="px-4 py-2">
-                                  {record.user
-                                    ? `${record.user.firstName} ${record.user.lastName}`
-                                    : '--'}
-                                </td>
-                                <td className="px-4 py-2">{record.notes || '--'}</td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
+                              return (
+                                <tr key={record.id} className="border-b border-gray-200 last:border-b-0 h-16">
+  <td className="px-4 py-2 align-middle">{record?.unitRepair?.orderId ?? ''}</td>
+  <td className="px-4 py-2 align-middle">{date}</td>
+  <td className={`px-4 py-2 align-middle font-medium ${qtyChangeColor}`}>{qtyChangeDisplay}</td>
+  <td className="px-4 py-2 align-middle">{totalQtyDisplay}</td>
+  <td className="px-4 py-2 align-middle">
+    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${statusBadge.color}`}>
+      {statusBadge.label}
+    </span>
+  </td>
+  <td className="px-4 py-2 align-middle">
+    {record.user ? `${record.user.firstName} ${record.user.lastName}` : '--'}
+  </td>
+  <td className="px-4 py-2 align-middle">{record.notes || '--'}</td>
+</tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
 
-                      {filteredHistory.length > 5 && !isExpanded && (
-                        <div className="mt-4 text-center">
-                          <button
-                            onClick={() => handleViewMore(user.id)}
-                            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-100 transition-colors"
-                          >
-                            <svg
-                              className="w-4 h-4 mr-2"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
+                        {userSpecificHistory.length > 5 && !isExpanded && (
+                          <div className="mt-4 text-center">
+                            <button
+                              onClick={() => handleViewMore(user.id)}
+                              className={` ${EditClass} inline-flex items-center justify-center px-4 py-2 border border-gray-300 hover:border-cyan-300 rounded-md shadow-sm text-sm font-medium bg-white hover:bg-gray-100 transition-colors`}
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M19 9l-7 7-7-7"
-                              />
-                            </svg>
-                            View More ({filteredHistory.length - 5})
-                          </button>
-                        </div>
-                      )}
-                    </>
-                  );
-                })()
-              )}
-            </div>
-          )}
-        </div>
-      </td>
-    </tr>
-  );
-};
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 9l-7 7-7-7"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()
+                )}
+              </div>
+            )}
+          </div>
+        </td>
+      </tr>
+    );
+  };
+
+
 
   useEffect(() => {
     setIsLoaded(true);
@@ -742,7 +728,7 @@ const renderHistoryRow = (user: any) => {
                             </button>
                           </td>
                           <td className={TableDataClass}>
-                            <button 
+                            <button
                               onClick={() => handleUseClick(user)}
                               className={InventoryView}
                             >
@@ -777,8 +763,8 @@ const renderHistoryRow = (user: any) => {
         </div>
       </div>
 
- {/* Add/Edit Modal */}
-       {showModal && (
+      {/* Add/Edit Modal */}
+      {showModal && (
         <>
           <div className={ShowModalMainClass}>
             <div className="bg-white rounded-2xl shadow-xl p-8 max-w-xl w-[90%] relative">
@@ -793,17 +779,6 @@ const renderHistoryRow = (user: any) => {
               >
                 &times;
               </button>
-
-{/* Re-Fill Mode */}
-              {selectedInventoryForReFill && (
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                  <h3 className="font-medium text-lg mb-2">Selected Product:</h3>
-                  <p className="text-gray-700">{selectedInventoryForReFill.productPart.name}</p>
-                  <p className="text-gray-600 text-sm">Current Quantity: {selectedInventoryForReFill.quantity}</p>
-                  <p className="text-gray-600 text-sm">Category: {selectedInventoryForReFill.productPart.subCategory.category.name}</p>
-                  <p className="text-gray-600 text-sm">SubCategory: {selectedInventoryForReFill.productPart.subCategory.name}</p>
-                </div>
-              )}
 
 
               {/* Product-Part-Label Selection - Only for Add/Edit Mode */}
@@ -846,21 +821,21 @@ const renderHistoryRow = (user: any) => {
               )}
 
               {/* Quantity Input */}
-            {!isOrderUseMode && (
+              {!isOrderUseMode && (
                 <div className="mb-6">
-                <label className="block text-lg font-medium mb-2">
-                  {isReFillMode ? "ReFill Quantity" : "Quantity"}
-                </label>
-                <input
-                  type="number"
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
-                  className={inputClass}
-                  placeholder={isReFillMode ? "Enter quantity to add" : "Enter quantity"}
-                  min={isReFillMode ? "1" : "0"}
-                />
-              </div>
-            )}
+                  <label className="block text-lg font-medium mb-2">
+                    {isReFillMode ? "ReFill Quantity" : "Quantity"}
+                  </label>
+                  <input
+                    type="number"
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    className={inputClass}
+                    placeholder={isReFillMode ? "Enter quantity to add" : "Enter quantity"}
+                    min={isReFillMode ? "1" : "0"}
+                  />
+                </div>
+              )}
 
               {/* Notes Input */}
               <div className="mb-6">

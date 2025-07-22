@@ -74,7 +74,6 @@ const SubCategorySlice = createSlice({
         }
       };
     },
-    // Slice में
     Update: (state, action) => {
       // action.payload = user object
       return {
@@ -104,7 +103,7 @@ const SubCategorySlice = createSlice({
       .addCase(GetAllSubCategory.rejected, (state, action) => {
         state.isLoading = false;
         state.isSuccess = false;
-        // console.log("Add Category fetch Failed ----------", action.payload)
+        console.log("Add Category fetch Failed ----------", action.payload)
       })
 
       // Create

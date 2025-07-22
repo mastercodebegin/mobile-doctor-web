@@ -46,8 +46,8 @@ interface EditVariant {
   id: number | string;
   ram: string;
   rom: string;
-  selfieCamera: string;  // Changed back to camelCase to match API response
-  mainCamera: string;    // Changed back to camelCase to match API response
+  selfieCamera: string;  
+  mainCamera: string;    
   battery: string;
   network: string;
   isDeleted: boolean | null;
@@ -71,8 +71,8 @@ const initialState: Variant = {
       id: 0,
       ram: "",
       rom: "",
-      selfieCamera: "",  // Fixed field name
-      mainCamera: "",    // Fixed field name
+      selfieCamera: "",  
+      mainCamera: "",   
       battery: "",
       network: "",
       isDeleted: null,
@@ -299,7 +299,7 @@ export const UpdateVariant = createAsyncThunk("UPDATE/VARIANT", async (id: strin
     const payload = {
       id: updateData.id,
       ram: updateData.ram,
-      rom: updateData.rom.replace(/\s*GB\s*/gi, ''), // Remove "GB" from ROM
+      rom: updateData.rom.replace(/\s*GB\s*/gi, ''), 
       selfieCamera: updateData.selfieCamera,
       mainCamera: updateData.mainCamera,
       battery: updateData.battery,

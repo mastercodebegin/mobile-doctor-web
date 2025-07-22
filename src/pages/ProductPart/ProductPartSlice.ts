@@ -54,7 +54,7 @@ interface ProductPartRecord {
 
 interface History {
   isLoading: boolean;
-  data: []
+  data: Record<number, any[]>
 }
 
 interface ProductPartInterface {
@@ -71,7 +71,7 @@ const initialState: ProductPartInterface = {
     ProductPartData: storeData ? JSON.parse(storeData) : [],
     History: {
   isLoading: false,
-  data: storeData ? JSON.parse(storeData) : [],
+  data: storeData ? JSON.parse(storeData) : {},
 },
     Edit: {
         isEdit: false,
@@ -129,7 +129,10 @@ const ProductPartSlice = createSlice({
 },
 Update: (state,action) =>{
     state.Edit = {inventory: action.payload, isEdit: true}
-}
+},
+ clearHistoryCache: (state, action: PayloadAction<number>) => {
+      delete state.History.data[action.payload];
+    },
 
     },
     extraReducers: (builder) => {
@@ -257,7 +260,8 @@ console.log("Re-Fill Data :--", action.payload)
 .addCase(InventoryHistory.fulfilled, (state, action) => {
     state.History.isLoading = false; 
     state.isSuccess = true;
-    state.History.data = action.payload?.content || [];
+const inventoryId = action.meta.arg.id;
+state.History.data[inventoryId] = action.payload?.content || [];
     console.log("✅ Inventory History Data Set:", state.History);
 })
 .addCase(InventoryHistory.rejected, (state, action) => {
@@ -289,7 +293,7 @@ console.log("Order Inventory Used Data :--", action.payload)
 
 
 export default ProductPartSlice.reducer
-export const {restore, Update} = ProductPartSlice.actions
+export const {restore, Update, clearHistoryCache } = ProductPartSlice.actions
 
 // Fetch All Product-Part
 export const GetAllProductPart = createAsyncThunk("FETCH/ALL/PRODUCT-PART", async (_, thunkAPI) =>{

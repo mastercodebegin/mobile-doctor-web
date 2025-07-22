@@ -6,11 +6,11 @@ import { CreateModalNumber, FetchAllModalNumber, FetchBrandIdModalNumber, Remove
 import ConfirmationModal from "../../components/ConfirmationModal";
 import { GetAllSubCategory } from "../AddSubCategory/SubCategorySlice";
 import { GetAllBrand } from "../AddBrand/BrandSlice";
-import { DeleteClass, EditClass, inputClass, SelectClass, ShowModalMainClass, ShowModelCloseButtonClass, ShowVarientButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass, ThemeTextColor } from "../../helper/ApplicationConstants";
+import { DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, SelectClass, ShowModalMainClass, ShowModelCloseButtonClass, ShowVarientButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass, ThemeTextColor } from "../../helper/ApplicationConstants";
 import Pagination from "../../helper/Pagination";
 import { toast } from "react-toastify";
 import { GetAllCategory } from "../AddCategory/AddCategorySlice";
-  
+
 const MobileNumberPage = () => {
   // State declarations
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -40,58 +40,58 @@ const MobileNumberPage = () => {
   };
 
   // ✅ NEW: Function to check if user is in brand-filtered view
-const isInBrandFilteredView = () => {
-  return selectedBrand && selectedBrand !== "";
-};
-
-// ✅ ENHANCED: getCurrentContextInfo with more details
-const getCurrentContextInfo = () => {
-  if (isInBrandFilteredView()) {
-    const brandData = BrandData?.find(brand => brand.id == selectedBrand);
-    return {
-      context: 'brand-filtered',
-      brandName: brandData?.name || 'Unknown Brand',
-      brandId: selectedBrand,
-      totalItems: BrandModalNumberData?.length || 0,
-      displayData: BrandModalNumberData,
-      filterActive: true,
-      message: `Viewing models for ${brandData?.name || 'Unknown Brand'}`
-    };
-  }
-  
-  return {
-    context: 'all-models',
-    totalItems: AllModalNumberData?.length || 0,
-    displayData: AllModalNumberData,
-    filterActive: false,
-    message: 'Viewing all models from all brands'
+  const isInBrandFilteredView = () => {
+    return selectedBrand && selectedBrand !== "";
   };
-};
 
-// ✅ NEW: Additional utility function using context info
-const getContextBasedMessage = (action = 'create') => {
-  const contextInfo = getCurrentContextInfo();
-  
-  switch (action) {
-    case 'create':
-      return contextInfo.context === 'brand-filtered' 
-        ? `Adding new model to ${contextInfo.brandName} collection`
-        : 'Adding new model to main database';
-        
-    case 'success':
-      return contextInfo.context === 'brand-filtered'
-        ? `Model successfully added to ${contextInfo.brandName}! Total ${contextInfo.brandName} models: ${contextInfo.totalItems + 1}`
-        : `Model successfully added! Total models: ${contextInfo.totalItems + 1}`;
-        
-    case 'delete':
-      return contextInfo.context === 'brand-filtered'
-        ? `Are you sure you want to remove this model from ${contextInfo.brandName}?`
-        : 'Are you sure you want to remove this model?';
-        
-    default:
-      return contextInfo.message;
-  }
-};
+  // ✅ ENHANCED: getCurrentContextInfo with more details
+  const getCurrentContextInfo = () => {
+    if (isInBrandFilteredView()) {
+      const brandData = BrandData?.find(brand => brand.id == selectedBrand);
+      return {
+        context: 'brand-filtered',
+        brandName: brandData?.name || 'Unknown Brand',
+        brandId: selectedBrand,
+        totalItems: BrandModalNumberData?.length || 0,
+        displayData: BrandModalNumberData,
+        filterActive: true,
+        message: `Viewing models for ${brandData?.name || 'Unknown Brand'}`
+      };
+    }
+
+    return {
+      context: 'all-models',
+      totalItems: AllModalNumberData?.length || 0,
+      displayData: AllModalNumberData,
+      filterActive: false,
+      message: 'Viewing all models from all brands'
+    };
+  };
+
+  // ✅ NEW: Additional utility function using context info
+  const getContextBasedMessage = (action = 'create') => {
+    const contextInfo = getCurrentContextInfo();
+
+    switch (action) {
+      case 'create':
+        return contextInfo.context === 'brand-filtered'
+          ? `Adding new model to ${contextInfo.brandName} collection`
+          : 'Adding new model to main database';
+
+      case 'success':
+        return contextInfo.context === 'brand-filtered'
+          ? `Model successfully added to ${contextInfo.brandName}! Total ${contextInfo.brandName} models: ${contextInfo.totalItems + 1}`
+          : `Model successfully added! Total models: ${contextInfo.totalItems + 1}`;
+
+      case 'delete':
+        return contextInfo.context === 'brand-filtered'
+          ? `Are you sure you want to remove this model from ${contextInfo.brandName}?`
+          : 'Are you sure you want to remove this model?';
+
+      default:
+        return contextInfo.message;
+    }
+  };
 
 
   const paginatedUsers = displayData.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
@@ -115,30 +115,30 @@ const getContextBasedMessage = (action = 'create') => {
   };
 
   // ✅ ENHANCED: Updated getDefaultFormData to handle auto brand selection
-const getDefaultFormData = (autoBrandId = null, autoBrandName = null) => ({
-  modelNo: "",
-  category: {
-    id: "",
-    name: "",
-    is_deleted: false
-  },
-  subCategory: {
-    id: "",
-    name: "",
+  const getDefaultFormData = (autoBrandId = null, autoBrandName = null) => ({
+    modelNo: "",
     category: {
       id: "",
       name: "",
       is_deleted: false
     },
-    is_deleted: false
-  },
-  brand: {
-    id: autoBrandId || "",
-    name: autoBrandName || "",
-    is_deleted: false
-  },
-  showVarient: defaultShowVarient,
-});
+    subCategory: {
+      id: "",
+      name: "",
+      category: {
+        id: "",
+        name: "",
+        is_deleted: false
+      },
+      is_deleted: false
+    },
+    brand: {
+      id: autoBrandId || "",
+      name: autoBrandName || "",
+      is_deleted: false
+    },
+    showVarient: defaultShowVarient,
+  });
 
   // formData
   const [formData, setFormData] = useState(getDefaultFormData());
@@ -147,16 +147,16 @@ const getDefaultFormData = (autoBrandId = null, autoBrandName = null) => ({
   // Updated handleChange function to handle nested object updates
   const handleChage = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    
+
     if (name === "modelNo") {
       setFormData((prev) => ({ ...prev, [name]: value }));
-    } 
+    }
     else if (name === "category") {
       const selectedCategory = data.find(cat => cat.id == value || cat?.id === parseInt(value));
       console.log("Selected Category:", selectedCategory);
-      
-      setFormData((prev) => ({ 
-        ...prev, 
+
+      setFormData((prev) => ({
+        ...prev,
         category: {
           id: value,
           name: selectedCategory?.name || "Category not found",
@@ -167,9 +167,9 @@ const getDefaultFormData = (autoBrandId = null, autoBrandName = null) => ({
     else if (name === "subCategory") {
       const selectedSubCategory = SubCategoriesData.find(subCat => subCat.id == value || subCat.id === parseInt(value));
       console.log("Selected SubCategory:", selectedSubCategory);
-      
-      setFormData((prev) => ({ 
-        ...prev, 
+
+      setFormData((prev) => ({
+        ...prev,
         subCategory: {
           id: value,
           name: selectedSubCategory?.name || "SubCategory not found",
@@ -185,9 +185,9 @@ const getDefaultFormData = (autoBrandId = null, autoBrandName = null) => ({
     else if (name === "brand") {
       const selectedBrand = BrandData.find(brand => brand.id == value || brand.id === parseInt(value));
       console.log("Selected Brand:", selectedBrand);
-      
-      setFormData((prev) => ({ 
-        ...prev, 
+
+      setFormData((prev) => ({
+        ...prev,
         brand: {
           id: value,
           name: selectedBrand?.name || "Brand not found",
@@ -206,164 +206,162 @@ const getDefaultFormData = (autoBrandId = null, autoBrandName = null) => ({
   };
 
   // ✅ NEW: Function to handle Create Model button click
-const handleCreateModelClick = () => {
-  // ✅ If a brand is selected, auto-populate it in the form
-  if (selectedBrand && selectedBrand !== "") {
-    const selectedBrandData = BrandData?.find(brand => brand.id == selectedBrand);
-    if (selectedBrandData) {
-      setFormData(getDefaultFormData(selectedBrand, selectedBrandData.name));
+  const handleCreateModelClick = () => {
+    if (selectedBrand && selectedBrand !== "") {
+      const selectedBrandData = BrandData?.find(brand => brand.id == selectedBrand);
+      if (selectedBrandData) {
+        setFormData(getDefaultFormData(selectedBrand, selectedBrandData.name));
+      } else {
+        setFormData(getDefaultFormData());
+      }
     } else {
       setFormData(getDefaultFormData());
     }
-  } else {
-    // ✅ No brand filter - start with empty form
-    setFormData(getDefaultFormData());
-  }
-  
-  setIsEditMode(false);
-  setShowModal(true);
-};
+
+    setIsEditMode(false);
+    setShowModal(true);
+  };
 
 
-// ✅ ENHANCED: Updated handleSaveClick for proper edit functionality
-const handleSaveClick = async () => {
-  if (!formData.modelNo || !formData.brand.id || !formData.category.id) {
-    alert("Please enter full details!!");
-    return;
-  }
-
-  if (isEditMode && Edit.modalNumber?.id) {
-    try {
-      const updateData = {
-        id: Edit.modalNumber.id,
-        name: formData.modelNo,
-        categories: formData.category,
-        subCategory: formData.subCategory,
-        brand: formData.brand,
-        productSpecification: {
-          id: Edit.modalNumber.productSpecification?.id || "",
-          network: formData.showVarient.network,
-          platform: formData.showVarient.platform,
-          ram: formData.showVarient.ram,
-          rom: formData.showVarient.rom
-        },
-        is_deleted: Edit.modalNumber.is_deleted
-      };
-
-      dispatch(Update(updateData));
-
-      const updateResult = await dispatch(UpdateModalNumber(Edit.modalNumber.id)).unwrap();
-      
-      console.log("Update successful:", updateResult);
-      
-      // ✅ After successful update, refresh the appropriate data
-      if (selectedBrand && selectedBrand !== "") {
-        await dispatch(FetchBrandIdModalNumber(parseInt(selectedBrand)));
-      } else {
-        await dispatch(FetchAllModalNumber());
-      }
-      
-      toast.success(updateResult.message || "Model Number Updated Successfully!");
-      handleCloseModal();
-      
-    } catch (error : any) {
-      console.error("Update Failed:", error);
-      toast.error("Model Number update failed: " + (error?.message || error));
+  // ✅ ENHANCED: Updated handleSaveClick for proper edit functionality
+  const handleSaveClick = async () => {
+    if (!formData.modelNo || !formData.brand.id || !formData.category.id) {
+      alert("Please enter full details!!");
+      return;
     }
-  } else {
-    setShowConfirmModal(true);
-  }
-};
 
-// ✅ Usage in handleConfirmSave with context info
-const handleConfirmSave = async () => {
-  const contextInfo = getCurrentContextInfo();
-  
-  const newMobileNumber = {
-    name: formData.modelNo,
-    brand: {
-      id: parseInt(formData.brand.id),
-      name: formData.brand.name,
-      is_deleted: false
-    },
-    categories: {
-      id: parseInt(formData.category.id),
-      name: formData.category.name,
-      is_deleted: false
-    },
-    subCategory: {
-      id: parseInt(formData.subCategory.id),
-      name: formData.subCategory.name,
-      category: {
-        id: parseInt(formData.subCategory.category.id),
-        name: formData.subCategory.category.name,
-        is_deleted: false
-      },
-      is_deleted: false
-    },
-    is_deleted: false,
-    productSpecification: {
-      network: formData.showVarient.network,
-      platform: formData.showVarient.platform,
-      rom: formData.showVarient.rom,
-      ram: formData.showVarient.ram,
+    if (isEditMode && Edit.modalNumber?.id) {
+      try {
+        const updateData = {
+          id: Edit.modalNumber.id,
+          name: formData.modelNo,
+          categories: formData.category,
+          subCategory: formData.subCategory,
+          brand: formData.brand,
+          productSpecification: {
+            id: Edit.modalNumber.productSpecification?.id || "",
+            network: formData.showVarient.network,
+            platform: formData.showVarient.platform,
+            ram: formData.showVarient.ram,
+            rom: formData.showVarient.rom
+          },
+          is_deleted: Edit.modalNumber.is_deleted
+        };
+
+        dispatch(Update(updateData));
+
+        const updateResult = await dispatch(UpdateModalNumber(Edit.modalNumber.id)).unwrap();
+
+        console.log("Update successful:", updateResult);
+
+        // ✅ After successful update, refresh the appropriate data
+        if (selectedBrand && selectedBrand !== "") {
+          await dispatch(FetchBrandIdModalNumber(parseInt(selectedBrand)));
+        } else {
+          await dispatch(FetchAllModalNumber());
+        }
+
+        toast.success(updateResult.message || "Model Number Updated Successfully!");
+        handleCloseModal();
+
+      } catch (error: any) {
+        console.error("Update Failed:", error);
+        toast.error("Model Number update failed: " + (error?.message || error));
+      }
+    } else {
+      setShowConfirmModal(true);
     }
   };
 
-  try {
-    console.log("Creating model with context:", contextInfo);
-    
-    const createResult = await dispatch(CreateModalNumber(newMobileNumber)).unwrap();
+  // ✅ Usage in handleConfirmSave with context info
+  const handleConfirmSave = async () => {
+    const contextInfo = getCurrentContextInfo();
 
-    console.log(createResult)
-    
-    // Refresh based on context
-    if (contextInfo.context === 'brand-filtered') {
-      await dispatch(FetchBrandIdModalNumber(parseInt(contextInfo.brandId)));
-    } else {
-      await dispatch(FetchAllModalNumber());
+    const newMobileNumber = {
+      name: formData.modelNo,
+      brand: {
+        id: parseInt(formData.brand.id),
+        name: formData.brand.name,
+        is_deleted: false
+      },
+      categories: {
+        id: parseInt(formData.category.id),
+        name: formData.category.name,
+        is_deleted: false
+      },
+      subCategory: {
+        id: parseInt(formData.subCategory.id),
+        name: formData.subCategory.name,
+        category: {
+          id: parseInt(formData.subCategory.category.id),
+          name: formData.subCategory.category.name,
+          is_deleted: false
+        },
+        is_deleted: false
+      },
+      is_deleted: false,
+      productSpecification: {
+        network: formData.showVarient.network,
+        platform: formData.showVarient.platform,
+        rom: formData.showVarient.rom,
+        ram: formData.showVarient.ram,
+      }
+    };
+
+    try {
+      console.log("Creating model with context:", contextInfo);
+
+      const createResult = await dispatch(CreateModalNumber(newMobileNumber)).unwrap();
+
+      console.log(createResult)
+
+      // Refresh based on context
+      if (contextInfo.context === 'brand-filtered') {
+        await dispatch(FetchBrandIdModalNumber(parseInt(contextInfo.brandId)));
+      } else {
+        await dispatch(FetchAllModalNumber());
+      }
+
+      // Reset form with context awareness
+      if (contextInfo.context === 'brand-filtered') {
+        const selectedBrandData = BrandData?.find(brand => brand.id == contextInfo.brandId);
+        setFormData(getDefaultFormData(contextInfo.brandId, selectedBrandData?.name || ""));
+      } else {
+        setFormData(getDefaultFormData());
+      }
+
+      setShowVarients(defaultShowVarient);
+      setShowConfirmModal(false);
+      setShowModal(false);
+      setCurrentPage(1);
+
+      // Context-aware success message
+      toast.success(getContextBasedMessage('success'));
+
+    } catch (error: any) {
+      console.error("Failed to create model number:", error);
+      toast.error("Failed to create model number: " + (error?.message || error));
     }
-    
-    // Reset form with context awareness
-    if (contextInfo.context === 'brand-filtered') {
-      const selectedBrandData = BrandData?.find(brand => brand.id == contextInfo.brandId);
-      setFormData(getDefaultFormData(contextInfo.brandId, selectedBrandData?.name || ""));
-    } else {
-      setFormData(getDefaultFormData());
-    }
-    
-    setShowVarients(defaultShowVarient);
-    setShowConfirmModal(false);
-    setShowModal(false);
-    setCurrentPage(1);
-    
-    // Context-aware success message
-    toast.success(getContextBasedMessage('success'));
-    
-  } catch (error : any) {
-    console.error("Failed to create model number:", error);
-    toast.error("Failed to create model number: " + (error?.message || error));
-  }
-};
+  };
 
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedBrand("");
     setIsEditMode(false);
-    setFormData(getDefaultFormData()); // ✅ Reset form data properly
-    setShowVarients(defaultShowVarient); // ✅ Reset variants
+    setFormData(getDefaultFormData()); 
+    setShowVarients(defaultShowVarient); 
     dispatch(restore());
   }
 
   // ✅ FIXED: Updated handleEditUser to properly populate form data
   const handleEditUser = (user: any) => {
     console.log("Editing user:", user);
-    
+
     // ✅ Dispatch the correct data structure to Redux
     dispatch(Update({
       id: user.id,
-      name: user.name, // ✅ Using 'name' field consistently
-      categories: user.categories, // ✅ Note: 'categories' not 'category'
+      name: user.name, 
+      categories: user.categories, 
       subCategory: user.subCategory,
       brand: user.brand,
       productSpecification: user.productSpecification,
@@ -423,7 +421,7 @@ const handleConfirmSave = async () => {
 
   useEffect(() => {
     setIsLoaded(true);
-        localStorage.setItem("Modal-Numbers", JSON.stringify(AllModalNumberData));
+    localStorage.setItem("Modal-Numbers", JSON.stringify(AllModalNumberData));
     dispatch(GetAllSubCategory());
     dispatch(GetAllBrand());
     dispatch(GetAllCategory());
@@ -440,13 +438,13 @@ const handleConfirmSave = async () => {
 
   useEffect(() => {
     console.log("🔍 useEffect triggered with selectedBrand:", selectedBrand);
-    
+
     if (selectedBrand && selectedBrand !== "" && selectedBrand !== "undefined") {
       console.log("🚀 Dispatching FetchBrandIdModalNumber");
-      
+
       // Make sure to pass the right type
       const brandId = parseInt(selectedBrand);
-      
+
       if (!isNaN(brandId)) {
         dispatch(FetchBrandIdModalNumber(brandId));
       } else {
@@ -458,29 +456,29 @@ const handleConfirmSave = async () => {
     }
   }, [selectedBrand, dispatch]);
 
-// 3. CHECK: Your dropdown onChange handler
-const handleBrandChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-  const value = e.target.value;
-  console.log("Brand dropdown changed:", value, typeof value);
-  
-  // Make sure value is not empty string
-  if (value && value !== "") {
-    setSelectedBrand(value);
-  } else {
-    setSelectedBrand("");
-    // Reset to show all data
-    dispatch(FetchAllModalNumber());
-  }
-};
+  // 3. CHECK: Your dropdown onChange handler
+  const handleBrandChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    console.log("Brand dropdown changed:", value, typeof value);
 
-// 6. DEBUG: Add state logging
-useEffect(() => {
-  console.log("🔍 Current states:");
-  console.log("selectedBrand:", selectedBrand);
-  console.log("BrandData:", BrandData);
-  console.log("AllModalNumberData:", AllModalNumberData?.length);
-  console.log("BrandModalNumberData:", BrandModalNumberData?.length);
-}, [selectedBrand, BrandData, AllModalNumberData, BrandModalNumberData]);
+    // Make sure value is not empty string
+    if (value && value !== "") {
+      setSelectedBrand(value);
+    } else {
+      setSelectedBrand("");
+      // Reset to show all data
+      dispatch(FetchAllModalNumber());
+    }
+  };
+
+  // 6. DEBUG: Add state logging
+  useEffect(() => {
+    console.log("🔍 Current states:");
+    console.log("selectedBrand:", selectedBrand);
+    console.log("BrandData:", BrandData);
+    console.log("AllModalNumberData:", AllModalNumberData?.length);
+    console.log("BrandModalNumberData:", BrandModalNumberData?.length);
+  }, [selectedBrand, BrandData, AllModalNumberData, BrandModalNumberData]);
 
 
   const handleClear = () => {
@@ -514,13 +512,13 @@ useEffect(() => {
                 <option value="">All Brands</option>
                 {BrandData?.map((item) => (
                   <option key={item?.id} value={item?.id}>
-                   {item?.name}
+                    {item?.name}
                   </option>
                 ))}
               </select>
-              
+
               {selectedBrand && (
-                <button 
+                <button
                   onClick={handleClear}
                   className="text-red-400 hover:text-red-600 text-sm bg-red-50 px-2 py-1 rounded"
                 >
@@ -530,12 +528,12 @@ useEffect(() => {
             </div>
           </div>
 
-<button 
-  onClick={handleCreateModelClick} // ✅ Changed from setShowModal(true)
-  className={`${SubmitButtonClass}`}
->
-  Add
-</button>
+          <button
+            onClick={handleCreateModelClick}
+            className={`${SubmitButtonClass}`}
+          >
+            Add
+          </button>
         </div>
 
         {/* Center Section - Show Data in Table Format */}
@@ -544,8 +542,8 @@ useEffect(() => {
             {/* Show filtering info */}
             <div className={`bg-transparent p-4 rounded-t-lg border border-gray-200 ${ThemeTextColor}`}>
               <h2 className="text-xl font-semibold">
-                {selectedBrand 
-                  ? `${getSelectedBrandName()} Models (${displayData.length} total)` 
+                {selectedBrand
+                  ? `${getSelectedBrandName()} Models (${displayData.length} total)`
                   : `All Models (${displayData.length} total)`
                 }
               </h2>
@@ -576,7 +574,7 @@ useEffect(() => {
                     <tr>
                       <td colSpan={8} className="text-center py-8">
                         <div className="text-gray-500">
-                          {selectedBrand 
+                          {selectedBrand
                             ? `No models found for ${getSelectedBrandName()}. Create your first model!`
                             : "No models found. Create your first model!"
                           }
@@ -587,9 +585,8 @@ useEffect(() => {
                     paginatedUsers.map((user, index) => (
                       <React.Fragment key={user?.id}>
                         <tr
-                          className={`transform transition-all duration-300 ${
-                            isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-                          } ${hoveredRow === user?.id ? 'bg-gray-50' : 'bg-white'}`}
+                          className={`transform transition-all duration-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+                            } ${hoveredRow === user?.id ? 'bg-gray-50' : 'bg-white'}`}
                           style={{ transitionDelay: `${index * 100}ms` }}
                           onMouseEnter={() => setHoveredRow(user?.id)}
                           onMouseLeave={() => setHoveredRow(null)}
@@ -612,9 +609,7 @@ useEffect(() => {
                               onClick={() => handleEditUser(user)}
                               className={EditClass}
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                              </svg>
+                              {EditIcon}
                             </button>
                           </td>
                           <td className={TableDataClass}>
@@ -622,9 +617,7 @@ useEffect(() => {
                               onClick={() => handleDeleteUser(user?.id)}
                               className={DeleteClass}
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                              </svg>
+                              {DeleteIcon}
                             </button>
                           </td>
                           <td className={TableDataClass}>
@@ -709,14 +702,14 @@ useEffect(() => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <label className="block font-medium mb-2">Model Number</label>
-                    <input 
-                      onChange={handleChage} 
-                      value={modelNo} 
-                      type="text" 
-                      required 
-                      name="modelNo" 
-                      placeholder="Model Number" 
-                      className={inputClass} 
+                    <input
+                      onChange={handleChage}
+                      value={modelNo}
+                      type="text"
+                      required
+                      name="modelNo"
+                      placeholder="Model Number"
+                      className={inputClass}
                     />
                   </div>
 
@@ -755,35 +748,35 @@ useEffect(() => {
                   </div>
 
 
-<div>
-  <label className="block font-medium mb-2">
-    Select Brand 
-    {selectedBrand && (
-      <span className="text-sm text-gray-600 ml-2">
-        (Auto-selected: {getSelectedBrandName()})
-      </span>
-    )}
-  </label>
-  <select
-    className={SelectClass}
-    onChange={handleChage}
-    name="brand"
-    value={brand.id}
-  >
-    <option value="">Select Brand</option>
-    {BrandData?.map((item) => (
-      <option key={item?.id} value={item?.id}>
-        {item?.name}
-        {selectedBrand == item?.id}
-      </option>
-    ))}
-  </select>
-  {selectedBrand && selectedBrand == brand.id && (
-    <p className="text-xs text-green-600 mt-1">
-      ✓ This brand is auto-selected because you're viewing {getSelectedBrandName()} models. You can change it if needed.
-    </p>
-  )}
-</div>
+                  <div>
+                    <label className="block font-medium mb-2">
+                      Select Brand
+                      {selectedBrand && (
+                        <span className="text-sm text-gray-600 ml-2">
+                          (Auto-selected: {getSelectedBrandName()})
+                        </span>
+                      )}
+                    </label>
+                    <select
+                      className={SelectClass}
+                      onChange={handleChage}
+                      name="brand"
+                      value={brand.id}
+                    >
+                      <option value="">Select Brand</option>
+                      {BrandData?.map((item) => (
+                        <option key={item?.id} value={item?.id}>
+                          {item?.name}
+                          {selectedBrand == item?.id}
+                        </option>
+                      ))}
+                    </select>
+                    {selectedBrand && selectedBrand == brand.id && (
+                      <p className="text-xs text-green-600 mt-1">
+                        ✓ This brand is auto-selected because you're viewing {getSelectedBrandName()} models. You can change it if needed.
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Specification Title */}
@@ -834,19 +827,19 @@ useEffect(() => {
           <ConfirmationModal
             isOpen={showConfirmModal}
             title="Confirm Mobile Number Creation"
-             message={(() => {
-    const contextInfo = getCurrentContextInfo();
-    
-    if (contextInfo.context === 'brand-filtered') {
-      return `Are you sure you want to add the model "${modelNo}" for brand "${brand.name}"? 
+            message={(() => {
+              const contextInfo = getCurrentContextInfo();
+
+              if (contextInfo.context === 'brand-filtered') {
+                return `Are you sure you want to add the model "${modelNo}" for brand "${brand.name}"? 
               This will be added to your current ${contextInfo.brandName} filter view 
               (Total ${contextInfo.brandName} models will become ${contextInfo.totalItems + 1}).`;
-    } else {
-      return `Are you sure you want to add the model "${modelNo}" for brand "${brand.name}"? 
+              } else {
+                return `Are you sure you want to add the model "${modelNo}" for brand "${brand.name}"? 
               This will be added to the main models list 
               (Total models will become ${contextInfo.totalItems + 1}).`;
-    }
-  })()}
+              }
+            })()}
             onConfirm={handleConfirmSave}
             onCancel={() => setShowConfirmModal(false)}
           />

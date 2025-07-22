@@ -159,7 +159,7 @@ export const UpdateColorName = createAsyncThunk(
       );
 
       return {
-        id: id, // keep original ID
+        id: id, 
         color: response.color || payload.color,
         colorCode: response.colorCode || payload.colorCode,
         is_deleted: response.is_deleted

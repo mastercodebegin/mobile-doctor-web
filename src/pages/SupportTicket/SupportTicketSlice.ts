@@ -1,20 +1,102 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { pageSize } from "../../helper/ApplicationConstants";
-import { getRequestMethodWithParam, postRequestMethod } from "../../util/CommonService";
+import { getRequestMethodWithParam, postRequestMethod, putRequestMethod } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
 
 const storeData = localStorage.getItem('support-ticket')
 
-const initialState = {
+// Role interface
+interface Role {
+  id: number;
+  name: string;
+}
+
+// User/CreatedBy interface
+interface User {
+  id: number;
+  firstName: string;
+  lastName: string;
+  mobile: string;
+  email: string;
+  personalEmail: string | null;
+  password: string;
+  createdAt: string | null;
+  deviceToken: string;
+  role: Role;
+  createdBy: User | null;
+}
+
+// Complete Support Ticket interface (response data)
+interface SupportTicket {
+  id: number;
+  userIssue: string;
+  ticketNumber: string;
+  supportTicketStatus: "PENDING" | "RESOLVED" | "IN_PROGRESS" | "CLOSED";
+  seniorCSDescription: string;
+  customer_support: any | null;
+  seniorCustomerSupport: any | null;
+  createdBy: User;
+  unitRepairOrder: any | null;
+  createdOn: string;
+  closed: boolean;
+  cssescription: string;
+}
+
+// Redux state interface
+interface SupportTicketState {
+  isLoading: boolean;
+  isSuccess: boolean;
+  SupportTicketData: SupportTicket[];
+  Edit: {supportTicket: SupportTicket, isEdit: boolean};
+}
+
+
+const initialState: SupportTicketState = {
     isLoading: false,
     isSuccess: false,
-    SupportTicketData: storeData ? JSON.parse(storeData) : []
+    SupportTicketData: storeData ? JSON.parse(storeData) : [],
+    Edit: {
+        isEdit: false,
+        supportTicket: {
+            id: 0,
+            userIssue: "",
+            ticketNumber: "",
+            supportTicketStatus: "PENDING",
+            seniorCSDescription: "",
+            customer_support: null,
+            seniorCustomerSupport: null,
+            createdBy: {
+                id: 0,
+                firstName: "",
+                lastName: "",
+                mobile: "",
+                email: "",
+                personalEmail: null,
+                password: "",
+                createdAt: null,
+                deviceToken: "",
+                role: {
+                    id: 0,
+                    name: ""
+                },
+                createdBy: null
+            },
+            unitRepairOrder: null,
+            createdOn: "",
+            closed: false,
+            cssescription: ""
+        }
+    }
 }
 
 const SupportTicketSlice = createSlice({
     name: 'SupportTicketSlice',
     initialState,
-    reducers: {},
+    reducers: {
+        Update: (state, action) => {
+            state.Edit = { supportTicket: action.payload, isEdit: true }
+        },
+    },
     extraReducers: (builder) =>{
         builder
         .addCase(GetAllSupportTicket.pending, (state, action) =>{
@@ -66,11 +148,40 @@ const SupportTicketSlice = createSlice({
             state.isSuccess = false 
             console.log("Support Ticket Data Creating is Failed With :----", action.payload)
         })
+
+         // Update Support Ticket
+        .addCase(UpdateSupportTicket.pending, (state, action) => {
+            state.isLoading = true
+            state.isSuccess = false
+            console.log("Support Ticket Updating is Pending :---", action.payload)
+        })
+     .addCase(UpdateSupportTicket.fulfilled, (state, action) => {
+            state.isLoading = false;
+            state.isSuccess = true;
+
+            const updatedItem = action.payload;
+            const itemIndex = state.SupportTicketData.findIndex((item) => item.id === updatedItem.id);
+            if(itemIndex !== -1) {
+                state.SupportTicketData[itemIndex] = updatedItem;
+            }
+
+            // Sync to localStorage
+            localStorage.setItem('support-ticket', JSON.stringify(state.SupportTicketData));
+
+            // Reset Edit State
+            state.Edit = initialState.Edit
+        })   
+             .addCase(UpdateSupportTicket.rejected, (state, action) => {
+            state.isLoading = false
+            state.isSuccess = false
+            console.log("Support Ticket Data Updation Failed :--", action.payload)
+        })
     }
 })
 
 
 export default SupportTicketSlice.reducer
+export const {Update} = SupportTicketSlice.actions
 
 // Fetch All Support Ticket
 export const GetAllSupportTicket = createAsyncThunk("FETCH/ALL/SUPPORT-TICKET", async (_, thunkAPI) =>{
@@ -108,7 +219,7 @@ export const GetAllSupportTicketByTicketNumber = createAsyncThunk("FETCH/ALL/SUP
 // Create Support Ticket
 export const AddsupportTicket = createAsyncThunk("ADD/SUPPORT-TICKET", async (requestData: any, thunkAPI) =>{
     try {
-        const response = await postRequestMethod(requestData, UrlConstants);
+        const response = await postRequestMethod(requestData, UrlConstants.ADD_SUPPORT_TICKET);
         console.log("Response Data :--", response);
         return response;
     } catch (error: any) {
@@ -116,3 +227,36 @@ export const AddsupportTicket = createAsyncThunk("ADD/SUPPORT-TICKET", async (re
     return thunkAPI.rejectWithValue(message)
     }
 })
+
+// Update Support Ticket
+export const UpdateSupportTicket = createAsyncThunk(
+  "UPDATE/SUPPORT-TICKET",
+  async (updatePayload: { id: number; updateData: any }, thunkAPI) => {
+    try {
+      const { id, updateData } = updatePayload;
+
+      const requestBody = {
+        id: id,
+        userIssue: updateData.userIssue,
+        ticketNumber: updateData.ticketNumber,
+        supportTicketStatus: updateData.supportTicketStatus,
+        seniorCSDescription: updateData.seniorCSDescription,
+        createdOn: updateData.createdOn,
+        cssescription: updateData.cssescription,
+      };
+
+      console.log("RequestBody Response Data :--", requestBody);
+
+      const response = await putRequestMethod(
+        requestBody,
+        `${UrlConstants.UPDATE_SUPPORT_TICKET}`
+      );
+
+      console.log("Response To Update Support Ticket :--", response);
+      return response;
+    } catch (error: any) {
+      const message = error?.response?.data?.message || error.message;
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
