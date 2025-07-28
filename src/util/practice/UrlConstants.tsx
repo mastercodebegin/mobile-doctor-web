@@ -1,7 +1,8 @@
 const UrlConstants = {
   //  BASE_URL:'https://reqres.in/api/users?page=2',
   // BASE_URL: 'https://faaziqa123.loca.lt/doctor-mobile/',
-  BASE_URL: 'http://34.93.130.230:8080/doctor-mobile/',
+  // BASE_URL: 'http://34.93.130.230:8080/doctor-mobile/',
+  BASE_URL: 'http://34.93.224.0:8080/mobile/',
   LOGIN: 'user/login',
   TEST_API:'user/testapi',
   GET_MY_PROFILE:'user/getMyProfile',
@@ -22,6 +23,7 @@ const UrlConstants = {
   UPDATE_PRODUCT_PART_LABEL: 'ProductPart/updateProductPart',
   UPDATE_REPAIR_COST: 'RepairCost/update',
   UPDATE_INVENTORY: 'inventory/updateInventory',
+  UPDATE_SUPPORT_TICKET: 'supportTicket/update',
 
   GET_ALL_PRODUCT_PART_LABEL: 'ProductPart/getAllProductPart',
   GET_PRODUCT_PART_LABEL_BY_SUB_CATEGORY_ID: 'ProductPart/getPartItemBySubCategoryId',
@@ -36,24 +38,23 @@ ADD_RE_FILL_INVENTORY: 'inventory/reFillInventory',
 GET_INVENTORY_HISTORY: 'inventoryUsageHistory/getInventoryHistoryByInventoryId',
 ORDER_INVENTORY_USE: 'inventory/consumeInventoryItem',
 GET_ALL_SUPPORT_TICKET: 'supportTicket/getAll',
+ADD_SUPPORT_TICKET: 'supportTicket/create',
+GET_ALL_ROLES: 'userRole/getAllRole',
+GET_ROLE_BY_ID: 'userRole/getRoleById',
+ADD_ROLE: 'userRole/createrole',
 
 
 
-  //  BASE_URL:'https://reqres.in/api/users?page=2/',
-  // BASE_URL: 'http://52.201.90.251:8082/api/',
-  // BASE_URL: 'http://52.201.90.251:8082/api/',
-  // BASE_URL:'http://10.0.0.85:9090/',
-  // BASE_URL: 'http://api.famawork.com:8082/api/',
-
-
-  // Vendor Token
-  // TOKEN:"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiVmVuZG9yIiwiaXNzIjoic2hvcGV4IiwiZXhwIjoxNzA5MjAyNDg3LCJpYXQiOjE2Nzc2NjY0ODcsInVzZXJJZCI6MywiZW1haWwiOiJ2ZW5kb3JAeW9wbWFpbC5jb20iLCJqdGkiOiI4ODdlNGE2Yy1lMmJiLTQ4OGItYjkxZC1jZGM2OTJmNTNlOTMifQ.Q1ERjn52Mzrjo-VubRjEI9rPIAhu9r5qJef3HGRXs2c",
   AWS_IMAGE_BASE_URL:'https://userdocumentx.s3.ap-northeast-1.amazonaws.com/',
-  // LOGIN: 'vendor/login',
+  // LOGIN: 'vendor/login
   CREATE_VENDOR:'vendor/createVendor',
   UPDATE_VENDOR_STATUS:'vendor/updateVendorAccountStatus',
   GET_ALL_VENDOR:'vendor/getAllVendor',
+
   GET_PROFILE:'User/getMyProfile',
+CREATE_USER_BY_ADMIN: 'user/createUserByAdmin',
+GET_ALL_USER: 'user/getAllUser',
+
   ADD_BRAND:'brand/addBrand',
   ADD_SUB_CATEGORY:'subCategory/addSubCategory',
   GET_ALL_SUB_CATEGORY_BY_ID:'subCategory/getallSubCategoriesByCategoryPK/',

@@ -26,6 +26,7 @@ import ProductPart from "./pages/ProductPart/ProductPart";
 import Products from "./pages/Products/Products";
 import Order from "./pages/Orders/Order";
 import SupportTicket from "./pages/SupportTicket/SupportTicket";
+import Role from "./pages/Roles/Role";
 
 function App() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
@@ -132,6 +133,7 @@ function App() {
               <Route path="/products" element={<Products />} />
               <Route path="/orders" element={<Order />} />
               <Route path="/support-ticket" element={<SupportTicket />} />
+              <Route path="/role" element={<Role />} />
             </Route>
           </Routes>
         </div>

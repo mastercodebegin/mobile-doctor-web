@@ -54,8 +54,11 @@ interface ProductPartRecord {
 
 interface History {
   isLoading: boolean;
-  data: Record<number, any[]>
+  data: Record<number, any[]>; 
+  pagination: Record<number, any>; 
 }
+
+
 
 interface ProductPartInterface {
     isLoading: boolean;
@@ -71,7 +74,8 @@ const initialState: ProductPartInterface = {
     ProductPartData: storeData ? JSON.parse(storeData) : [],
     History: {
   isLoading: false,
-  data: storeData ? JSON.parse(storeData) : {},
+  data: {},
+  pagination: {},
 },
     Edit: {
         isEdit: false,
@@ -257,13 +261,55 @@ console.log("Re-Fill Data :--", action.payload)
     state.isSuccess = false;
     console.log("Inventory History is Pending :--", action.payload);
 })
+// .addCase(InventoryHistory.fulfilled, (state, action) => {
+//     state.History.isLoading = false; 
+//     state.isSuccess = true;
+// const inventoryId = action.meta.arg.id;
+// state.History.data[inventoryId] = action.payload?.content || [];
+//     console.log("✅ Inventory History Data Set:", state.History);
+// })
+
+
+
 .addCase(InventoryHistory.fulfilled, (state, action) => {
-    state.History.isLoading = false; 
-    state.isSuccess = true;
-const inventoryId = action.meta.arg.id;
-state.History.data[inventoryId] = action.payload?.content || [];
-    console.log("✅ Inventory History Data Set:", state.History);
+  const inventoryId = action.meta.arg.id;
+  const payload = action.payload;
+  const pageNumber = payload.number;
+  const pageSize = payload.size;
+  
+  // Initialize array if doesn't exist
+  if (!state.History.data[inventoryId]) {
+    state.History.data[inventoryId] = [];
+  }
+  
+  // Calculate the correct index to insert data
+  const startIndex = pageNumber * pageSize;
+  
+  // Insert data at the correct position
+  payload.content.forEach((item, index) => {
+    state.History.data[inventoryId][startIndex + index] = item;
+  });
+  
+  state.History.pagination[inventoryId] = {
+    totalElements: payload.totalElements,
+    totalPages: payload.totalPages,
+    number: payload.number,
+    size: payload.size,
+    first: payload.first,
+    last: payload.last,
+  };
+  
+  console.log(`Data after fetching page ${payload.number} for user ${inventoryId}:`, state.History.data[inventoryId]);
+  state.History.isLoading = false;
 })
+
+
+
+
+
+
+
+
 .addCase(InventoryHistory.rejected, (state, action) => {
     state.History.isLoading = false; 
     state.isSuccess = false;

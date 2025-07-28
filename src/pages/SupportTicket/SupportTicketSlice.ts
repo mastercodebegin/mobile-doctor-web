@@ -31,7 +31,7 @@ interface SupportTicket {
   id: number;
   userIssue: string;
   ticketNumber: string;
-  supportTicketStatus: "PENDING" | "RESOLVED" | "IN_PROGRESS" | "CLOSED";
+  supportTicketStatus: "PENDING" | "REOPEN" | "INREVIEW" | "CLOSED";
   seniorCSDescription: string;
   customer_support: any | null;
   seniorCustomerSupport: any | null;

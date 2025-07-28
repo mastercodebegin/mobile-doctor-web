@@ -255,6 +255,15 @@ export default function Sidebar({ collapsed, onNavigate }: SidebarProps) {
         >
           Support Ticket
         </SidebarItem>
+
+                <SidebarItem
+          to="/role"
+          icon={Users}
+          {...SidebarColors.role}
+          isActive={activeLink === "/role"}
+        >
+          User Role
+        </SidebarItem>
       </nav>
 
       <style jsx>{`

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
 import Pagination from '../../helper/Pagination';
-import { DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, InventoryView, pageSize, ShowModalMainClass, ShowModelCloseButtonClass, ShowVarientButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from '../../helper/ApplicationConstants';
+import { DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, InventoryView, pageSize, ShowModalMainClass, ShowModelCloseButtonClass, ShowVarientButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass, ThemeBackgroundColor } from '../../helper/ApplicationConstants';
 import { toast } from 'react-toastify';
 import Loading from '../../components/Loading';
 import { GetAllCategory } from '../AddCategory/AddCategorySlice';
@@ -27,6 +27,7 @@ const ProductPart = () => {
   const [notes, setNotes] = useState<any>("");
   const [history, setHistory] = useState<any>(null);
   const [expandedHistory, setExpandedHistory] = useState<{ [key: number]: boolean }>({});
+  const [historyPagination, setHistoryPagination] = useState<{ [key: number]: { currentPage: number, totalPages: number, totalElements: number } }>({});
 
   // ReFill specific states
   const [isReFillMode, setIsReFillMode] = useState(false);
@@ -333,61 +334,263 @@ const ProductPart = () => {
     }
   }
 
-  // Handle history toggle
+  //   // Handle history toggle
+  //   const handleHistoryToggle = (userId: number) => {
+  //     if (history === userId) {
+  //       setExpandedHistory({});
+  //       setHistory(null);
+  //       return;
+  //     }
+
+  //       // already cached?
+  //   if (History.data[userId]?.length) {
+  //     setHistory(userId);
+  //     setExpandedHistory({ [userId]: false });
+  //     return;
+  //   }
+
+  //     const historyData = {
+  //       id: userId,
+  //       pageSize: pageSize || 10,
+  //       pageNumber: 0,
+  //     };
+
+  //     // ✅ Only dispatch if id is defined
+  //     if (userId && typeof userId === 'number') {
+  //       dispatch(InventoryHistory(historyData));
+  //       setHistory(userId);
+  //       setExpandedHistory({ [userId]: false })
+  //     } else {
+  //       console.error('Invalid userId for history fetch:', userId);
+  //       toast.error('Invalid user ID for history fetch');
+  //       return;
+  //     }
+
+
+  //   };
+
+  //   // Handle view more toggle
+  //   const handleViewMore = (userId: number) => {
+  //     setExpandedHistory(prev => ({
+  //       ...prev,
+  //       [userId]: !prev[userId]
+  //     }));
+  //   };
+
+  //   // Render history row
+  //   const renderHistoryRow = (user: any) => {
+  //     const isExpanded = expandedHistory[user.id];
+
+  //     const userSpecificHistory = History.data[user.id] || [];
+
+  //     return (
+  //       <tr key={`history-${user?.id}`} className="bg-gray-50">
+  //         <td colSpan={10} className="px-6 py-4">
+  //           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+
+  //             {isHistoryLoading ? (
+  //               <div className="flex justify-center items-center py-8">
+  //                 <div className="relative">
+  //                   <div
+  //                     className="w-16 h-16 border border-white rounded-full animate-spin"
+  //                     style={{ animationDuration: '2s' }}
+  //                   >
+  //                     <div
+  //                       className="absolute inset-0 border-3 border-transparent border-y-cyan-600 border-l-cyan-600 rounded-full animate-spin"
+  //                       style={{ animationDuration: '2s' }}
+  //                     />
+  //                   </div>
+  //                   <p className="text-center text-gray-600 mt-4">Loading history...</p>
+  //                 </div>
+  //               </div>
+  //             ) : (
+  //               <div className="overflow-x-auto">
+  //                 {!userSpecificHistory.length ? (
+  //                   <div className="text-center text-red-500 py-8">
+  //                     <p className="text-lg">📋 Inventory History Not Available</p>
+  //                     <p className="text-sm text-gray-500 mt-2">
+  //                       No history records found for this product
+  //                     </p>
+  //                   </div>
+  //                 ) : (
+  //                   (() => {
+  //                     const displayedHistory = isExpanded
+  //                       ? userSpecificHistory
+  //                       : userSpecificHistory.slice(0, 5);
+
+  //                     return (
+  //                       <>
+  //                         <table className="min-w-full divide-y divide-gray-200 text-sm">
+  //                           <thead className="bg-gray-100">
+  //                             <tr>
+  //                               <th className="px-4 py-2 text-left">Order ID</th>
+  //                               <th className="px-4 py-2 text-left">Date</th>
+  //                               <th className="px-4 py-2 text-left">Qty Change</th>
+  //                               <th className="px-4 py-2 text-left">Updated Qty</th>
+  //                               <th className="px-4 py-2 text-left">Status</th>
+  //                               <th className="px-4 py-2 text-left">Used By</th>
+  //                               <th className="px-4 py-2 text-left">Notes</th>
+  //                             </tr>
+  //                           </thead>
+  //                           <tbody className="divide-y divide-gray-200 bg-white">
+  //                             {displayedHistory.map((record) => {
+  //                               const date = record.usedOn?.split('T')[0] || record.usedOn || '--';
+
+  //                               const prevQty = record.previousQuantity ?? 0;
+  //                               const newQty = record.updatedQuantity ?? 0;
+  //                               const ReFillQty = record.quantity ?? 0;
+  //                               const NewReFillQty = record.inventory?.quantity ?? 0;
+
+  //                               let qtyChangeDisplay = '';
+  //                               let qtyChangeColor = '';
+  //                               let statusBadge = { label: '', color: '' };
+  //                               let totalQtyDisplay = '';
+
+  //                               // Check if it's a new product creation
+  //                               if (record.new) {
+  //                                 qtyChangeDisplay = `+${newQty}`;
+  //                                 qtyChangeColor = 'text-blue-600';
+  //                                 statusBadge = { label: 'Created', color: 'text-blue-500' };
+  //                                 totalQtyDisplay = newQty;
+  //                               } else if (record.refill) {
+  //                                 // Refill action
+  //                                 qtyChangeDisplay = `+${ReFillQty}`;
+  //                                 qtyChangeColor = 'text-green-600';
+  //                                 statusBadge = { label: 'Re-Filled', color: 'text-green-500' };
+  //                                 totalQtyDisplay = NewReFillQty;
+  //                               } else if (record.unitRepair) {
+  //                                 // Use action
+  //                                 qtyChangeDisplay = `${prevQty} - 1`;
+  //                                 qtyChangeColor = 'text-red-600';
+  //                                 statusBadge = { label: 'Utilise', color: 'text-yellow-500' };
+  //                                 totalQtyDisplay = newQty;
+  //                               } else {
+  //                                 // Default case (should not happen)
+  //                                 qtyChangeDisplay = '--';
+  //                                 qtyChangeColor = 'text-gray-600';
+  //                                 statusBadge = { label: 'Updated', color: 'bg-gray-100 text-gray-500' };
+  //                                 totalQtyDisplay = newQty;
+  //                               }
+
+  //                               return (
+  //                                 <tr key={record.id} className="border-b border-gray-200 last:border-b-0 h-16">
+  //   <td className="px-4 py-2 align-middle">{record?.unitRepair?.orderId ?? ''}</td>
+  //   <td className="px-4 py-2 align-middle">{date}</td>
+  //   <td className={`px-4 py-2 align-middle font-medium ${qtyChangeColor}`}>{qtyChangeDisplay}</td>
+  //   <td className="px-4 py-2 align-middle">{totalQtyDisplay}</td>
+  //   <td className="px-4 py-2 align-middle">
+  //     <span className={`px-2 py-1 text-xs font-semibold rounded-full ${statusBadge.color}`}>
+  //       {statusBadge.label}
+  //     </span>
+  //   </td>
+  //   <td className="px-4 py-2 align-middle">
+  //     {record.user ? `${record.user.firstName} ${record.user.lastName}` : '--'}
+  //   </td>
+  //   <td className="px-4 py-2 align-middle">{record.notes || '--'}</td>
+  // </tr>
+  //                               );
+  //                             })}
+  //                           </tbody>
+  //                         </table>
+
+  //                         {userSpecificHistory.length > 5 && !isExpanded && (
+  //                           <div className="mt-4 text-center">
+  //                             <button
+  //                               onClick={() => handleViewMore(user.id)}
+  //                               className={` ${EditClass} inline-flex items-center justify-center px-4 py-2 border border-gray-300 hover:border-cyan-300 rounded-md shadow-sm text-sm font-medium bg-white hover:bg-gray-100 transition-colors`}
+  //                             >
+  //                               <svg
+  //                                 className="w-4 h-4"
+  //                                 fill="none"
+  //                                 stroke="currentColor"
+  //                                 viewBox="0 0 24 24"
+  //                               >
+  //                                 <path
+  //                                   strokeLinecap="round"
+  //                                   strokeLinejoin="round"
+  //                                   strokeWidth={2}
+  //                                   d="M19 9l-7 7-7-7"
+  //                                 />
+  //                               </svg>
+  //                             </button>
+  //                           </div>
+  //                         )}
+  //                       </>
+  //                     );
+  //                   })()
+  //                 )}
+  //               </div>
+  //             )}
+  //           </div>
+  //         </td>
+  //       </tr>
+  //     );
+  //   };
+
+
+
+
   const handleHistoryToggle = (userId: number) => {
+    // If the history is already open for this user, close it
     if (history === userId) {
-      setExpandedHistory({});
       setHistory(null);
       return;
     }
 
-      // already cached?
-  if (History.data[userId]?.length) {
+    // If the history is not open, set it to the current user ID
     setHistory(userId);
-    setExpandedHistory({ [userId]: false });
-    return;
-  }
 
-    const historyData = {
-      id: userId,
-      pageSize: pageSize || 10,
-      pageNumber: 0,
-    };
-
-    // ✅ Only dispatch if id is defined
-    if (userId && typeof userId === 'number') {
-      dispatch(InventoryHistory(historyData));
-      setHistory(userId);
-      setExpandedHistory({ [userId]: false })
-    } else {
-      console.error('Invalid userId for history fetch:', userId);
-      toast.error('Invalid user ID for history fetch');
+    if (History.data[userId]?.length) {
+      setHistory(userId);           // use existing
       return;
     }
 
+    // Check if data is already cached
+    const cachedData = History.data[userId] || [];
+    const totalElements = History.pagination[userId]?.totalElements || 0;
 
-  };
+    // If data is not fully cached, fetch the first page
+    if (cachedData.length === 0 || cachedData.length < totalElements) {
+      const historyData = {
+        id: userId,
+        pageSize: pageSize || 10,
+        pageNumber: 0,
+      };
+      dispatch(InventoryHistory(historyData));
+    }
 
-  // Handle view more toggle
-  const handleViewMore = (userId: number) => {
-    setExpandedHistory(prev => ({
+    // Reset the current page to the first page when opening history
+    setHistoryPagination(prev => ({
       ...prev,
-      [userId]: !prev[userId]
+      [userId]: { ...prev[userId], currentPage: 0 },
     }));
   };
 
-  // Render history row
+  // Also update the renderHistoryRow function to show correct page data:
   const renderHistoryRow = (user: any) => {
-    const isExpanded = expandedHistory[user.id];
-
     const userSpecificHistory = History.data[user.id] || [];
+    const userPagination = historyPagination[user.id] || { currentPage: 0, totalPages: 0, totalElements: 0 };
+
+    console.log('Checking history for user ID:', user.id, History.data);
+
+    const currentPage = userPagination.currentPage;
+    const totalPages = userPagination.totalPages;
+    const totalElements = userPagination.totalElements;
+    const historyPageSize = pageSize || 10;
+    const startEntry = (currentPage * historyPageSize) + 1;
+    const endEntry = Math.min((currentPage + 1) * historyPageSize, totalElements);
+
+    // Get current page data from cached history
+    const startIndex = currentPage * historyPageSize;
+    const endIndex = startIndex + historyPageSize;
+    const currentPageData = userSpecificHistory.slice(startIndex, endIndex).filter(item => item !== undefined);
 
     return (
       <tr key={`history-${user?.id}`} className="bg-gray-50">
         <td colSpan={10} className="px-6 py-4">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-
             {isHistoryLoading ? (
+              // ... loading content remains same
               <div className="flex justify-center items-center py-8">
                 <div className="relative">
                   <div
@@ -412,111 +615,152 @@ const ProductPart = () => {
                     </p>
                   </div>
                 ) : (
-                  (() => {
-                    const displayedHistory = isExpanded
-                      ? userSpecificHistory
-                      : userSpecificHistory.slice(0, 5);
+                  <>
+                    <table className="min-w-full divide-y divide-gray-200 text-sm">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th scope="col" className={TableHadeClass}>Order ID</th>
+                          <th scope="col" className={TableHadeClass}>Date</th>
+                          <th scope="col" className={TableHadeClass}>Qty Change</th>
+                          <th scope="col" className={TableHadeClass}>Updated Qty</th>
+                          <th scope="col" className={TableHadeClass}>Status</th>
+                          <th scope="col" className={TableHadeClass}>Used By</th>
+                          <th scope="col" className={TableHadeClass}>Notes</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 bg-white">
+                        {/* Use currentPageData instead of userSpecificHistory */}
+                        {currentPageData.map((record) => {
+                          // ... rest of the mapping logic remains same
+                          const date = record.usedOn?.split('T')[0] || record.usedOn || '--';
 
-                    return (
-                      <>
-                        <table className="min-w-full divide-y divide-gray-200 text-sm">
-                          <thead className="bg-gray-100">
-                            <tr>
-                              <th className="px-4 py-2 text-left">Order ID</th>
-                              <th className="px-4 py-2 text-left">Date</th>
-                              <th className="px-4 py-2 text-left">Qty Change</th>
-                              <th className="px-4 py-2 text-left">Updated Qty</th>
-                              <th className="px-4 py-2 text-left">Status</th>
-                              <th className="px-4 py-2 text-left">Used By</th>
-                              <th className="px-4 py-2 text-left">Notes</th>
+                          const prevQty = record.previousQuantity ?? 0;
+                          const newQty = record.updatedQuantity ?? 0;
+                          const ReFillQty = record.quantity ?? 0;
+                          const NewReFillQty = record.inventory?.quantity ?? 0;
+
+                          let qtyChangeDisplay = '';
+                          let qtyChangeColor = '';
+                          let statusBadge = { label: '', color: '' };
+                          let totalQtyDisplay = '';
+
+                          if (record.new) {
+                            qtyChangeDisplay = `+${newQty}`;
+                            qtyChangeColor = 'text-blue-600';
+                            statusBadge = { label: 'Created', color: 'text-blue-500' };
+                            totalQtyDisplay = newQty;
+                          } else if (record.refill) {
+                            qtyChangeDisplay = `+${ReFillQty}`;
+                            qtyChangeColor = 'text-green-600';
+                            statusBadge = { label: 'Re-Filled', color: 'text-green-500' };
+                            totalQtyDisplay = NewReFillQty;
+                          } else if (record.unitRepair) {
+                            qtyChangeDisplay = `${prevQty} - 1`;
+                            qtyChangeColor = 'text-red-600';
+                            statusBadge = { label: 'Utilise', color: 'text-yellow-500' };
+                            totalQtyDisplay = newQty;
+                          } else {
+                            qtyChangeDisplay = '--';
+                            qtyChangeColor = 'text-gray-600';
+                            statusBadge = { label: 'Updated', color: 'bg-gray-100 text-gray-500' };
+                            totalQtyDisplay = newQty;
+                          }
+
+                          return (
+                            <tr key={record.id} className="border-b border-gray-200 last:border-b-0 h-16">
+                              <td className="px-4 py-2 align-middle">{record?.unitRepair?.orderId ?? ''}</td>
+                              <td className="px-4 py-2 align-middle">{date}</td>
+                              <td className={`px-4 py-2 align-middle font-medium ${qtyChangeColor}`}>{qtyChangeDisplay}</td>
+                              <td className="px-4 py-2 align-middle">{totalQtyDisplay}</td>
+                              <td className="px-4 py-2 align-middle">
+                                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${statusBadge.color}`}>
+                                  {statusBadge.label}
+                                </span>
+                              </td>
+                              <td className="px-4 py-2 align-middle">
+                                {record.user ? `${record.user.firstName} ${record.user.lastName}` : '--'}
+                              </td>
+                              <td className="px-4 py-2 align-middle">{record.notes || '--'}</td>
                             </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-200 bg-white">
-                            {displayedHistory.map((record) => {
-                              const date = record.usedOn?.split('T')[0] || record.usedOn || '--';
+                          );
+                        })}
+                      </tbody>
+                    </table>
 
-                              const prevQty = record.previousQuantity ?? 0;
-                              const newQty = record.updatedQuantity ?? 0;
-                              const ReFillQty = record.quantity ?? 0;
-                              const NewReFillQty = record.inventory?.quantity ?? 0;
-
-                              let qtyChangeDisplay = '';
-                              let qtyChangeColor = '';
-                              let statusBadge = { label: '', color: '' };
-                              let totalQtyDisplay = '';
-
-                              // Check if it's a new product creation
-                              if (record.new) {
-                                qtyChangeDisplay = `+${newQty}`;
-                                qtyChangeColor = 'text-blue-600';
-                                statusBadge = { label: 'Created', color: 'text-blue-500' };
-                                totalQtyDisplay = newQty;
-                              } else if (record.refill) {
-                                // Refill action
-                                qtyChangeDisplay = `+${ReFillQty}`;
-                                qtyChangeColor = 'text-green-600';
-                                statusBadge = { label: 'Re-Filled', color: 'text-green-500' };
-                                totalQtyDisplay = NewReFillQty;
-                              } else if (record.unitRepair) {
-                                // Use action
-                                qtyChangeDisplay = `${prevQty} - 1`;
-                                qtyChangeColor = 'text-red-600';
-                                statusBadge = { label: 'Utilise', color: 'text-yellow-500' };
-                                totalQtyDisplay = newQty;
-                              } else {
-                                // Default case (should not happen)
-                                qtyChangeDisplay = '--';
-                                qtyChangeColor = 'text-gray-600';
-                                statusBadge = { label: 'Updated', color: 'bg-gray-100 text-gray-500' };
-                                totalQtyDisplay = newQty;
-                              }
-
-                              return (
-                                <tr key={record.id} className="border-b border-gray-200 last:border-b-0 h-16">
-  <td className="px-4 py-2 align-middle">{record?.unitRepair?.orderId ?? ''}</td>
-  <td className="px-4 py-2 align-middle">{date}</td>
-  <td className={`px-4 py-2 align-middle font-medium ${qtyChangeColor}`}>{qtyChangeDisplay}</td>
-  <td className="px-4 py-2 align-middle">{totalQtyDisplay}</td>
-  <td className="px-4 py-2 align-middle">
-    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${statusBadge.color}`}>
-      {statusBadge.label}
-    </span>
-  </td>
-  <td className="px-4 py-2 align-middle">
-    {record.user ? `${record.user.firstName} ${record.user.lastName}` : '--'}
-  </td>
-  <td className="px-4 py-2 align-middle">{record.notes || '--'}</td>
-</tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-
-                        {userSpecificHistory.length > 5 && !isExpanded && (
-                          <div className="mt-4 text-center">
-                            <button
-                              onClick={() => handleViewMore(user.id)}
-                              className={` ${EditClass} inline-flex items-center justify-center px-4 py-2 border border-gray-300 hover:border-cyan-300 rounded-md shadow-sm text-sm font-medium bg-white hover:bg-gray-100 transition-colors`}
-                            >
-                              <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M19 9l-7 7-7-7"
-                                />
-                              </svg>
-                            </button>
+                    {/* Pagination section remains same but use handlePreviewClick for Previous button */}
+                    {totalElements > 0 && totalPages > 1 && (
+                      <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
+                        <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                          <div>
+                            <p className="text-sm text-gray-700">
+                              Showing <span className="font-medium">{startEntry}</span> to{' '}
+                              <span className="font-medium">{endEntry}</span> of{' '}
+                              <span className="font-medium">{totalElements}</span> entries
+                            </p>
                           </div>
-                        )}
-                      </>
-                    );
-                  })()
+
+                          <div>
+                            <nav className="relative z-0 inline-flex rounded-md space-x-2" aria-label="Pagination">
+                              {/* Previous Button - Use handlePreviewClick */}
+                              {currentPage !== 0 && (
+                                <button
+                                  onClick={() => handlePreviewClick(user.id, currentPage - 1)}
+                                  className={`relative inline-flex hover:rounded-md items-center px-3 py-1 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors duration-200
+                                 ${currentPage === 0
+                                      ? 'hover:bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed'
+                                      : 'border-gray-300 text-gray-500 hover:bg-gray-50 cursor-pointer'
+                                    }`}
+                                >
+                                  Previous
+                                </button>
+                              )}
+
+                              {/* Page Numbers - Use handlePreviewClick for page numbers too */}
+                              {(() => {
+                                const maxVisiblePages = pageSize;
+                                const halfVisible = Math.floor(maxVisiblePages / 2);
+                                let startPage = Math.max(0, currentPage - halfVisible);
+                                let endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
+
+                                if (endPage - startPage < maxVisiblePages - 1) {
+                                  startPage = Math.max(0, endPage - maxVisiblePages + 1);
+                                }
+
+                                return Array.from({ length: endPage - startPage + 1 }, (_, index) => {
+                                  const pageIndex = startPage + index;
+                                  return (
+                                    <button
+                                      key={pageIndex}
+                                      onClick={() => handleNextPrevClick(user.id, pageIndex)}
+                                      className={`relative inline-flex items-center px-3.5 py-1 text-sm font-medium rounded-md ${currentPage === pageIndex
+                                          ? `z-10 ${ThemeBackgroundColor} text-white`
+                                          : 'bg-white text-gray-500 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                      {pageIndex + 1}
+                                    </button>
+                                  );
+                                });
+                              })()}
+
+                              {/* Next Button - Use handlePreviewClick */}
+                              {currentPage < totalPages - 1 && (
+                                <button
+                                  onClick={() => handleNextPrevClick(user.id, currentPage + 1)}
+                                  className={`relative inline-flex hover:rounded-md items-center px-2 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors duration-200 ${currentPage >= totalPages - 1
+                                      ? 'bg-gray-100 border-gray-300 hover:bg-gray-100 text-gray-400 cursor-not-allowed'
+                                      : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50 cursor-pointer'
+                                    }`}
+                                >
+                                  Next
+                                </button>
+                              )}
+                            </nav>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
@@ -525,6 +769,75 @@ const ProductPart = () => {
       </tr>
     );
   };
+
+
+  const handlePreviewClick = (userId: number, newPageNumber: number) => {
+    const userPagination = historyPagination[userId];
+    if (!userPagination || newPageNumber < 0 || newPageNumber >= userPagination.totalPages) {
+      return;
+    }
+
+    // Only update pagination state, don't make API call
+    // Just show the previous page data from state
+    setHistoryPagination(prev => ({
+      ...prev,
+      [userId]: {
+        ...prev[userId],
+        currentPage: newPageNumber
+      }
+    }));
+  };
+
+  const handleNextPrevClick = (userId: number, newPageNumber: number) => {
+    const userPagination = historyPagination[userId];
+    if (!userPagination || newPageNumber < 0 || newPageNumber >= userPagination.totalPages) return;
+
+    const cachedData = History.data[userId] || [];
+    const start = newPageNumber * pageSize;
+    const end = (newPageNumber + 1) * pageSize;
+
+    // Check if the requested page data exists (not just length check)
+    const hasPageData = cachedData.slice(start, end).every(item => item !== undefined);
+
+    if (hasPageData) {
+      // Fetch the requested page
+      const historyData = {
+        id: userId,
+        pageSize,
+        pageNumber: newPageNumber,
+      };
+      dispatch(InventoryHistory(historyData));
+    }
+
+    // Update pagination state to show the requested page
+    setHistoryPagination(prev => ({
+      ...prev,
+      [userId]: { ...prev[userId], currentPage: newPageNumber },
+    }));
+  };
+
+
+  useEffect(() => {
+    if (History.pagination) {
+      const updatedPagination = {};
+      Object.keys(History.pagination).forEach(userId => {
+        const paginationData = History.pagination[userId];
+        updatedPagination[userId] = {
+          currentPage: paginationData.number || 0,
+          totalPages: paginationData.totalPages || 0,
+          totalElements: paginationData.totalElements || 0,
+          data: History.data[userId] || [], // Ensure data is updated
+        };
+      });
+
+      setHistoryPagination(updatedPagination);
+    }
+  }, [History.pagination, History.data]);
+
+
+
+
+
 
 
 

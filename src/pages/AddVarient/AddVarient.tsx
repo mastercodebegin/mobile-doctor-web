@@ -647,22 +647,26 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
                                     return (
                                       <>
                                         {variantFields.map((field, i) => (
-                                          <div key={i} className="p-4 bg-white rounded shadow-sm border">
+                                          <div key={i} className="p-4 bg-white rounded shadow-sm border border-gray-200">
                                             <div className="text-sm font-medium text-green-600">{field?.label}</div>
                                             <div className="text-sm text-gray-800 mt-1">{field?.value}</div>
                                           </div>
                                         ))}
-                                        <div className="p-4 bg-white rounded shadow-sm border">
-                                          <div className="text-sm font-medium text-green-600 mb-1">Image</div>
-                                          <div className="flex items-center gap-3 flex-wrap">
-                                            <img 
-                                              src={"https://shopax.s3.eu-north-1.amazonaws.com/1731065173166.jpg"}
-                                              alt="Variant"
-                                              className="w-20 h-20 object-contain border rounded"
-                                             />
-                                          </div>
+  <div className="p-4 bg-white rounded shadow-sm border border-gray-200">
+  <div className="text-sm font-medium text-green-600 mb-1">Image</div>
+  <div className="flex items-center gap-3 flex-wrap">
+    <img 
+      src={
+        "https://shopax.s3.eu-north-1.amazonaws.com/1731065173166.jpg"
+      }
+      alt="Variant"
+      className="w-20 h-20 object-contain border rounded"
+    />
+  </div>
+</div>
 
-                                        </div>
+
+
                                       </>
                                     );
                                   })()}

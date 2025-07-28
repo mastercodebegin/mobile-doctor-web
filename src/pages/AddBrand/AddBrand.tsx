@@ -65,7 +65,6 @@ const AddBrand = () => {
     setShowModal(false);
     setIsEditMode(false)
     setCategory("")
-    dispatch(restore(null))
   }
 
   const handleConfirmSave = () => {

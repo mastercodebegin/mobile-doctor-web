@@ -250,8 +250,9 @@ if(Edit?.isEdit && Edit?.supportTicket) {
                         <td className={TableDataClass}>
                           <span
                             className={`px-2 py-1 text-xs font-semibold rounded-full
-                      ${ticket.supportTicketStatus === 'PENDING' ? 'bg-gray-100 text-gray-800'
-                                : ticket.supportTicketStatus === 'RESOLVED' ? 'bg-green-100 text-green-800'
+                      ${ticket.supportTicketStatus === 'PENDING' ? 'bg-blue-100 text-blue-800'
+                                : ticket.supportTicketStatus === 'INREVIEW' ? 'bg-yellow-100 text-yellow-800'
+                                : ticket.supportTicketStatus === 'REOPEN' ? 'bg-orange-100 text-orange-800'
                                   : 'bg-red-100 text-red-800'}
                     `}
                           >
@@ -357,7 +358,8 @@ if(Edit?.isEdit && Edit?.supportTicket) {
                       className={inputClass}
                     >
                       <option value="PENDING">PENDING</option>
-                      <option value="RESOLVED">RESOLVED</option>
+                      <option value="RESOLVED">REOPEN</option>
+                      <option value="RESOLVED">INREVIEW</option>
                       <option value="CLOSED">CLOSED</option>
                     </select>
                   </div>
