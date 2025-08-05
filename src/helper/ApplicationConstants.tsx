@@ -22,7 +22,7 @@ export const TableDataClass = "py-4 px-6 whitespace-nowrap text-sm text-gray-500
 
 export const TableHadeClass = `py-4 px-6 text-left text-sm font-medium ${ThemeTextColor} `
 
-export const ShowModalMainClass = "fixed inset-0 z-50 flex items-center justify-center bg-white/30 backdrop-blur-sm"
+export const ShowModalMainClass = "fixed inset-0 z-50 flex items-center justify-center bg-transparent/30 backdrop-blur-sm"
 
 export const SelectClass = "w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
 

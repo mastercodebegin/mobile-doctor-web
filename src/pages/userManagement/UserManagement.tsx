@@ -224,6 +224,7 @@ const UserManagement = () => {
     setShowModal(false);
     setShowConfirmModal(false);
     setIsEditMode(false);
+    setSearchByEmail(false)
     setFormData({})
   };
 
@@ -393,7 +394,7 @@ const UserManagement = () => {
                             </td>
                             <td className={TableDataClass}>
                               <button onClick={() => toggleSpecRow(openSpecRow === vendor?.id ? null : vendor?.id)} className={ShowVarientButtonClass}>
-                                {openSpecRow === vendor?.id ? 'Hide' : 'Show'} Specification
+                                {openSpecRow === vendor?.id ? 'Hide' : 'Show'} Details
                               </button>
                             </td>
                           </tr>
@@ -462,24 +463,15 @@ const UserManagement = () => {
                                 <tr key={`variant-${vendor?.id}`}>
                                   <td colSpan={13}>
                                     <div className="bg-gray-50 p-6">
-                                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                      <div className="flex items-center gap-4">
                                         {vendor?.vendor?.vendorDocument?.map((doc: any, i: number) => (
                                           <div key={i} className="p-4 bg-white rounded shadow-sm border border-gray-200">
-                                            <div className="text-sm font-medium text-green-600 mb-2">
-                                              {doc?.idtype?.replace('_', ' ')} - {doc?.frontSide ? 'Front Side' : 'Back Side'}
-                                            </div>
                                             <img
                                               src={`https://shopax.s3.eu-north-1.amazonaws.com/${doc?.imageName}`}
                                               alt={`${doc?.idtype}`}
                                               className="w-20 h-20 object-contain border border-gray-200 rounded-md cursor-pointer hover:opacity-80 transition-opacity"
                                               onClick={() => setSelectedImage(`https://shopax.s3.eu-north-1.amazonaws.com/${doc?.imageName}`)}
                                             />
-                                            <div className="text-sm text-gray-700 mt-2">
-                                              <strong>ID:</strong> {doc?.id}
-                                            </div>
-                                            <div className="text-sm text-gray-700">
-                                              <strong>IdType:</strong> {doc?.idtype ?? "N/A"}
-                                            </div>
                                           </div>
                                         ))}
                                       </div>
@@ -493,7 +485,7 @@ const UserManagement = () => {
                           {/* Add this Image Modal at the end of your component (before closing div/fragment) */}
                           {selectedImage && (
                             <div
-                              className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+                              className={ShowModalMainClass}
                               onClick={() => setSelectedImage(null)}
                             >
                               <div className="relative max-w-4xl max-h-4xl p-4">
