@@ -1,7 +1,16 @@
 import { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { LineChart, Line, ResponsiveContainer, XAxis, Tooltip } from 'recharts';
+import { RootState } from '../redux/store';
+import Loading from '../components/Loading';
+import { useNavigate } from 'react-router-dom';
+import useAuthStatus from '../hooks/useAuthStatus';
 
 const Dashboard = () => { 
+
+  const {isLoading} = useSelector((state:RootState) => state.UserLoginSlice)
+  const {loggedIn} = useAuthStatus()
+  const navigate = useNavigate()
 
     // State for animating numbers
   const [customerCount, setCustomerCount] = useState(0);
@@ -59,6 +68,18 @@ const Dashboard = () => {
     
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() =>{
+if(loggedIn){
+  navigate("/", { replace: true })
+} else {
+  navigate("/login")
+}
+},[loggedIn, navigate])
+
+if(isLoading){
+ return <Loading />
+}
 
   return (
     <>

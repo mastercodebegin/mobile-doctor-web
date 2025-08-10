@@ -1,4 +1,4 @@
-import { SetStateAction, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../../features/auth/UserLoginSlice";
 import { useNavigate } from "react-router-dom";
@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { AppDispatch, RootState } from "../../redux/store";
 import { Dispatch } from "@reduxjs/toolkit";
 import { SubmitButtonClass, ThemeBackgroundColor, ThemeBackgroundHoverColor } from "../../helper/ApplicationConstants";
+import useAuthStatus from "../../hooks/useAuthStatus";
 
 interface LoginPageProps {
   onLogin: Dispatch<SetStateAction<string>>;
@@ -16,6 +17,7 @@ const Login: React.FC<LoginPageProps> = ({onLogin}) => {
 
 const response = useSelector((state : RootState) => state.ErrorModalWindowSlice)
 const {isLoading} = useSelector((state : RootState) => state.UserLoginSlice)
+const {loggedIn} = useAuthStatus()
 
 const dispatch = useDispatch<AppDispatch>()
 const navigate = useNavigate()
@@ -62,6 +64,14 @@ const login = async (e) => {
     // toast.error("Login Failed!");
   }
 };
+
+useEffect(() =>{
+if(loggedIn){
+  navigate("/", { replace: true })
+} else {
+  navigate("/login")
+}
+},[loggedIn, navigate])
 
 if(isLoading){
  return <Loading />

@@ -21,7 +21,7 @@ import PrivateComponent from "./components/PrivateComponent";
 import ErrorModalWindow from "./ErrorModalWindow/ErrorModalWindow/ErrorModalWindow";
 import { setErrorCallback } from "./util/CommonService";
 import { ShowErrorModal } from "./ErrorModalWindow/ErrorModalWindow/ErrorModalWindowSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";  
 import ProductPart from "./pages/ProductPart/ProductPart";
 import Products from "./pages/Products/Products";
 import Order from "./pages/Orders/Order";
