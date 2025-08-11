@@ -209,9 +209,58 @@ setEditRepairCost: (state, action) => {
         state.isLoading = false;
         state.isSuccess = false;
         state.error = action.payload as string;
-        state.RepairCostData = []; // Clear data on error
+        state.RepairCostData = []; 
         console.log("Repair Cost Data Fetch By Modal ID Failed:", action.payload);
       })
+
+// Get Repair Cost by SubCategory ID
+.addCase(GetRepairCostBySubCategoryId.pending, (state) => {
+  state.isLoading = true;
+  state.isSuccess = false;
+  state.error = null;
+})
+.addCase(GetRepairCostBySubCategoryId.fulfilled, (state, action) => {
+  state.isLoading = false;
+  state.isSuccess = true;
+  state.error = null;
+
+  if (action.payload) {
+    // Handle different response formats
+    if (Array.isArray(action.payload)) {
+      state.RepairCostData = action.payload;
+    } else if (action.payload.data && Array.isArray(action.payload.data)) {
+      state.RepairCostData = action.payload.data;
+    } else if (action.payload.success && action.payload.data) {
+      state.RepairCostData = Array.isArray(action.payload.data)
+        ? action.payload.data
+        : [action.payload.data];
+    } else if (typeof action.payload === "object" && action.payload.id) {
+      // Single object response
+      state.RepairCostData = [action.payload];
+    } else {
+      state.RepairCostData = [];
+    }
+
+    // Save in localStorage
+    localStorage.setItem(
+      "Repair-Cost",
+      JSON.stringify(state.RepairCostData)
+    );
+  } else {
+    state.RepairCostData = [];
+  }
+})
+.addCase(GetRepairCostBySubCategoryId.rejected, (state, action) => {
+  state.isLoading = false;
+  state.isSuccess = false;
+  state.error = action.payload as string;
+  state.RepairCostData = []; 
+  console.log(
+    "Repair Cost Data Fetch By SubCategory ID Failed:",
+    action.payload
+  );
+})
+
 
       // Create Repair Cost
       .addCase(CreateRepairCost.pending, (state) => {
@@ -224,7 +273,6 @@ setEditRepairCost: (state, action) => {
         state.isSuccess = true;
         state.error = null;
         if (action.payload) {
-          // Handle different response formats
           let newRepairCost = null;
           if (action.payload.data) {
             newRepairCost = action.payload.data;
@@ -266,7 +314,6 @@ setEditRepairCost: (state, action) => {
     );
 
     if (itemIndex !== -1) {
-      // Optional: preserve original price/message if new values are empty
       const originalItem = state.RepairCostData[itemIndex];
 
       state.RepairCostData[itemIndex] = {
@@ -337,6 +384,43 @@ export const GetRepairCostByModalId = createAsyncThunk(
     } catch (error: any) {
       const message = error?.response?.data?.message || error.message || "Failed to fetch filtered repair costs";
       console.error("GetRepairCostByModalId Error:", message);
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Get RepairCost By SubCategoryId Thunk
+export const GetRepairCostBySubCategoryId = createAsyncThunk(
+  "FETCH/REPAIR-COST/BY/SUBCATEGORY-ID",
+  async ({ subCategoryId }: { subCategoryId: number }, thunkAPI) => {
+    try {
+      const params = {
+        subCategoryId: subCategoryId
+      };
+
+      console.log("Sending params:", params);
+
+      // API call
+      const response = await getRequestMethodWithParam(
+        params,
+        UrlConstants.GET_REPAIR_COST_BY_SUBCATEGORY_ID
+      );
+
+      console.log("Response To Fetch Repair-Cost By SubCategoryId:", response);
+      console.log(
+        "Response Type:",
+        typeof response,
+        "Is Array:",
+        Array.isArray(response)
+      );
+
+      return response;
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        error.message ||
+        "Failed to fetch repair costs by subCategoryId";
+      console.error("GetRepairCostBySubCategoryId Error:", message);
       return thunkAPI.rejectWithValue(message);
     }
   }

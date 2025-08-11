@@ -7,7 +7,7 @@ import { AppDispatch, RootState } from "../../redux/store";
 import Loading from "../../components/Loading";
 import { FetchAllModalNumber } from "../AddMobileNumber/MobileNumberSlice";
 import { GetAllModalIssues, GetAllProductPartsBySubCategory } from "../ModalIssues/ModalIssuesSlice";
-import { GetAllRepairCost, GetRepairCostByModalId, CreateRepairCost, setEditRepairCost, UpdateRepairCost } from "./RepairCostSlice";
+import { GetAllRepairCost, GetRepairCostByModalId, CreateRepairCost, setEditRepairCost, UpdateRepairCost, GetRepairCostBySubCategoryId } from "./RepairCostSlice";
 import { GetAllSubCategory, GetAllSubCategoryById } from "../AddSubCategory/SubCategorySlice";
 import { GetAllCategory } from "../AddCategory/AddCategorySlice";
 import { toast } from "react-toastify";
@@ -145,10 +145,13 @@ const RepairCost = () => {
     setSelectedProductPart("");
     setSelectedModalNumber("");
 
-    if (subCategoryId) {
+   if (subCategoryId) {
+      dispatch(GetRepairCostBySubCategoryId({ subCategoryId: Number(subCategoryId) }));
       dispatch(GetAllProductPartsBySubCategory(Number(subCategoryId)));
-    }
+      setIsFiltered(true);
+      setCurrentPage(1)
   };
+}
 
   // Handle product part selection from dropdown
   const handleProductPartSelect = (productPartId: string) => {
@@ -583,6 +586,7 @@ const handleEditUser = async (user: any) => {
                     <th scope="col" className={TableHadeClass}>#</th>
                     <th scope="col" className={TableHadeClass}>Price</th>
                     <th scope="col" className={TableHadeClass}>Product Part</th>
+                    <th scope="col" className={TableHadeClass}>Sub Category</th>
                     <th scope="col" className={TableHadeClass}>Modal Number</th>
                     <th scope="col" className={TableHadeClass}>Message</th>
                     <th scope="col" className={TableHadeClass}>Edit</th>
@@ -627,6 +631,11 @@ const handleEditUser = async (user: any) => {
                             <td className={TableDataClass}>
                               <div className="text-sm font-medium text-gray-600">
                                 {user?.productPart?.name || 'N/A'}
+                              </div>
+                            </td>
+                            <td className={TableDataClass}>
+                              <div className="text-sm font-medium text-gray-600">
+                                {user?.productPart?.subCategory?.name || 'N/A'}
                               </div>
                             </td>
                             <td className={TableDataClass}>
@@ -722,6 +731,23 @@ const handleEditUser = async (user: any) => {
                   </select>
                 </div>
 
+                    {/* Modal Number Selection */}
+                <div>
+                  <label className="block font-medium mb-2">Select Modal Number</label>
+                  <select
+                    name="modalNumber"
+                    className={SelectClass}
+                    onChange={handleChange}
+                    value={formModalNumber}
+                    disabled={!formSubCategory}
+                  >
+                    <option value="">Choose Modal Number</option>
+                    {AllModalNumberData?.map((item) => (
+                      <option key={item?.id} value={item?.id}>{item?.name}</option>
+                    ))}
+                  </select>
+                </div>
+
                 {/* Product Part Selection */}
                 <div>
                   <label className="block font-medium mb-2">Select Product Part</label>
@@ -730,27 +756,10 @@ const handleEditUser = async (user: any) => {
                     className={SelectClass}
                     onChange={handleChange}
                     value={formProductPart}
-                    disabled={!formSubCategory}
+                    disabled={!formModalNumber}
                   >
                     <option value="">Choose Product Part</option>
                     {formFilteredProductParts?.map((item) => (
-                      <option key={item?.id} value={item?.id}>{item?.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Modal Number Selection */}
-                <div>
-                  <label className="block font-medium mb-2">Select Modal Number</label>
-                  <select
-                    name="modalNumber"
-                    className={SelectClass}
-                    onChange={handleChange}
-                    value={formModalNumber}
-                    disabled={!formProductPart}
-                  >
-                    <option value="">Choose Modal Number</option>
-                    {AllModalNumberData?.map((item) => (
                       <option key={item?.id} value={item?.id}>{item?.name}</option>
                     ))}
                   </select>

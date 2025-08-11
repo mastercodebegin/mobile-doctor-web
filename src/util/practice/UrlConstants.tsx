@@ -31,6 +31,7 @@ const UrlConstants = {
   ADD_PRODUCT_PART_LABEL: 'ProductPart/createProductPart',
   GET_ALL_REPAIR_COST: 'RepairCost/getAllRepairCost',
   GET_REPAIR_COST_BY_ID: 'RepairCost/getRepairCostByModelNumberAndModelIssueTitleId',
+  GET_REPAIR_COST_BY_SUBCATEGORY_ID: 'RepairCost/getAllRepairCostBySubCategoryId',
 ADD_REPAIR_COST_: 'RepairCost/add',  
 GET_ALL_INVENTORY: 'inventory/getAllInventory',
 ADD_INVENTORY: 'inventory/create',
