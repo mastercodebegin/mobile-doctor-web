@@ -647,17 +647,17 @@ const ProductPart = () => {
                           if (record.new) {
                             qtyChangeDisplay = `+${newQty}`;
                             qtyChangeColor = 'text-blue-600';
-                            statusBadge = { label: 'Created', color: 'text-blue-500' };
+                            statusBadge = { label: 'INITIAL', color: 'text-blue-500' };
                             totalQtyDisplay = newQty;
                           } else if (record.refill) {
                             qtyChangeDisplay = `+${ReFillQty}`;
                             qtyChangeColor = 'text-green-600';
-                            statusBadge = { label: 'Re-Filled', color: 'text-green-500' };
+                            statusBadge = { label: 'IN', color: 'text-green-500' };
                             totalQtyDisplay = NewReFillQty;
                           } else if (record.unitRepair) {
                             qtyChangeDisplay = `${prevQty} - 1`;
                             qtyChangeColor = 'text-red-600';
-                            statusBadge = { label: 'Utilise', color: 'text-yellow-500' };
+                            statusBadge = { label: 'OUT', color: 'text-yellow-500' };
                             totalQtyDisplay = newQty;
                           } else {
                             qtyChangeDisplay = '--';
@@ -826,13 +826,13 @@ const ProductPart = () => {
           currentPage: paginationData.number || 0,
           totalPages: paginationData.totalPages || 0,
           totalElements: paginationData.totalElements || 0,
-          data: History.data[userId] || [], // Ensure data is updated
+          data: History.data[userId] || [],  
         };
       });
 
       setHistoryPagination(updatedPagination);
     }
-  }, [History.pagination, History.data]);
+  }, [History?.pagination, History?.data]);
 
 
 

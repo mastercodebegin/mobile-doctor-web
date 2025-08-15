@@ -8,7 +8,7 @@ import useAuthStatus from '../hooks/useAuthStatus';
 
 const Dashboard = () => { 
 
-  const {isLoading} = useSelector((state:RootState) => state.UserLoginSlice)
+  const {isLoading, data} = useSelector((state:RootState) => state.UserLoginSlice)
   const {loggedIn} = useAuthStatus()
   const navigate = useNavigate()
 
@@ -69,13 +69,18 @@ const Dashboard = () => {
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() =>{
-if(loggedIn){
-  navigate("/", { replace: true })
-} else {
-  navigate("/login")
-}
-},[loggedIn, navigate])
+useEffect(() => {
+  if (!loggedIn) {
+    navigate("/login", { replace: true });
+  } else if (data?.role?.name === "customer") {
+    navigate("/orders", { replace: true });
+  } else if (data?.role?.name === "admin") {
+    navigate("/", { replace: true });
+  } else if (data?.role?.name === "vendor") {
+    navigate("/product-part", {replace: true})
+  }
+}, [loggedIn, data, navigate]);
+
 
 if(isLoading){
  return <Loading />

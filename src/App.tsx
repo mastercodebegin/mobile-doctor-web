@@ -78,12 +78,12 @@ function App() {
     else setSidebarMobileOpen((prev) => !prev);
   };
 
-      useEffect(() => {
-        // Set the error callback once when app loads
-        setErrorCallback((message: string) => {
-            dispatch(ShowErrorModal(message));
-        });
-    }, [dispatch]);
+  useEffect(() => {
+    // Set the error callback once when app loads
+    setErrorCallback((message: string) => {
+        dispatch(ShowErrorModal(message));
+    });
+  }, [dispatch]);
 
   return (
     <Router>
@@ -102,7 +102,7 @@ function App() {
             onNavigate={() => !isDesktop && setSidebarMobileOpen(false)}
           />
         )}
-        
+
         {/* Main Content Area */}
         <div
           className={`flex-1 overflow-auto transition-all duration-300 bg-gray-50 ${
@@ -145,16 +145,6 @@ function App() {
 }
 
 export default App;
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -290,3 +280,20 @@ export default App;
 //     }
 
 // export default App
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

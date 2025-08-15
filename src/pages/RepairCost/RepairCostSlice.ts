@@ -367,27 +367,18 @@ export const GetAllRepairCost = createAsyncThunk(
 // Get By Modal-Id Thunk
 export const GetRepairCostByModalId = createAsyncThunk(
   "FETCH/REPAIR-COST/BY/ID",
-  async (
-    { modalNumberId, modelIssueTitleId }: { modalNumberId: number; modelIssueTitleId: number },
-    thunkAPI
-  ) => {
+  async (modalNumberId: number, thunkAPI) => {
     try {
-      const params = {
-        modalNumberId: modalNumberId,
-        ModelIssueTitleId: modelIssueTitleId
-      };
-      console.log("Sending params:", params);
+      const params = { modalNumberId }; 
       const response = await getRequestMethodWithParam(params, UrlConstants.GET_REPAIR_COST_BY_ID);
-      console.log("Response To Fetch Repair-Cost By Id:", response);
-      console.log("Response Type:", typeof response, "Is Array:", Array.isArray(response));
       return response;
     } catch (error: any) {
       const message = error?.response?.data?.message || error.message || "Failed to fetch filtered repair costs";
-      console.error("GetRepairCostByModalId Error:", message);
       return thunkAPI.rejectWithValue(message);
     }
   }
 );
+
 
 // Get RepairCost By SubCategoryId Thunk
 export const GetRepairCostBySubCategoryId = createAsyncThunk(

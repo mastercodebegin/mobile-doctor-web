@@ -3,7 +3,10 @@ import useAuthStatus from '../hooks/useAuthStatus'
 import Loading from './Loading'
 
 const PrivateComponent = () => {
-  const {loggedIn , checkStatus} = useAuthStatus()
+  const {loggedIn , checkStatus, role} = useAuthStatus()
+
+  // Debug info
+  console.log("PrivateComponent - loggedIn:", loggedIn, "role:", role);
 
   if(checkStatus){
     return <Loading />
@@ -14,7 +17,17 @@ const PrivateComponent = () => {
   }
 
   return loggedIn ? <Outlet /> : <Navigate to="/login" replace />
-
 }
 
 export default PrivateComponent
+
+
+
+
+
+
+
+
+
+
+

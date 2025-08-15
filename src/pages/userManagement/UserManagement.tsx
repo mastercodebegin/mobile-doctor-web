@@ -405,55 +405,74 @@ const UserManagement = () => {
                                 <td colSpan={13}>
                                   <div className="bg-gray-50 p-6">
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                      {(() => {
-                                        const user = vendor.vendor;
-                                        const isVendorRole = user?.role?.name?.toLowerCase() === 'vendor';
+                                  {(() => {
+  const user = vendor.vendor;
+  const roleName = user?.role?.name?.toLowerCase();
 
-                                        let variantFields = [
-                                          { label: "First Name", value: user?.firstName || 'N/A' },
-                                          { label: "Last Name", value: user?.lastName || 'N/A' },
-                                          { label: "Mobile", value: user?.mobile || 'N/A' },
-                                          { label: "Email", value: user?.email || 'N/A' },
-                                          { label: "PAN Card", value: user?.panCard || 'N/A' },
-                                          { label: "Aadhar Number", value: user?.aadharNumber || 'N/A' },
-                                          { label: "Pin Code", value: user?.pinCode || 'N/A' },
-                                          { label: "State", value: user?.state || 'N/A' },
-                                          { label: "City", value: user?.city || 'N/A' },
-                                          { label: "Home Address", value: user?.homeAddress || 'N/A' },
-                                          { label: "Created On", value: user?.createdOn ? new Date(user.createdOn).toLocaleString() : 'N/A' },
-                                          { label: "Account Status", value: user?.accountStatus || 'N/A' },
-                                        ];
+  // All possible fields
+  const allFields = [
+    { label: "First Name", value: user?.firstName || 'N/A' },
+    { label: "Last Name", value: user?.lastName || 'N/A' },
+    { label: "Mobile", value: user?.mobile || 'N/A' },
+    { label: "Email", value: user?.email || 'N/A' },
+    { label: "PAN Card", value: user?.panCard || 'N/A' },
+    { label: "Aadhar Number", value: user?.aadharNumber || 'N/A' },
+    { label: "Pin Code", value: user?.pinCode || 'N/A' },
+    { label: "State", value: user?.state || 'N/A' },
+    { label: "City", value: user?.city || 'N/A' },
+    { label: "Home Address", value: user?.homeAddress || 'N/A' },
+    { label: "Created On", value: user?.createdOn ? new Date(user.createdOn).toLocaleString() : 'N/A' },
+    { label: "Account Status", value: user?.accountStatus || 'N/A' },
+    { label: "Role ID", value: user?.role?.id || 'N/A' },
+    { label: "Business Name", value: user?.businessName || 'N/A' },
+    { label: "Business Address", value: user?.businessAddress || 'N/A' },
+    { label: "GST Number", value: user?.gstNumber || 'N/A' },
+    { label: "Role Name", value: user?.role?.name || 'N/A' },
+  ];
 
-                                        // Add vendor-specific fields only if role is vendor
-                                        if (isVendorRole) {
-                                          variantFields = [
-                                            ...variantFields,
-                                            { label: "Role ID", value: user?.role?.id || 'N/A' },
-                                            { label: "Business Name", value: user?.businessName || 'N/A' },
-                                            { label: "Business Address", value: user?.businessAddress || 'N/A' },
-                                            { label: "GST Number", value: user?.gstNumber || 'N/A' },
-                                            { label: "Role Name", value: user?.role?.name || 'N/A' },
-                                          ];
-                                        }
+  let variantFields = [];
 
-                                        return (
-                                          <>
-                                            {variantFields.map((field, i) => (
-                                              <div key={i} className="p-4 bg-white rounded shadow-sm border border-gray-200">
-                                                <div className="text-sm font-medium text-black">{field?.label}</div>
-                                                <div className={`text-sm text-gray-800 mt-1`} >
-                                                  {field?.value}
-                                                </div>
-                                              </div>
-                                            ))}
-                                            <div className="p-4 bg-white rounded shadow-sm border border-gray-200">
-                                              <button onClick={() => toggleSpecImgRow(openSpecImgRow === vendor?.id ? null : vendor?.id)} className={ShowVarientButtonClass}>
-                                                {openSpecImgRow === vendor?.id ? 'Hide' : 'Show'} Images
-                                              </button>
-                                            </div>
-                                          </>
-                                        );
-                                      })()}
+  if (roleName === 'vendor') {
+    // Vendor: Show ALL fields
+    variantFields = allFields;
+  } else if (roleName === 'customer') {
+    // Customer: Hide BusinessName, BusinessAddress, GstNumber, Aadhar, PanCard
+    variantFields = allFields.filter(field => 
+      !['Business Name', 'Business Address', 'GST Number', 'Aadhar Number', 'PAN Card'].includes(field.label)
+    );
+  } else {
+    // Other roles: Hide only BusinessName, BusinessAddress, GstNumber
+    variantFields = allFields.filter(field => 
+      !['Business Name', 'Business Address', 'GST Number'].includes(field.label)
+    );
+  }
+
+  return (
+    <>
+      {variantFields.map((field, i) => (
+        <div key={i} className="p-4 bg-white rounded shadow-sm border border-gray-200">
+          <div className="text-sm font-medium text-black">{field?.label}</div>
+          <div className={`text-sm text-gray-800 mt-1`}>
+            {field?.value}
+          </div>
+        </div>
+      ))}
+      <div className="p-4 bg-white rounded shadow-sm border border-gray-200">
+        <button onClick={() => toggleSpecImgRow(openSpecImgRow === vendor?.id ? null : vendor?.id)} className={ShowVarientButtonClass}>
+          {openSpecImgRow === vendor?.id ? 'Hide' : 'Show'} Images
+        </button>
+      </div>
+    </>
+  );
+})()}
+
+
+
+
+
+
+
+
                                     </div>
                                   </div>
                                 </td>

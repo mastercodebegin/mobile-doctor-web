@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ChevronDown,
   ChevronUp,
@@ -16,14 +16,32 @@ import {
   Archive,
   ShoppingCart,
 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { SidebarColors } from "../../helper/ApplicationConstants";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 
-interface SidebarProps {
-  collapsed: boolean;
-  onNavigate?: () => void;
-}
+// ==========================
+// Sidebar Role Config
+// ==========================
+const roleMenuConfig: Record<string, string[] | "ALL"> = {
+  admin: "ALL",
+  vendor: ["/product-part", "/products", "/orders"],
+  customerExecutive: ["/orders", "/support-ticket"],
+  customer: ["/orders", "/support-ticket"],
+};
 
+// Default routes for each role
+const defaultRoutes: Record<string, string> = {
+  admin: "/",
+  vendor: "/product-part",
+  customerExecutive: "/orders",
+  customer: "/orders",
+};
+
+// ==========================
+// Add Product Dropdown Links
+// ==========================
 const AddProductLinks = [
   { name: "Category", to: "/category", icon: Tag, ...SidebarColors.addProduct.category },
   { name: "Sub Category", to: "/sub-category", icon: Grid3x3, ...SidebarColors.addProduct.subCategory },
@@ -34,22 +52,107 @@ const AddProductLinks = [
   { name: "Variant Color", to: "/variant-color", icon: Package, ...SidebarColors.addProduct.variantColor },
 ];
 
-const Inventory = [
+// ==========================
+// Inventory Dropdown Links
+// ==========================
+const InventoryLinks = [
   { name: "Product Part", to: "/product-part", icon: Package, ...SidebarColors.inventory.productPart },
   { name: "Products", to: "/products", icon: ShoppingCart, ...SidebarColors.inventory.products },
 ];
+
+// ==========================
+// All Main Menu Items
+// ==========================
+const menuItems = [
+  { type: "link", to: "/", label: "Dashboard", icon: Home, ...SidebarColors.dashboard },
+  { type: "link", to: "/user-management", label: "User Management", icon: Users, ...SidebarColors.userManagement },
+  { type: "dropdown", label: "Add Product", icon: Plus, color: SidebarColors.dropdown.addProduct.color, children: AddProductLinks },
+  { type: "link", to: "/product-part-label", label: "Product Part Label", icon: BookOpen, ...SidebarColors.productPartLabel },
+  { type: "link", to: "/repair-cost", label: "Repair Cost", icon: DollarSign, ...SidebarColors.repairCost },
+  { type: "dropdown", label: "Inventory", icon: Archive, color: SidebarColors.dropdown.inventory.color, children: InventoryLinks },
+  { type: "link", to: "/orders", label: "Orders", icon: Users, ...SidebarColors.orders },
+  { type: "link", to: "/support-ticket", label: "Support Ticket", icon: Users, ...SidebarColors.supportTicket },
+  { type: "link", to: "/role", label: "User Role", icon: Users, ...SidebarColors.role },
+];
+
+interface SidebarProps {
+  collapsed: boolean;
+  onNavigate?: () => void;
+}
 
 export default function Sidebar({ collapsed, onNavigate }: SidebarProps) {
   const [addProductOpen, setAddProductOpen] = useState(false);
   const [inventoryOpen, setInventoryOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const [activeLink, setActiveLink] = useState(location.pathname);
+
+  // Get user role from Redux - handle both object and string formats
+  const userRole = useSelector((state: RootState) => state.UserLoginSlice.data?.role);
+  const role = typeof userRole === 'object' && userRole?.name ? userRole.name : (typeof userRole === 'string' ? userRole : 'admin');
+  
+  // Debug: Console log to check the role value
+  console.log("Raw user role from Redux:", userRole);
+  console.log("Processed role:", role);
+  console.log("Role config for this role:", roleMenuConfig[role]);
 
   const handleLinkClick = (to: string) => {
     setActiveLink(to);
     if (onNavigate) onNavigate();
   };
 
+  // ==========================
+  // Helper function to check if route is allowed for role
+  // ==========================
+  const isRouteAllowed = (route: string): boolean => {
+    const roleConfig = roleMenuConfig[role];
+    
+    console.log(`Checking route: ${route} for role: ${role}`, roleConfig);
+    
+    if (!roleConfig) {
+      console.log(`Role ${role} not found in config, denying access`);
+      return false;
+    }
+    
+    const isAllowed = roleConfig === "ALL" || (Array.isArray(roleConfig) && roleConfig.includes(route));
+    console.log(`Route ${route} allowed: ${isAllowed}`);
+    return isAllowed;
+  };
+
+  // ==========================
+  // Route Protection Effect
+  // ==========================
+  useEffect(() => {
+    const currentPath = location.pathname;
+    
+    // Skip protection for login/public routes
+    if (currentPath === '/login' || currentPath === '/register') {
+      return;
+    }
+
+    // Check if current route is allowed for user's role
+    if (!isRouteAllowed(currentPath)) {
+      console.log(`Access denied for route: ${currentPath}, redirecting to default route`);
+      const defaultRoute = defaultRoutes[role] || '/orders';
+      navigate(defaultRoute, { replace: true });
+    }
+  }, [location.pathname, role, navigate]);
+
+  // ==========================
+  // Filter Menu Based on Role
+  // ==========================
+  const allowedItems = menuItems.filter((item) => {
+    if (item.type === "dropdown") {
+      return item.children?.some((child) => isRouteAllowed(child.to));
+    }
+    return isRouteAllowed(item.to);
+  });
+
+  console.log("Allowed items for role:", role, allowedItems);
+
+  // ==========================
+  // SidebarItem Component
+  // ==========================
   const SidebarItem = ({ to, icon: Icon, children, color, bgColor, isActive, isSubItem = false }) => (
     <div
       className={`
@@ -65,7 +168,6 @@ export default function Sidebar({ collapsed, onNavigate }: SidebarProps) {
         `}
         style={{ backgroundColor: color + "20" }}
       />
-
       <div
         className={`
           absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-6 rounded-r-full
@@ -74,7 +176,6 @@ export default function Sidebar({ collapsed, onNavigate }: SidebarProps) {
         `}
         style={{ backgroundColor: color }}
       />
-
       <Link
         to={to}
         onClick={() => handleLinkClick(to)}
@@ -91,38 +192,24 @@ export default function Sidebar({ collapsed, onNavigate }: SidebarProps) {
           `}
           style={{ color: isActive ? color : undefined }}
         />
-        {!collapsed && (
-          <span className={`font-medium transition-all duration-300 ${isSubItem ? "text-sm" : ""}`}>
-            {children}
-          </span>
-        )}
+        {!collapsed && <span className={`font-medium transition-all duration-300 ${isSubItem ? "text-sm" : ""}`}>{children}</span>}
       </Link>
-
       {isActive && (
-        <div
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 w-2 h-2 rounded-full z-10"
-          style={{ backgroundColor: color }}
-        />
+        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 w-2 h-2 rounded-full z-10" style={{ backgroundColor: color }} />
       )}
     </div>
   );
 
-
+  // ==========================
+  // DropdownButton Component
+  // ==========================
   const DropdownButton = ({ icon: Icon, children, isOpen, onClick, color }) => (
     <div
       className="relative group cursor-pointer transition-all duration-300 ease-in-out mx-3 my-1 overflow-hidden"
       onClick={onClick}
     >
-      <div
-        className="absolute inset-0 rounded-lg transition-all duration-300 ease-out w-0 group-hover:w-full"
-        style={{ backgroundColor: color + "20" }}
-      />
-
-      <div
-        className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-6 rounded-r-full transition-all duration-300 opacity-0 group-hover:opacity-100 z-10"
-        style={{ backgroundColor: color }}
-      />
-
+      <div className="absolute inset-0 rounded-lg transition-all duration-300 ease-out w-0 group-hover:w-full" style={{ backgroundColor: color + "20" }} />
+      <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-6 rounded-r-full transition-all duration-300 opacity-0 group-hover:opacity-100 z-10" style={{ backgroundColor: color }} />
       <div className="relative flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-300 text-gray-600 group-hover:text-gray-800 z-10">
         <div className="flex items-center">
           <Icon size={20} className="mr-4 transition-all duration-300 text-gray-500 group-hover:text-gray-700" />
@@ -142,128 +229,72 @@ export default function Sidebar({ collapsed, onNavigate }: SidebarProps) {
         flex flex-col
       `}
     >
+      {/* Debug Info - Remove in production */}
+      <div className="p-2 bg-gray-100 text-xs text-gray-600 border-b">
+        Role: {role} | Items: {allowedItems.length}
+      </div>
+
       <nav className="flex-1 py-4 overflow-y-auto">
-        <SidebarItem
-          to="/"
-          icon={Home}
-          {...SidebarColors.dashboard}
-          isActive={activeLink === "/"}
-        >
-          Dashboard
-        </SidebarItem>
-
-        <SidebarItem
-          to="/user-management"
-          icon={Users}
-          {...SidebarColors.userManagement}
-          isActive={activeLink === "/user-management"}
-        >
-          User Management
-        </SidebarItem>
-
-        <DropdownButton
-          icon={Plus}
-          color={SidebarColors.dropdown.addProduct.color}
-          isOpen={addProductOpen}
-          onClick={() => setAddProductOpen(!addProductOpen)}
-        >
-          Add Product
-        </DropdownButton>
-
-        {addProductOpen && !collapsed && (
-          <div className="overflow-hidden">
-            <div className="transform transition-all duration-300 ease-in-out animate-slideDown">
-              {AddProductLinks.map((item) => (
-                <SidebarItem
-                  key={item.to}
-                  to={item.to}
-                  icon={item.icon}
-                  color={item.color}
-                  bgColor={item.bgColor}
-                  isActive={activeLink === item.to}
-                  isSubItem={true}
-                >
-                  {item.name}
-                </SidebarItem>
-              ))}
-            </div>
+        {allowedItems.length === 0 ? (
+          <div className="p-4 text-center text-gray-500">
+            No menu items available for your role
           </div>
+        ) : (
+          allowedItems.map((item) => {
+            if (item.type === "dropdown") {
+              const isAddProduct = item.label === "Add Product";
+              const isInventory = item.label === "Inventory";
+              const isOpen = isAddProduct ? addProductOpen : inventoryOpen;
+
+              return (
+                <div key={item.label}>
+                  <DropdownButton
+                    icon={item.icon}
+                    color={item.color}
+                    isOpen={isOpen}
+                    onClick={() => {
+                      if (isAddProduct) setAddProductOpen(!addProductOpen);
+                      if (isInventory) setInventoryOpen(!inventoryOpen);
+                    }}
+                  >
+                    {item.label}
+                  </DropdownButton>
+                  {isOpen && !collapsed && (
+                    <div className="overflow-hidden animate-slideDown">
+                      {item.children
+                        ?.filter((child) => isRouteAllowed(child.to))
+                        .map((child) => (
+                          <SidebarItem
+                            key={child.to}
+                            to={child.to}
+                            icon={child.icon}
+                            color={child.color}
+                            bgColor={child.bgColor}
+                            isActive={activeLink === child.to}
+                            isSubItem={true}
+                          >
+                            {child.name}
+                          </SidebarItem>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+            return (
+              <SidebarItem
+                key={item.to}
+                to={item.to}
+                icon={item.icon}
+                color={item.color}
+                bgColor={item.bgColor}
+                isActive={activeLink === item.to}
+              >
+                {item.label}
+              </SidebarItem>
+            );
+          })
         )}
-
-        <SidebarItem
-          to="/product-part-label"
-          icon={BookOpen}
-          {...SidebarColors.productPartLabel}
-          isActive={activeLink === "/product-part-label"}
-        >
-          Product Part Label
-        </SidebarItem>
-
-        <SidebarItem
-          to="/repair-cost"
-          icon={DollarSign}
-          {...SidebarColors.repairCost}
-          isActive={activeLink === "/repair-cost"}
-        >
-          Repair Cost
-        </SidebarItem>
-
-        <DropdownButton
-          icon={Archive}
-          color={SidebarColors.dropdown.inventory.color}
-          isOpen={inventoryOpen}
-          onClick={() => setInventoryOpen(!inventoryOpen)}
-        >
-          Inventory
-        </DropdownButton>
-
-        {inventoryOpen && !collapsed && (
-          <div className="overflow-hidden">
-            <div className="transform transition-all duration-300 ease-in-out animate-slideDown">
-              {Inventory.map((item) => (
-                <SidebarItem
-                  key={item.to}
-                  to={item.to}
-                  icon={item.icon}
-                  color={item.color}
-                  bgColor={item.bgColor}
-                  isActive={activeLink === item.to}
-                  isSubItem={true}
-                >
-                  {item.name}
-                </SidebarItem>
-              ))}
-            </div>
-          </div>
-        )}
-
-                <SidebarItem
-          to="/orders"
-          icon={Users}
-          {...SidebarColors.orders}
-          isActive={activeLink === "/orders"}
-        >
-          Orders
-        </SidebarItem>
-
-
-                <SidebarItem
-          to="/support-ticket"
-          icon={Users}
-          {...SidebarColors.supportTicket}
-          isActive={activeLink === "/support-ticket"}
-        >
-          Support Ticket
-        </SidebarItem>
-
-                <SidebarItem
-          to="/role"
-          icon={Users}
-          {...SidebarColors.role}
-          isActive={activeLink === "/role"}
-        >
-          User Role
-        </SidebarItem>
       </nav>
 
       <style jsx>{`
@@ -277,7 +308,6 @@ export default function Sidebar({ collapsed, onNavigate }: SidebarProps) {
             transform: translateY(0);
           }
         }
-
         .animate-slideDown {
           animation: slideDown 0.3s ease-out;
         }
@@ -285,3 +315,15 @@ export default function Sidebar({ collapsed, onNavigate }: SidebarProps) {
     </aside>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+

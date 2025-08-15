@@ -153,25 +153,16 @@ const RepairCost = () => {
   };
 }
 
-  // Handle product part selection from dropdown
-  const handleProductPartSelect = (productPartId: string) => {
-    setSelectedProductPart(productPartId);
-    setSelectedModalNumber("");
-  };
+  const handleModalNumberSelect = (modalNumberId: number) => {
+  setSelectedModalNumber(modalNumberId);
 
-  // Handle modal number selection from dropdown
-  const handleModalNumberSelect = (modalNumberId: string) => {
-    setSelectedModalNumber(modalNumberId);
+  if (modalNumberId) {
+    dispatch(GetRepairCostByModalId(modalNumberId)); // yahan object nahi, number pass karo
+    setIsFiltered(true);
+    setCurrentPage(1);
+  }
+};
 
-    if (selectedProductPart && modalNumberId) {
-      dispatch(GetRepairCostByModalId({
-        modalNumberId: Number(modalNumberId),
-        modelIssueTitleId: Number(selectedProductPart)
-      }));
-      setIsFiltered(true);
-      setCurrentPage(1);
-    }
-  };
 
   // Handle clear filter
   const handleClearFilter = () => {
@@ -522,27 +513,13 @@ const handleEditUser = async (user: any) => {
 
   {/* Second Row - Product Part and Modal Number */}
   <div className="flex items-center gap-2">
-    {/* Product Part Dropdown */}
-    <select
-      className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-[150px] disabled:bg-gray-100 disabled:cursor-not-allowed"
-      value={selectedProductPart}
-      onChange={(e) => handleProductPartSelect(e.target.value)}
-      disabled={!selectedSubCategory}
-    >
-      <option value="">Select Product Part</option>
-      {filteredProductParts?.map((part) => (
-        <option key={part.id} value={part.id}>
-          {part.name}
-        </option>
-      ))}
-    </select>
 
     {/* Modal Number Dropdown */}
     <select
       className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-[150px] disabled:bg-gray-100 disabled:cursor-not-allowed"
       value={selectedModalNumber}
       onChange={(e) => handleModalNumberSelect(e.target.value)}
-      disabled={!selectedProductPart}
+      disabled={!selectedSubCategory}
     >
       <option value="">Select Modal Number</option>
       {AllModalNumberData?.map((modal) => (
