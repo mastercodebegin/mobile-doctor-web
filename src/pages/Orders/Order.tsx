@@ -1,36 +1,27 @@
 import React, { useEffect, useState } from 'react'
 import Loading from '../../components/Loading'
 import { GetAllCategory } from '../AddCategory/AddCategorySlice';
-import { GetAllSubCategory, GetAllSubCategoryById } from '../AddSubCategory/SubCategorySlice';
+import { GetAllSubCategory } from '../AddSubCategory/SubCategorySlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
 import { toast } from 'react-toastify';
-import { EditClass, EditIcon, getStatusBadgeClass, pageSize, ShowVarientButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from '../../helper/ApplicationConstants';
+import { EditClass, EditIcon, getStatusBadgeClass, pageSize, ShowVarientButtonClass, TableDataClass, TableHadeClass } from '../../helper/ApplicationConstants';
 import Pagination from '../../helper/Pagination';
-import { GetAllRepairUnitOrderByDate, GetAllRepairUnitOrderByStatus, GetAllRepairUnitOrderByUserId } from './OrderSlice';
+import { GetAllRepairUnitOrderByUserId } from './OrderSlice';
 
 const Order = () => {
 
-      const [showConfirmModal, setShowConfirmModal] = useState(false);
-      const [showModal, setShowModal] = useState(false);
       const [currentPage, setCurrentPage] = useState(1);
       const [hoveredRow, setHoveredRow] = useState<number | null>(null);
-      const [isEditMode, setIsEditMode] = useState(false);
       const [isLoaded, setIsLoaded] = useState(false);
-
-      //  const [filterSubCategory, setFilterSubCategory] = useState<any>(null);
-      //   const [filterCategory, setFilterCategory] = useState<any>(null);
-        const [filterStatus, setFilterStatus] = useState<string>('');
+        const [unitRepairStatus, setUnitRepairStatus] = useState<string>('');
         const [filterDate, setFilterDate] = useState<string>('');
 
         const dispatch = useDispatch<AppDispatch>();
 
         const {Orders, isLoading} = useSelector((state: RootState) => state.OrderSlice)
-         const { SubCategoriesData } = useSelector((state: RootState) => state.SubCategorySlice)
-          const { data } = useSelector((state: RootState) => state.AddCategorySlice)
-
             const usersPerPage = 5;
-              const paginatedUsers = Orders.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage)
+              const paginatedUsers = Orders?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage)
 
         // Status options - Add more as needed
         const statusOptions = [
@@ -46,59 +37,28 @@ const Order = () => {
           'COMPLETED',
         ];
 
-      // // Filter Category Change - Top Left Filter
-      // const handleFilterCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      //   const selectedValue = e.target.value;
-    
-      //   if (selectedValue === "") {
-      //     setFilterCategory(null);
-      //     setFilterSubCategory(null);
-      //     setFilterStatus('');
-      //     setCurrentPage(1);
-      //     return;
-      //   }
-    
-      //   const selectedCat = JSON.parse(selectedValue);
-      //   setFilterCategory(selectedCat);
-      //   setFilterSubCategory(null);
-      //   setFilterStatus('');
-    
-      //   // API call to get subcategories by category ID
-      //   dispatch(GetAllSubCategoryById(selectedCat.id))
-      //     .unwrap()
-      //     .then((res: any) => {
-      //       console.log("Filter SubCategories Response:", res);
-      //       setCurrentPage(1);
-      //     })
-      //     .catch((err: any) => {
-      //       console.log("Filter SubCategories API Error:", err);
-      //       toast.error("Failed to fetch subcategories");
-      //     });
-      // };
-    
-      // // Filter SubCategory Change - Top Left Filter
-      // const handleFilterSubCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      //   const selectedValue = e.target.value;
-    
-      //   if (selectedValue === "") {
-      //     setFilterSubCategory(null);
-      //     setFilterStatus('');
-      //     setCurrentPage(1);
-      //     return;
-      //   }
-    
-      //   const selectedSubCat = JSON.parse(selectedValue);
-      //   setFilterSubCategory(selectedSubCat);
-      //   setFilterStatus('');
-      //   setCurrentPage(1);
-      // };
 
-      // Filter Status Change - New function
+        const getAllUnitOrderCommonFunction = (filterObj = {}, ) => {
+        const noFilterObj = {
+            pageSize: pageSize,
+            pageNumber: 0,
+            ...(unitRepairStatus && {unitRepairStatus}),
+            // orderId: "TEST60989968",
+  //            "fromDate": "2025-08-06",
+  // "toDate": "2025-08-06",
+        };
+
+        const hasFilters = Object.keys(filterObj).length > 0;
+        console.log('hasFilters====', hasFilters);
+        
+
+        dispatch(GetAllRepairUnitOrderByUserId(hasFilters ? filterObj : noFilterObj));
+    }
      
       //  By Status
       const handleFilterStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedStatus = e.target.value;
-        setFilterStatus(selectedStatus);
+        setUnitRepairStatus(selectedStatus);
         setCurrentPage(1);
 
         // API call to fetch orders by status
@@ -116,39 +76,12 @@ const Order = () => {
 console.log("Selected Status Value:", selectedStatus);
       };
 
-      // By Date
-      const handleFilterDate = () => {
-  if (!filterDate) {
-    toast.error("Please select a date first");
-    return;
-  }
-
-  const payload = {
-    pageSize,
-    pageNumber: currentPage,
-    // date: filterDate.trim(), // in yyyy-mm-dd format
-    // date: '01-06-2024', 
-  };
-
-  dispatch(GetAllRepairUnitOrderByDate(payload))
-    .unwrap()
-    .then((res: any) => {
-      console.log("Orders by Date Response:", res);
-    })
-    .catch((err: any) => {
-      console.log("Orders by Date API Error:", err);
-      toast.error("Failed to fetch orders by date");
-    });
-};
-
 
      // Clear filter function
      const handleClearFilter = () => {
-      //  setFilterCategory(null);
-      //  setFilterSubCategory(null);
-       setFilterStatus('');
+       setUnitRepairStatus('');
        setCurrentPage(1);
-        dispatch(GetAllRepairUnitOrderByUserId());
+        getAllUnitOrderCommonFunction();
      };
 
     const handleEditUser = (user: any) =>{
@@ -159,7 +92,7 @@ console.log("Selected Status Value:", selectedStatus);
         setIsLoaded(true);
         dispatch(GetAllCategory());
         dispatch(GetAllSubCategory());
-        dispatch(GetAllRepairUnitOrderByUserId())
+        getAllUnitOrderCommonFunction()
 
     },[])
 
@@ -184,40 +117,10 @@ console.log("Selected Status Value:", selectedStatus);
 
   {/* Left Section */}
           <div className="flex items-center gap-2">
-            {/* Category Filter */}
-            {/* <select
-              value={filterCategory ? JSON.stringify(filterCategory) : ""}
-              onChange={handleFilterCategoryChange}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select Category</option>
-              {data?.map((category) => (
-                <option key={category.id} value={JSON.stringify(category)}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-
-            {/* SubCategory Filter - Only show when category is selected *}
-            {filterCategory && (
-              <select
-                value={filterSubCategory ? JSON.stringify(filterSubCategory) : ""}
-                onChange={handleFilterSubCategoryChange}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select SubCategory</option>
-                {SubCategoriesData?.filter(subCat => subCat.category?.id === filterCategory?.id)?.map((subCat) => (
-                  <option key={subCat.id} value={JSON.stringify(subCat)}>
-                    {subCat.name}
-                  </option>
-                ))}
-              </select>
-            )} */}
-
+          
             {/* Status Filter - Only show when subcategory is selected */}
-            {/* {filterSubCategory && ( */}
               <select
-                value={filterStatus}
+                value={unitRepairStatus}
                 onChange={handleFilterStatusChange}
                 className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
@@ -228,11 +131,10 @@ console.log("Selected Status Value:", selectedStatus);
                   </option>
                 ))}
               </select>
-            {/* )} */}
 
             {(
               // filterCategory && filterSubCategory ||
-               filterStatus) && (
+               unitRepairStatus) && (
               <button
                 onClick={handleClearFilter}
                 className="text-red-400 hover:text-red-600 text-sm bg-red-50 px-2 py-1 rounded"
@@ -251,7 +153,7 @@ console.log("Selected Status Value:", selectedStatus);
   className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
 />
 <button
-  onClick={handleFilterDate}
+  // onClick={handleFilterDate}
   className={ShowVarientButtonClass}
 >
   Filter by Date
@@ -340,7 +242,7 @@ console.log("Selected Status Value:", selectedStatus);
     ) : (
       <tr>
         <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
-          {filterStatus ? `No orders found for status: ${filterStatus.replace(/_/g, ' ')}` : 'No orders found'}
+          {unitRepairStatus ? `No orders found for status: ${unitRepairStatus.replace(/_/g, ' ')}` : 'No orders found'}
         </td>
       </tr>
     )}

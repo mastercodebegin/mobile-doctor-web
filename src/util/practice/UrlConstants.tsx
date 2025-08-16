@@ -36,7 +36,7 @@ const UrlConstants = {
 ADD_REPAIR_COST_: 'RepairCost/add',  
 GET_ALL_INVENTORY: 'inventory/getAllInventory',
 ADD_INVENTORY: 'inventory/create',
-GET_ALL_REPAIR_UNIT_ORDER_BY_USER_ID: 'unitRepair/getAllRepairUnitOrderByUserId',
+GET_ALL_REPAIR_UNIT_ORDER_BY_USER_ID: 'unitRepair/getAllUnitRepairOrderByFilter',
 ADD_RE_FILL_INVENTORY: 'inventory/reFillInventory',
 GET_INVENTORY_HISTORY: 'inventoryUsageHistory/getInventoryHistoryByInventoryId',
 ORDER_INVENTORY_USE: 'inventory/consumeInventoryItem',
