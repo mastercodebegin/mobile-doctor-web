@@ -4,12 +4,14 @@ import { UrlConstants } from "../../util/practice/UrlConstants";
 
 const storeData = localStorage.getItem('product-part')
 
+// Category Interface
 interface Category {
   id: number;
   name: string;
   is_deleted: boolean;
 }
 
+// SubCategory Interface
 interface SubCategory {
   id: number;
   name: string;
@@ -17,7 +19,23 @@ interface SubCategory {
   is_deleted: boolean;
 }
 
+// Brand Interface
+interface Brand {
+  id: number;
+  name: string;
+  is_deleted: boolean;
+}
 
+// ProductSpecification Interface
+interface ProductSpecification {
+  id: number;
+  network: string;
+  platform: string;
+  rom: string;
+  ram: string;
+}
+
+// ProductPart Interface
 interface ProductPart {
     id: number;
     name: string;
@@ -25,11 +43,24 @@ interface ProductPart {
     deleted: boolean;
 }
 
+// ProductModelNumber Interface
+interface ProductModelNumber {
+ id: number;
+  name: string;
+  brand: Brand;
+  categories: Category;
+  subCategory: SubCategory;
+  is_deleted: boolean;
+  productSpecification: ProductSpecification;
+}
+
+// Role Interface
 interface Role {
 id: number;
 name: string;
 }
 
+// User Interface
 interface UserInterface {
     id: number;
     firstName: string;
@@ -43,21 +74,24 @@ interface UserInterface {
     role: Role;
 }
 
+// ProductpartRecord Interface
 interface ProductPartRecord {
   id: number;
   quantity: number;
   notes: string;
   productPart: ProductPart;
+  productModelNumber: ProductModelNumber;
   user: UserInterface;
   deleted: boolean;
 }
 
+// History Interface
 interface History {
   isLoading: boolean;
+  isSuccess: boolean;
   data: Record<number, any[]>; 
   pagination: Record<number, any>; 
 }
-
 
 
 interface ProductPartInterface {
@@ -74,6 +108,7 @@ const initialState: ProductPartInterface = {
     ProductPartData: storeData ? JSON.parse(storeData) : [],
     History: {
   isLoading: false,
+  isSuccess: false,
   data: {},
   pagination: {},
 },
@@ -114,6 +149,38 @@ const initialState: ProductPartInterface = {
           name: ""
         }
             },
+            productModelNumber: {
+              id: 0,
+  name: "",
+  brand: {
+    id: 0,
+    name: "",
+    is_deleted: false,
+  },
+  categories: {
+    id: 0,
+    name: "",
+    is_deleted: false,
+  },
+  subCategory: {
+    id: 0,
+    name: "",
+    category: {
+      id: 0,
+      name: "",
+      is_deleted: false,
+    },
+    is_deleted: false,
+  },
+  is_deleted: false,
+  productSpecification: {
+    id: 0,
+    network: "",
+    platform: "",
+    rom: "",
+    ram: "",
+  },
+            }
         }
     }
 }
@@ -258,19 +325,9 @@ console.log("Re-Fill Data :--", action.payload)
         // Inventory History
 .addCase(InventoryHistory.pending, (state, action) => {
     state.History.isLoading = true;
-    state.isSuccess = false;
+    state.History.isSuccess = false;
     console.log("Inventory History is Pending :--", action.payload);
 })
-// .addCase(InventoryHistory.fulfilled, (state, action) => {
-//     state.History.isLoading = false; 
-//     state.isSuccess = true;
-// const inventoryId = action.meta.arg.id;
-// state.History.data[inventoryId] = action.payload?.content || [];
-//     console.log("✅ Inventory History Data Set:", state.History);
-// })
-
-
-
 .addCase(InventoryHistory.fulfilled, (state, action) => {
   const inventoryId = action.meta.arg.id;
   const payload = action.payload;
@@ -303,18 +360,12 @@ console.log("Re-Fill Data :--", action.payload)
   state.History.isLoading = false;
 })
 
-
-
-
-
-
-
-
 .addCase(InventoryHistory.rejected, (state, action) => {
-    state.History.isLoading = false; 
-    state.isSuccess = false;
-    state.History.data = []; 
-    console.log("Inventory History Data fetched Failed :--", action.payload);
+  state.History.isLoading = false;
+  state.History.isSuccess = false;
+  state.History.data = {};
+  state.History.pagination = {};
+  console.log("Inventory History Data fetched Failed :--", action.payload);
 })
 
 // Order Use Inventory
