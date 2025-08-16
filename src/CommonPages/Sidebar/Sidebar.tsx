@@ -91,10 +91,10 @@ export default function Sidebar({ collapsed, onNavigate }: SidebarProps) {
   const userRole = useSelector((state: RootState) => state.UserLoginSlice.data?.role);
   const role = typeof userRole === 'object' && userRole?.name ? userRole.name : (typeof userRole === 'string' ? userRole : 'admin');
   
-  // Debug: Console log to check the role value
-  console.log("Raw user role from Redux:", userRole);
-  console.log("Processed role:", role);
-  console.log("Role config for this role:", roleMenuConfig[role]);
+  // // Debug: Console log to check the role value
+  // console.log("Raw user role from Redux:", userRole);
+  // console.log("Processed role:", role);
+  // console.log("Role config for this role:", roleMenuConfig[role]);
 
   const handleLinkClick = (to: string) => {
     setActiveLink(to);
@@ -229,11 +229,6 @@ export default function Sidebar({ collapsed, onNavigate }: SidebarProps) {
         flex flex-col
       `}
     >
-      {/* Debug Info - Remove in production */}
-      <div className="p-2 bg-gray-100 text-xs text-gray-600 border-b">
-        Role: {role} | Items: {allowedItems.length}
-      </div>
-
       <nav className="flex-1 py-4 overflow-y-auto">
         {allowedItems.length === 0 ? (
           <div className="p-4 text-center text-gray-500">
