@@ -6,7 +6,7 @@ import Loading from "../../components/Loading";
 import { toast } from "react-toastify";
 import { AppDispatch, RootState } from "../../redux/store";
 import { Dispatch } from "@reduxjs/toolkit";
-import { SubmitButtonClass, ThemeBackgroundColor, ThemeBackgroundHoverColor } from "../../helper/ApplicationConstants";
+import { SubmitButtonClass } from "../../helper/ApplicationConstants";
 import useAuthStatus from "../../hooks/useAuthStatus";
 
 interface LoginPageProps {
@@ -15,7 +15,6 @@ interface LoginPageProps {
 
 const Login: React.FC<LoginPageProps> = ({onLogin}) => {
 
-const response = useSelector((state : RootState) => state.ErrorModalWindowSlice)
 const {isLoading, data} = useSelector((state : RootState) => state.UserLoginSlice)
 const {loggedIn} = useAuthStatus()
 
@@ -61,7 +60,6 @@ const login = async (e) => {
     setFormData({ email: "", password: "" });
   } catch (error) {
     console.error("Login failed:", error);
-    // toast.error("Login Failed!");
   }
 };
 
@@ -129,7 +127,7 @@ if(isLoading){
 
           <button
             type="submit"
-            className={`w-full ${ThemeBackgroundColor} ${ThemeBackgroundHoverColor} text-white py-2 rounded-md transition-colors duration-300`}
+            className={SubmitButtonClass}
           >
             Login
           </button>

@@ -331,6 +331,9 @@ const UserManagement = () => {
                       Role Name
                     </th>
                     <th scope="col" className={TableHadeClass}>
+                      Status
+                    </th>
+                    <th scope="col" className={TableHadeClass}>
                       <button>View</button>
                     </th>
                   </tr>
@@ -423,11 +426,9 @@ const UserManagement = () => {
     { label: "Home Address", value: user?.homeAddress || 'N/A' },
     { label: "Created On", value: user?.createdOn ? new Date(user.createdOn).toLocaleString() : 'N/A' },
     { label: "Account Status", value: user?.accountStatus || 'N/A' },
-    { label: "Role ID", value: user?.role?.id || 'N/A' },
     { label: "Business Name", value: user?.businessName || 'N/A' },
     { label: "Business Address", value: user?.businessAddress || 'N/A' },
     { label: "GST Number", value: user?.gstNumber || 'N/A' },
-    { label: "Role Name", value: user?.role?.name || 'N/A' },
   ];
 
   let variantFields = [];
