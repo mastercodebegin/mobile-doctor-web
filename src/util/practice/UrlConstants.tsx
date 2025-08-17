@@ -30,7 +30,6 @@ const UrlConstants = {
   GET_PRODUCT_PART_LABEL_BY_SUB_CATEGORY_ID: 'ProductPart/getPartItemBySubCategoryId',
   ADD_PRODUCT_PART_LABEL: 'ProductPart/createProductPart',
   GET_ALL_REPAIR_COST: 'RepairCost/getAllRepairCost',
-  // GET_REPAIR_COST_BY_ID: 'RepairCost/getRepairCostByModelNumberAndModelIssueTitleId', 
   GET_REPAIR_COST_BY_ID: 'RepairCost/getAllRepairCostByModelNumber', 
   GET_REPAIR_COST_BY_SUBCATEGORY_ID: 'RepairCost/getAllRepairCostBySubCategoryId',
 ADD_REPAIR_COST_: 'RepairCost/add',  
@@ -45,6 +44,7 @@ ADD_SUPPORT_TICKET: 'supportTicket/create',
 GET_ALL_ROLES: 'userRole/getAllRole',
 GET_ROLE_BY_ID: 'userRole/getRoleById',
 ADD_ROLE: 'userRole/createrole',
+GET_ALL_ORDER_COUNT: 'unitRepair/getOrderCountByStatus',
 
 
 

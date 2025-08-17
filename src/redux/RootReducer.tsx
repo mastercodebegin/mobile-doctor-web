@@ -1,4 +1,5 @@
 import ErrorModalWindowSlice from "../ErrorModalWindow/ErrorModalWindow/ErrorModalWindowSlice"
+import DashbaordSlice from "../pages/Dashboard/DashboardSlice"
 import UserLoginSlice from "../features/auth/UserLoginSlice"
 import VendorSlice from "../pages/userManagement/VendorSlice"
 import AddCategorySlice from "../pages/AddCategory/AddCategorySlice"
@@ -16,22 +17,23 @@ import SupportTicketSlice from "../pages/SupportTicket/SupportTicketSlice"
 import RoleSlice from "../pages/Roles/RoleSlice"
 
 const RootReducer = ({
-    ErrorModalWindowSlice ,
+    ErrorModalWindowSlice,
+    DashbaordSlice,
     UserLoginSlice,
-VendorSlice,   
-AddCategorySlice,
-SubCategorySlice,
-BrandSlice,
-MobileNumberSlice,
-ColorNameSlice,
-variantSlice,
-VariantColorSlice,
-ModalIssuesSlice,
-RepairCostSlice,
-InventorySlice,
-OrderSlice,
-SupportTicketSlice,
-RoleSlice,
+    VendorSlice,
+    AddCategorySlice,
+    SubCategorySlice,
+    BrandSlice,
+    MobileNumberSlice,
+    ColorNameSlice,
+    variantSlice,
+    VariantColorSlice,
+    ModalIssuesSlice,
+    RepairCostSlice,
+    InventorySlice,
+    OrderSlice,
+    SupportTicketSlice,
+    RoleSlice,
 })
 
 

@@ -194,23 +194,6 @@ export const UpdateCategory = createAsyncThunk("UPDATE/CATEGORY", async (id: str
     }
 });
 
-
-
-
-// export const RemoveCategory = createAsyncThunk("DELETE/CATEGORY", async (id: string, thunkAPI) => {
-//     try {
-//         // URL में ID को append करें
-//         const response = await deleteRequestMethodWithParam(`${UrlConstants.DELETE_CATEGORIE}${id}`);
-//         console.log('Delete response:', response);
-//         return id; // Return ID for state update
-//     } catch (error: any) {
-//         console.log('Delete thunk error:', error);
-//         const message = error.response?.data?.message || "Failed to delete category";
-//         return thunkAPI.rejectWithValue(message);
-//     }
-// });
-
-
 export const RemoveCategory = createAsyncThunk("DELETE/CATEGORY", async (id: string, thunkAPI) => {
     try {
         const response = await deleteRequestMethodWithParam({id}, UrlConstants.DELETE_CATEGORIE);

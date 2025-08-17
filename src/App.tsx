@@ -1,7 +1,7 @@
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "./pages/Dashboard/Dashboard";
 import UserManagement from "./pages/userManagement/UserManagement";
 import Sidebar from "./CommonPages/Sidebar/Sidebar";
 import Navbar from "./CommonPages/Header/Navbar";
