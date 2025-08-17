@@ -6,7 +6,7 @@ export const ThemeTextColor = 'text-gray-800 hover:text-gray-700'
 
 export const ShowVarientButtonClass = ` ${ThemeBackgroundColor} ${ThemeBackgroundHoverColor} duration-200 px-6 py-2 shadow rounded-md  transition text-white`
 
-export const SubmitButtonClass = `${ThemeBackgroundColor} ${ThemeBackgroundHoverColor} px-10 py-3 rounded-md text-white transition`
+export const SubmitButtonClass = `${ThemeBackgroundColor} ${ThemeBackgroundHoverColor} px-10 py-3 rounded-md text-white transition-colors duration-300`
 
 export const InventoryView = `${ThemeBackgroundColor} ${ThemeBackgroundHoverColor} px-5 py-2 rounded-md  text-white transition`
 

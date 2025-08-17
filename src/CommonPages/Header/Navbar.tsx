@@ -101,17 +101,17 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
         {open && (
           <div
             role="menu"
-            className="absolute right-0 mt-3 w-80 rounded-xl bg-white shadow-2xl p-3 text-black z-50 overflow-hidden"
+            className="absolute right-0 mt-3 w-80 border rounded-xl bg-white shadow-2xl p-3 z-50 overflow-hidden"
           >
             {/* Top user section (Chrome-like different shade, no border) */}
-            <div className="p-4 bg-[#2d2e30] text-center rounded-md">
+            <div className="p-4 bg-white text-center rounded-md">
               <p className="font-extrabold text-base tracking-wide">
                 {fullNameCaps || "USER"}
               </p>
 
               {/* Email */}
               {email ? (
-                <div className="mt-2 flex items-center justify-center gap-2 text-sm text-gray-300">
+                <div className="mt-2 flex items-center justify-center gap-2 text-sm text-gray-500">
                   <Mail size={16} />
                   <span className="truncate">{email}</span>
                 </div>
@@ -132,7 +132,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
             {/* Options */}
             <div className="flex flex-col p-2">
               <button
-                className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-[#3c4043] transition text-sm"
+                className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-400 transition text-sm"
                 onClick={() => {
                   // TODO: open change-password modal/page
                 }}
@@ -143,7 +143,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
 
               <button
                 onClick={handleClearLoginState}
-                className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-[#3c4043] transition text-sm text-red-400"
+                className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-400 transition text-sm hover:text-red-600 text-red-400"
               >
                 <LogOut size={18} />
                 Log Out

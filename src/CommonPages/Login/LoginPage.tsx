@@ -127,7 +127,7 @@ if(isLoading){
 
           <button
             type="submit"
-            className={SubmitButtonClass}
+            className={`w-full ${SubmitButtonClass}`}
           >
             Login
           </button>
