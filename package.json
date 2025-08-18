@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-      "tsc": "echo 'Skipping type check...'",
+    "tsc": "echo 'Skipping type check...'",
     "dev": "vite",
-  "build": "vite build",
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -15,6 +15,7 @@
     "@tailwindcss/vite": "^4.1.3",
     "axios": "^1.9.0",
     "lucide-react": "^0.510.0",
+    "moment": "^2.30.1",
     "qs": "^6.14.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

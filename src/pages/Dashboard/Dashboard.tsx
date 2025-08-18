@@ -1,19 +1,20 @@
-import { useState, useEffect, ActionDispatch } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { LineChart, Line, ResponsiveContainer, XAxis, Tooltip } from 'recharts';
-import { RootState } from '../../redux/store';
+import { LineChart, Line, ResponsiveContainer, XAxis, Tooltip, CartesianGrid, YAxis } from 'recharts';
+import { AppDispatch, RootState } from '../../redux/store';
 import Loading from '../../components/Loading';
 import { useNavigate } from 'react-router-dom';
 import useAuthStatus from '../../hooks/useAuthStatus';
-import { GetAllOrderCount } from './DashboardSlice';
+import { GetAllOrderCount, GetAllOrdersInGraph } from './DashboardSlice';
+import moment from 'moment';
 
 const Dashboard = () => { 
 
   const {data} = useSelector((state:RootState) => state.UserLoginSlice)
   const {loggedIn} = useAuthStatus()
-  const {dashboardData, isLoading} = useSelector((state: RootState) => state.DashbaordSlice)
+  const {dashboardData, isLoading, productVisitData} = useSelector((state: RootState) => state.DashbaordSlice)
   const navigate = useNavigate()
-  const dispatch = useDispatch<ActionDispatch>()
+  const dispatch = useDispatch<AppDispatch>()
 
     // State for animating numbers
   const [customerCount, setCustomerCount] = useState(0);
@@ -21,56 +22,35 @@ const Dashboard = () => {
   const [deliveryCount, setDeliveryCount] = useState(0);
   const [userCount, setUserCount] = useState(0);
   
-  // Chart data
-  const [productVisitsData] = useState<any[]>([
-    { name: 'Mon', visits: 400 },
-    { name: 'Tue', visits: 950 },
-    { name: 'Wed', visits: 550 },
-    { name: 'Thu', visits: 600 },
-    { name: 'Fri', visits: 720 },
-    { name: 'Sat', visits: 950 },
-    { name: 'Sun', visits: 650 },
-  ]);
+  // dropdown state
+  const [selectedPeriod, setSelectedPeriod] = useState("WEEKLY");
 
-  // Animate counting up effect
-  // useEffect(() => {
-  //   const animationDuration = 1500;
-  //   const frameDuration = 16;
-  //   const frames = animationDuration / frameDuration;
-    
-  //   const customerIncrement = Math.ceil(45679 / frames);
-  //   const orderIncrement = Math.ceil(80927 / frames);
-  //   const deliveryIncrement = Math.ceil(22339 / frames);
-  //   const userIncrement = Math.ceil(1900 / frames);
-    
-  //   let currentFrame = 0;
-    
-  //   const timer = setInterval(() => {
-  //     currentFrame++;
-      
-  //     setCustomerCount(prev => 
-  //       prev + customerIncrement > 45679 ? 45679 : prev + customerIncrement
-  //     );
-      
-  //     setOrderCount(prev => 
-  //       prev + orderIncrement > 80927 ? 80927 : prev + orderIncrement
-  //     );
-      
-  //     setDeliveryCount(prev => 
-  //       prev + deliveryIncrement > 22339 ? 22339 : prev + deliveryIncrement
-  //     );
-      
-  //     setUserCount(prev => 
-  //       prev + userIncrement > 1900 ? 1900 : prev + userIncrement
-  //     );
-      
-  //     if (currentFrame >= frames) {
-  //       clearInterval(timer);
-  //     }
-  //   }, frameDuration);
-    
-  //   return () => clearInterval(timer);
-  // }, []);
+   // Function -> jab user dropdown select karega
+  const handlePeriodChange = (period: string) => {
+    setSelectedPeriod(period);
+    dispatch(GetAllOrdersInGraph(period));  // yaha period jaayega thunk me
+  };
+
+  const formatDate = (period, type) => {
+  if (type === 'yearly' && period === null) {
+    return 'No Data';
+  }
+
+  if (type === 'monthly') {
+    return moment(period, 'YYYYMM').format('MMM YYYY');
+  }
+
+  if (type === 'weekly') {
+    return moment(period, 'YYYYWW').format('w');
+  }
+
+  if (type === 'daily') {
+    return moment(period).format('YYYY-MM-DD');
+  }
+
+  return period;
+};
+
 
   // Animate counting up effect with API data
 useEffect(() => {
@@ -207,10 +187,9 @@ if(isLoading){
 
       </div>
 
-      {/* Bottom Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-20 md:gap-4">
-        {/* Product Categories */}
-        <div className="bg-white p-6 rounded-md shadow-sm h-72">
+{/* Bottom Row */}
+<div className="grid grid-cols-1 md:grid-cols-2 gap-20 md:gap-4">
+              <div className="bg-white p-6 rounded-md shadow-sm h-72">
           <h3 className="text-gray-700 text-lg font-medium mb-6">Product categories</h3>
           <div className="flex justify-center">
             <svg width="200" height="200" viewBox="0 0 200 200">
@@ -240,42 +219,49 @@ if(isLoading){
           </div>
         </div>
 
-        {/* Product Visits */}
-        <div className="bg-white p-6 rounded-md shadow-sm h-72">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-gray-700 text-lg font-medium">Product visits</h3>
-            <div className="relative">
-              <button className="px-3 py-1 text-gray-600 border border-gray-300 rounded-md flex items-center text-sm">
-                This week
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={productVisitsData}>
-                <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                <Tooltip />
-                <Line 
-                  type="monotone" 
-                  dataKey="visits" 
-                  stroke="#781C86" 
-                  strokeWidth={2}
-                  dot={{ 
-                    fill: "#FFF", 
-                    stroke: "#FF6B35", 
-                    strokeWidth: 2, 
-                    r: 5 
-                  }}
-                  activeDot={{ r: 8, fill: "#FF6B35", stroke: "#FFF" }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+{/* Product Visits */}
+            <div className="bg-white h-72 p-6 rounded-md shadow-sm">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-gray-700 text-lg font-medium">
+                  Product visits
+                </h3>
+                <div className="relative inline-block text-left">
+               <select
+          value={selectedPeriod}
+          onChange={(e) => handlePeriodChange(e.target.value)}
+          className="border px-3 py-1 rounded-lg"
+        >
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+                </div>
+              </div>
+
+                  <div className="h-64">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={productVisitData}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+             <XAxis dataKey="period" tickFormatter={(value) => formatDate(value, selectedPeriod)} />
+            <YAxis />
+            <Tooltip />
+            <Line
+              type="monotone"
+              dataKey="count"
+              stroke="#3B82F6"
+              strokeWidth={3}
+              dot={{ r: 5, stroke: "#3B82F6", strokeWidth: 2, fill: "#fff" }}
+              activeDot={{ r: 8, fill: "#3B82F6" }}
+              isAnimationActive={true}   // ✅ Sirf ek baar animate hoga
+            />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
+
+              </div>
+            </div>
+
     </div>
   </div>
     </>

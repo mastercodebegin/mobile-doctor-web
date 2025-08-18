@@ -45,6 +45,7 @@ GET_ALL_ROLES: 'userRole/getAllRole',
 GET_ROLE_BY_ID: 'userRole/getRoleById',
 ADD_ROLE: 'userRole/createrole',
 GET_ALL_ORDER_COUNT: 'unitRepair/getOrderCountByStatus',
+GET_ALL_ORDERS_IN_GRAPH: '/unitRepair/getOrdersByPeriod',
 
 
 
