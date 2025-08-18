@@ -53,3 +53,12 @@ export const GetAllRepairUnitOrderByUserId = createAsyncThunk("FETCH/ALL/REPAIR/
 })
 
 
+// // Fetch User by Emali
+// export const GetUserByEmail = createAsyncThunk("FETCH/USER/BY/EMAIL", async (data:string, thunkAPI) =>{
+//     try {
+//         const
+//     } catch (error: any) {
+//           const message = error?.response?.data?.message || error.message
+//     return thunkAPI.rejectWithValue(message)
+//     }
+// })

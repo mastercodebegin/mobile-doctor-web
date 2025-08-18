@@ -9,6 +9,7 @@ import { CreateVariant, DeleteVariant, FetchVariantByModalId, Remove, Update, Up
 import { GetAllColors } from "../AddColorName/ColorNameSlice";
 import { toast } from "react-toastify";
 import ConfirmationModal from "../../components/ConfirmationModal";
+import IphoneImage from "../../assets/Laptop_Image.png";
 
 const AddVarient = () => {
  const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -579,8 +580,8 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
                       <td colSpan={8} className="text-center py-8">
                         <div className="text-gray-500">
                           {selectedModalNumber 
-                            ? `No variants found for ${getSelectedBrandName()}. Create your first variant!`
-                            : "No variants found. Create your first Variant!"
+                            ? `No variants found for ${getSelectedBrandName()}!`
+                            : "No variants found!"
                           }
                         </div>
                       </td>
@@ -656,11 +657,9 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
   <div className="text-sm font-medium text-green-600 mb-1">Image</div>
   <div className="flex items-center gap-3 flex-wrap">
     <img 
-      src={
-        "https://shopax.s3.eu-north-1.amazonaws.com/1731065173166.jpg"
-      }
+      src={IphoneImage}
       alt="Variant"
-      className="w-20 h-20 object-contain border rounded"
+      className="w-20 h-20 object-contain border border-gray-300 rounded"
     />
   </div>
 </div>

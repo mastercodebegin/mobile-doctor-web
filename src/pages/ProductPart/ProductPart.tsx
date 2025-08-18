@@ -11,6 +11,7 @@ import { GetAllModalIssues } from '../ModalIssues/ModalIssuesSlice';
 import { CreateInventory, DeleteInventory, GetAllProductPart, GetAllProductPartBySubCategoryId, Update, UpdateInventory, ReFillInventory, InventoryHistory, OrderInventoryUse, clearHistoryCache } from './ProductPartSlice';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { FetchAllModalNumber } from '../AddMobileNumber/MobileNumberSlice';
+import IphoneImage from "../../assets/Laptop_Image.png";
 
 const ProductPart = () => {
 
@@ -783,7 +784,7 @@ const ProductPart = () => {
                           <td className={TableDataClass}>{user.id}</td>
                           <td className={TableDataClass}>
                             <div className='flex items-center space-x-2' >
-                              <img src="https://tse4.mm.bing.net/th/id/OIP.FVpPrz3IlNVDLpKMLC3D2wHaHa?pid=Api&P=0&h=180" className="w-15 h-15 object-contain border rounded-md" alt="Iphone Image" />
+                              <img src={IphoneImage || 'https://tse4.mm.bing.net/th/id/OIP.FVpPrz3IlNVDLpKMLC3D2wHaHa?pid=Api&P=0&h=180'} className="w-15 h-15 object-contain border border-gray-300 rounded-md" alt="Iphone Image" />
                               <span>
                                 <h4 className='text-black' >{user.productPart.subCategory.name}</h4>
                                 <p>{user.productPart.subCategory.category.name}</p>

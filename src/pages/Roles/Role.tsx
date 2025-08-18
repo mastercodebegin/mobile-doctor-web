@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import Loading from "../../components/Loading";
 import ConfirmationModal from "../../components/ConfirmationModal";
-import { EditClass, EditIcon, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
+import { EditClass, EditIcon, inputClass, SearchIcon, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
 import Pagination from "../../helper/Pagination";
 import { toast } from "react-toastify";
 import { CreateRole, GetAllRoles, GetRoleById, restore, Update, UpdtaeRole } from './RoleSlice';
@@ -148,26 +148,14 @@ const Role = () => {
             <div className="md:overflow-y-hidden overflow-x-hidden">
                 <div className="mt-10 flex items-center justify-between">
 
+{/* Left Section */}
                     <div className="flex items-center gap-2">
                         <button
                             type="button"
                             className={"p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-all"}
                             onClick={handleSearchIconClick}
                         >
-                            <svg
-                                className="w-5 h-5 text-gray-600"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1116.65 5.65a7.5 7.5 0 010 10.6z"
-                                />
-                            </svg>
+                            {SearchIcon}
                         </button>
 
                         <button

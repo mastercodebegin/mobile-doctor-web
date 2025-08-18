@@ -103,6 +103,7 @@ const SupportTicket = () => {
         toast.success(res.message || "Ticket created successfully!");
         setShowModal(false);
         setShowConfirmModal(false);
+        handleCloseModal()
         dispatch(GetAllSupportTicket()); 
       })
       .catch((err: any) => {
@@ -358,7 +359,7 @@ if(Edit?.isEdit && Edit?.supportTicket) {
                       className={inputClass}
                     >
                       <option value="PENDING">PENDING</option>
-                      <option value="RESOLVED">REOPEN</option>
+                      <option value="REOPEN">REOPEN</option>
                       <option value="RESOLVED">INREVIEW</option>
                       <option value="CLOSED">CLOSED</option>
                     </select>

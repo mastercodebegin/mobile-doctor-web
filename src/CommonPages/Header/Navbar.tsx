@@ -101,7 +101,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
         {open && (
           <div
             role="menu"
-            className="absolute right-0 mt-3 w-80 border rounded-xl bg-white shadow-2xl p-3 z-50 overflow-hidden"
+            className="absolute right-0 mt-3 w-80 border border-gray-300 rounded-xl bg-white shadow-2xl p-3 z-50 overflow-hidden"
           >
             {/* Top user section (Chrome-like different shade, no border) */}
             <div className="p-4 bg-white text-center rounded-md">
