@@ -24,6 +24,7 @@ const Order = () => {
   const [searchModel, setSearchModel] = useState(false);
   const { Orders, isLoading } = useSelector((state: RootState) => state.OrderSlice);
   const [filterEmail, setFilterEmail] = useState<any>('')
+  const [filterOrderId, setFilterOrderId] = useState('')
   const [managerId, setManagerId] = useState<number | null>(null);
   const [engineerId, setEngineerId] = useState<number | null>(null);
   const [pickupPartnerId, setPickupPartnerId] = useState<number | null>(null);
@@ -61,7 +62,6 @@ const Order = () => {
     const baseFilterObj = {
       pageSize: pageSize,
       pageNumber: 0,
-      // managerId: 10,
     };
 
     const filterObj = {};
@@ -78,6 +78,11 @@ const Order = () => {
       filterObj.engineerId = engineerId;
     } else if (pickupPartnerId) {
       filterObj.pickupPartnerId = pickupPartnerId;
+    }
+
+    // Add Order Id filter
+    if(filterOrderId) {
+      filterObj.orderId = filterOrderId;
     }
 
 
@@ -111,7 +116,8 @@ const Order = () => {
     e.preventDefault()
     try {
       setLoading(true)
-      const res = await getRequestMethodWithParam({ email: filterEmail }, UrlConstants.GET_USRE_BY_EMAIL);
+     if(filterEmail && !filterOrderId) {
+       const res = await getRequestMethodWithParam({ email: filterEmail }, UrlConstants.GET_USRE_BY_EMAIL);
       console.log(res)
 
       const roleName = res?.responseDetails?.role?.name?.toLowerCase();
@@ -125,12 +131,25 @@ const Order = () => {
         setEngineerId(userId);
       } else if (roleName === "pickuppartner") {
         setPickupPartnerId(userId);
-      }
+      } else {
+      toast.warning(`Invalid role: ${roleName}. Please try again.`);
+      setFilterEmail("");
+      setLoading(false);
+      setSearchModel(true); 
+      return;
+    }
 
-      setSearchModel(false)
-      setShowConfirmModal(true);
+    setShowConfirmModal(true);
+    setSearchModel(false);
       setFilterEmail("");
 
+     } else if(filterOrderId && !filterEmail) {
+getAllUnitOrderCommonFunction()
+      setSearchModel(false);
+      setFilterOrderId("");
+     } else {
+      toast.warning("Please fill only one field (Email OR Order Id)");
+    }
     } catch (error: any) {
       console.error("Error fetching user by email:", error);
     }
@@ -208,7 +227,7 @@ const Order = () => {
 
           {/* Left Section */}
        <div className='flex items-center justify-start gap-x-5'>
-          <button type='button' className={"p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-all"} onClick={() => setSearchModel(true)}>
+          <button title='Email' type='button' className={"p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-all"} onClick={() => setSearchModel(true)}>
             {SearchIcon}
           </button>
            {(searchModel || managerId || engineerId || pickupPartnerId) && (
@@ -381,14 +400,29 @@ const Order = () => {
                 &times;
               </button>
 
+{/* By Email */}
               <div className="mb-6">
                 <label className="block text-lg font-medium mb-2">Enter Email</label>
                 <input
                   type="email"
                   value={filterEmail}
                   onChange={(e) => setFilterEmail(e.target.value)}
-                  className={inputClass}
+                  className={`${inputClass} ${!!filterOrderId ? 'cursor-not-allowed opacity-50' : ''}`}
                   placeholder="Enter Email"
+                  disabled={!!filterOrderId}
+                />
+              </div>
+
+{/* By Order Id */}
+               <div className="mb-6">
+                <label className="block text-lg font-medium mb-2">Enter Order Id</label>
+                <input
+                  type="text"
+                  value={filterOrderId}
+                  onChange={(e) => setFilterOrderId(e.target.value)}
+                  className={`${inputClass} ${!!filterEmail ? 'cursor-not-allowed opacity-50' : ''}`}
+                  placeholder="Enter Order Id"
+                  disabled={!!filterEmail}
                 />
               </div>
 
@@ -403,7 +437,13 @@ const Order = () => {
                   disabled={loading}
                   className={`${SubmitButtonClass} ${loading ? 'cursor-not-allowed opacity-50' : ''}`}
                 >
-                  {loading ? "Searching..." : "Search Email"}
+                   {loading
+            ? "Searching..."
+            : filterEmail
+            ? "Search Email"
+            : filterOrderId
+            ? "Search Order Id"
+            : "Search"}
                 </button>
               </div>
 
