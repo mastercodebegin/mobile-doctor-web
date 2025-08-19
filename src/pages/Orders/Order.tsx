@@ -166,34 +166,6 @@ const isUpdating = isEditMode && Edit?.order?.orderId;
       setFilterEmail("");
 
      }
-// else if (filterOrderId && !filterEmail) {
-//   try {
-//    await getAllUnitOrderCommonFunction(); // Wait for API to fetch data
-    
-//     // Check if Orders is empty after API call
-// setTimeout(() => {
-//       if (!Orders.content || Orders.content.length < 0) {
-//       toast.error("Invalid Order ID! Please enter a valid Order ID.");
-//       setFilterOrderId(""); // Clear input field
-//       setLoading(false);
-//       setSearchModel(true); // Keep modal open
-//       return; // Exit early
-//     }
-// }, 1000);
-
-
-//   // If data is found, proceed normally
-//     setSearchModel(false);
-//     setFilterOrderId("");
-//     setLoading(false);  
-//   } catch (error) {
-//     toast.error("Failed to fetch order. Please try again.");
-//     setLoading(false);
-//     setSearchModel(true); // Keep modal open on error
-//   }
-// }
-
-
 else if (filterOrderId && !filterEmail) {
   try {
      await getAllUnitOrderCommonFunction(); // API call ka response
@@ -216,8 +188,6 @@ else if (filterOrderId && !filterEmail) {
     setSearchModel(true); // error hone par modal open
   }
 }
-
-
  else if(isUpdating || isEditMode){
       if(!unitRepairStatus || !description || !price){
   toast.warn("Fill All Details!!")
