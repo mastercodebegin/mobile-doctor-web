@@ -25,6 +25,7 @@ const UrlConstants = {
   UPDATE_REPAIR_COST: 'RepairCost/update',
   UPDATE_INVENTORY: 'inventory/updateInventory',
   UPDATE_SUPPORT_TICKET: 'supportTicket/update',
+  UPDATE_ORDER: 'unitRepair/updateUnitRepairOrderPriceOrDescriptionOrStatusByManager',
 
   GET_ALL_PRODUCT_PART_LABEL: 'ProductPart/getAllProductPart',
   GET_PRODUCT_PART_LABEL_BY_SUB_CATEGORY_ID: 'ProductPart/getPartItemBySubCategoryId',

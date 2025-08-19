@@ -7,12 +7,23 @@ import { AppDispatch, RootState } from '../../redux/store';
 import { toast } from 'react-toastify';
 import { EditClass, EditIcon, getStatusBadgeClass, inputClass, pageSize, SearchIcon, ShowModalMainClass, SubmitButtonClass, TableDataClass, TableHadeClass } from '../../helper/ApplicationConstants';
 import Pagination from '../../helper/Pagination';
-import { GetAllRepairUnitOrderByUserId } from './OrderSlice';
+import { GetAllRepairUnitOrderByUserId, update, UpdateOrder } from './OrderSlice';
 import DatePicker from '../../components/DatePicker';
 import { UrlConstants } from '../../util/practice/UrlConstants';
 import { getRequestMethodWithParam } from '../../util/CommonService';
 import ConfirmationModal from '../../components/ConfirmationModal';
 
+interface FilterObject {
+  modalNumberId: number;
+  userId: number;
+  managerId: number;
+  pickupPartnerId: number;
+  engineerId: number;
+  unitRepairStatus: string;
+  fromDate: string;
+  toDate: string;
+  orderId: string;
+}
 
 
 const Order = () => {
@@ -20,14 +31,21 @@ const Order = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [loading, setLoading] = useState(false)
   const [searchModel, setSearchModel] = useState(false);
-  const { Orders, isLoading } = useSelector((state: RootState) => state.OrderSlice);
+  const { Orders, isLoading, Edit } = useSelector((state: RootState) => state.OrderSlice);
+  const [showFilters, setShowFilters] = useState(true); 
   const [filterEmail, setFilterEmail] = useState<any>('')
   const [filterOrderId, setFilterOrderId] = useState('')
   const [managerId, setManagerId] = useState<number | null>(null);
   const [engineerId, setEngineerId] = useState<number | null>(null);
   const [pickupPartnerId, setPickupPartnerId] = useState<number | null>(null);
+
+  const [unitRepairStatusEdit, setUnitRepairStatusEdit] = useState("PENDING");
+const [description, setDescription] = useState("");
+const [price, setPrice] = useState("");
+const [orderCompletedOn, setOrderCompletedOn] = useState("");
 
   const dispatch = useDispatch<AppDispatch>();
   const [unitRepairStatus, setUnitRepairStatus] = useState<string>('');
@@ -64,7 +82,7 @@ const Order = () => {
       pageNumber: 0,
     };
 
-    const filterObj = {};
+    const filterObj: FilterObject = {};
 
     // Add status filter if selected
     if (unitRepairStatus) {
@@ -114,8 +132,11 @@ const Order = () => {
 
   const handleSearchEmail = async (e: React.FormEvent) => {
     e.preventDefault()
+
+const isUpdating = isEditMode && Edit?.order?.orderId;
+
     try {
-      setLoading(true)
+      setLoading(true) 
      if(filterEmail && !filterOrderId) {
        const res = await getRequestMethodWithParam({ email: filterEmail }, UrlConstants.GET_USRE_BY_EMAIL);
       console.log(res)
@@ -141,34 +162,128 @@ const Order = () => {
 
     setShowConfirmModal(true);
     setSearchModel(false);
+    setShowFilters(false);
       setFilterEmail("");
 
-     } else if(filterOrderId && !filterEmail) {
-getAllUnitOrderCommonFunction()
-      setSearchModel(false);
-      setFilterOrderId("");
-     } else {
+     }
+// else if (filterOrderId && !filterEmail) {
+//   try {
+//    await getAllUnitOrderCommonFunction(); // Wait for API to fetch data
+    
+//     // Check if Orders is empty after API call
+// setTimeout(() => {
+//       if (!Orders.content || Orders.content.length < 0) {
+//       toast.error("Invalid Order ID! Please enter a valid Order ID.");
+//       setFilterOrderId(""); // Clear input field
+//       setLoading(false);
+//       setSearchModel(true); // Keep modal open
+//       return; // Exit early
+//     }
+// }, 1000);
+
+
+//   // If data is found, proceed normally
+//     setSearchModel(false);
+//     setFilterOrderId("");
+//     setLoading(false);  
+//   } catch (error) {
+//     toast.error("Failed to fetch order. Please try again.");
+//     setLoading(false);
+//     setSearchModel(true); // Keep modal open on error
+//   }
+// }
+
+
+else if (filterOrderId && !filterEmail) {
+  try {
+     await getAllUnitOrderCommonFunction(); // API call ka response
+
+    if (Orders.length > 0) {
+      // ✅ Valid case
+      setSearchModel(false);  // modal band
+      setFilterOrderId("");   // input clear
+      setLoading(false);      // loader off
+    } else {
+      // ❌ Invalid case
+      toast.error("Invalid Order ID! Please enter a valid Order ID.");
+      setFilterOrderId("");   // input clear
+      setLoading(false);
+      setSearchModel(true);   // modal open
+    }
+  } catch (error) {
+    toast.error("Failed to fetch order. Please try again.");
+    setLoading(false);
+    setSearchModel(true); // error hone par modal open
+  }
+}
+
+
+ else if(isUpdating || isEditMode){
+      if(!unitRepairStatus || !description || !price){
+  toast.warn("Fill All Details!!")
+};
+
+  setShowFilters(false)
+  console.log("✅ UPDATE FLOW");
+
+  try {
+    // FIXED: Create updated order object with current form values
+    const updateOrder = {
+      orderId: Edit.order.orderId,
+      unitRepairStatus: unitRepairStatusEdit,
+      price: price,
+      defectDescriptionByEngineer: description, // FIXED: Use current description input value
+      orderCompletedOn: orderCompletedOn || Edit.order.orderCompletedOn
+    }
+
+    // FIXED: Update Redux state with current form values before API call
+    dispatch(update(updateOrder))
+
+    const updateResult = await dispatch(UpdateOrder(updateOrder?.orderId)).unwrap();
+    console.log("Update successful:", updateResult);
+    await getAllUnitOrderCommonFunction();
+    toast.success(updateResult.message || "Repair Cost Updated Successfully!");
+    handleCloseModal();
+
+  } catch (error: any) {
+    console.error("Edit error:", error);
+    toast.error("Order Update Failed: " + error.message || error);
+  }
+} else {
       toast.warning("Please fill only one field (Email OR Order Id)");
+      setLoading(false)
     }
     } catch (error: any) {
       console.error("Error fetching user by email:", error);
+      toast.error(error.message || "An error occurred");
+    setLoading(false);
+    setSearchModel(true); // Keep modal open on error
     }
   }
+  
 
   const handleConfirmSave = () => {
     if (managerId || pickupPartnerId || engineerId) {
       getAllUnitOrderCommonFunction()
     }
+    setShowFilters(false)
   }
 
   const handleCloseModal = () => {
-    setSearchModel(false)
+    setShowConfirmModal(false);
+    setIsEditMode(false);
+    setLoading(false);
+    setSearchModel(false);
+    setShowFilters(true);
     setFilterEmail("");
+    setFilterOrderId("");
     setManagerId(null);
     setEngineerId(null);
     setPickupPartnerId(null);
-    setShowConfirmModal(false);
-    setLoading(false);
+    setUnitRepairStatusEdit("");
+    setDescription("");
+    setPrice("");
+    setOrderCompletedOn("");
     setUnitRepairStatus('');
   }
 
@@ -183,14 +298,38 @@ getAllUnitOrderCommonFunction()
     setPickupPartnerId(null);
     setSearchModel(false);
     setFilterEmail("");
+    setFilterOrderId("");
     setCurrentPage(1);
 
     getAllUnitOrderCommonFunction();
   };
 
-  const handleEditUser = (user: any) => {
-    console.log("Edit User with User :--", user)
+const handleEditUser = (user) => {
+  console.log("Edit User with User :--", user);
+
+  dispatch(update(user));
+
+  setIsEditMode(true);
+  setShowFilters(false);
+  setSearchModel(true);
+
+  // Populate input fields with user data
+  setUnitRepairStatusEdit(user?.order?.unitRepairStatus || "");
+  setDescription(user?.order?.defectDescriptionByEngineer || "");
+  setPrice(user?.order?.price || "");
+  
+  // FIXED: Use 'completedOn' from API response, not 'orderCompletedOn'
+  const orderCompletedOn = user?.order?.completedOn ? new Date(user.order.completedOn).toISOString().split('T')[0] : "";
+  setOrderCompletedOn(orderCompletedOn);
+};
+
+useEffect(() => {
+  if (Edit.isEdit) {
+    setDescription(Edit.order.defectDescriptionByEngineer);
+    setPrice(Edit.order.price);
+    setUnitRepairStatusEdit(Edit.order.unitRepairStatus);
   }
+}, [Edit]);
 
   useEffect(() => {
     setIsLoaded(true);
@@ -227,17 +366,23 @@ getAllUnitOrderCommonFunction()
 
           {/* Left Section */}
        <div className='flex items-center justify-start gap-x-5'>
-          <button title='Email' type='button' className={"p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-all"} onClick={() => setSearchModel(true)}>
+          <button title='Email' type='button' className={"p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-all"} onClick={() => {
+            setSearchModel(true)
+            }}>
             {SearchIcon}
           </button>
-           {(searchModel || managerId || engineerId || pickupPartnerId) && (
-                <button
-                  onClick={handleClearFilter}
-                  className="px-3 py-1.5 text-sm font-medium text-red-500 border border-red-500 hover:bg-red-600 hover:text-white rounded-md transition-all"
-                >
-                  Clear Filter
-                </button>
-              )}
+{(showFilters) && (
+   <button
+    onClick={handleClearFilter}
+    className={`px-3 py-1.5 text-sm font-medium border rounded-md transition-all ${
+      (showFilters)
+        ? "text-red-500 border-red-500 hover:bg-red-600 hover:text-white cursor-pointer"
+        : "text-gray-400 border-gray-300 cursor-not-allowed opacity-50"
+    }`}
+  >
+    Clear Filter
+  </button>
+ )} 
        </div>
 
 
@@ -400,8 +545,10 @@ getAllUnitOrderCommonFunction()
                 &times;
               </button>
 
-{/* By Email */}
-              <div className="mb-6">
+             {showFilters && (
+               <>
+               {/* By Email */}
+               <div className="mb-6">
                 <label className="block text-lg font-medium mb-2">Enter Email</label>
                 <input
                   type="email"
@@ -414,7 +561,7 @@ getAllUnitOrderCommonFunction()
               </div>
 
 {/* By Order Id */}
-               <div className="mb-6">
+                <div className="mb-6">
                 <label className="block text-lg font-medium mb-2">Enter Order Id</label>
                 <input
                   type="text"
@@ -425,8 +572,63 @@ getAllUnitOrderCommonFunction()
                   disabled={!!filterEmail}
                 />
               </div>
+              </>
+             )}
 
-              {/*Action  Buttons */}
+ {/* ====== Create Fields ====== */}
+      {isEditMode && (
+        <>
+          <div className="mb-6">
+          <label className="block text-lg font-medium mb-2">Unit Repair Status</label>
+         <select
+  value={unitRepairStatusEdit}
+  onChange={(e) => setUnitRepairStatusEdit(e.target.value)}
+  className={inputClass}
+>
+  <option value="">Select Status</option>
+  {statusOptions.map((status) => (
+    <option key={status} value={status}>
+      {status.replace(/_/g, ' ')}
+    </option>
+  ))}
+</select>
+        </div>
+
+           <div className="mb-6">
+          <label className="block text-lg font-medium mb-2">Order Completed On</label>
+          <input
+            type="date"
+            value={orderCompletedOn}
+            onChange={(e) => setOrderCompletedOn(e.target.value)}
+            className={inputClass}
+          />
+        </div>    
+
+        <div className="mb-6">
+          <label className="block text-lg font-medium mb-2">Description</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className={inputClass}
+            placeholder="Enter Description"
+          />
+        </div>
+
+        <div className="mb-6">
+          <label className="block text-lg font-medium mb-2">Price</label>
+          <input
+            type="text"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            className={inputClass}
+            placeholder="Enter Price"
+          />
+        </div>
+        </>
+      )}
+
+
+              {/* ===== Action Buttons ===== */}
               <div className="flex justify-end space-x-4 mt-4">
                 <button type="button" onClick={handleCloseModal} className="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400">
                   Close
@@ -437,13 +639,15 @@ getAllUnitOrderCommonFunction()
                   disabled={loading}
                   className={`${SubmitButtonClass} ${loading ? 'cursor-not-allowed opacity-50' : ''}`}
                 >
-                   {loading
-            ? "Searching..."
-            : filterEmail
-            ? "Search Email"
-            : filterOrderId
-            ? "Search Order Id"
-            : "Search"}
+                    {loading
+    ? "Processing..."
+    : isEditMode 
+    ? "Update Order"  
+    : filterEmail
+    ? "Search Email"
+    : filterOrderId
+    ? "Search Order Id"
+    : "Search"}
                 </button>
               </div>
 
