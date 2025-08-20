@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ConfirmationModal from "../../components/ConfirmationModal";
-import { DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, SelectClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
+import { ClearFilter, DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, SelectClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
 import Pagination from "../../helper/Pagination";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
@@ -533,7 +533,7 @@ const handleEditUser = async (user: any) => {
     {(selectedCategory || selectedSubCategory || selectedProductPart || selectedModalNumber || isFiltered) && (
       <button
         onClick={handleClearFilter}
-        className="text-red-400 hover:text-red-600 text-sm bg-red-50 px-3 py-2 rounded ml-2"
+        className={ClearFilter}
       >
         Clear Filter
       </button>

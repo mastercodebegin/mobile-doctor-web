@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import useAuthStatus from '../../hooks/useAuthStatus';
 import { GetAllOrderCount, GetAllOrdersInGraph } from './DashboardSlice';
 import moment from 'moment';
+import { Users, Package, Clock, ClipboardCheck, XCircle, CheckCircle2, Truck, UserCheck, Settings, Send, PackageCheck, Check } from "lucide-react";
 
 const Dashboard = () => { 
 
@@ -17,10 +18,22 @@ const Dashboard = () => {
   const dispatch = useDispatch<AppDispatch>()
 
     // State for animating numbers
-  const [customerCount, setCustomerCount] = useState(0);
-  const [orderCount, setOrderCount] = useState(0);
-  const [deliveryCount, setDeliveryCount] = useState(0);
   const [userCount, setUserCount] = useState(0);
+
+  // State for ResponseDetails
+const [total, setTotal] = useState<number>(0);
+const [readyToPick, setReadyToPick] = useState<number>(0);
+const [pending, setPending] = useState<number>(0);
+const [cancelled, setCancelled] = useState<number>(0);
+const [completed, setCompleted] = useState<number>(0);
+const [pickedUpByPartner, setPickedUpByPartner] = useState<number>(0);
+const [pickedUpByUser, setPickedUpByUser] = useState<number>(0);
+const [inService, setInService] = useState<number>(0);
+const [readyToDispatch, setReadyToDispatch] = useState<number>(0);
+const [dispatched, setDispatched] = useState<number>(0);
+const [delivered, setDelivered] = useState<number>(0);
+
+
   
   // dropdown state
   const [selectedPeriod, setSelectedPeriod] = useState("WEEKLY");
@@ -52,7 +65,7 @@ const Dashboard = () => {
 };
 
 
-  // Animate counting up effect with API data
+// Animate counting up effect with API data
 useEffect(() => {
   if (!dashboardData?.responseDetails) return;
 
@@ -60,33 +73,56 @@ useEffect(() => {
   const frameDuration = 16;
   const frames = animationDuration / frameDuration;
 
-  const { total, READY_TO_PICK, PENDING } = dashboardData.responseDetails;
+  const {
+    total,
+    READY_TO_PICK,
+    PENDING,
+    CANCELLED,
+    COMPLETED,
+    PICKED_UP_BY_PARTNER,
+    PICKED_UP_BY_USER,
+    IN_SERVICE,
+    READY_TO_DISPATCH,
+    DISPATCHED,
+    DELIVERED,
+  } = dashboardData.responseDetails;
 
-  const customerIncrement = Math.ceil(total / frames);
-  const orderIncrement = Math.ceil(PENDING / frames);
-  const deliveryIncrement = Math.ceil(READY_TO_PICK / frames);
-  const userIncrement = Math.ceil(1900 / frames); // <-- ye abhi static rakha hai
+  // Increments per frame
+  const totalInc = Math.ceil(total / frames) || 0;
+  const readyToPickInc = Math.ceil(READY_TO_PICK / frames) || 0;
+  const pendingInc = Math.ceil(PENDING / frames) || 0;
+  const cancelledInc = Math.ceil(CANCELLED / frames) || 0;
+  const completedInc = Math.ceil(COMPLETED / frames) || 0;
+  const pickedUpByPartnerInc = Math.ceil(PICKED_UP_BY_PARTNER / frames) || 0;
+  const pickedUpByUserInc = Math.ceil(PICKED_UP_BY_USER / frames) || 0;
+  const inServiceInc = Math.ceil(IN_SERVICE / frames) || 0;
+  const readyToDispatchInc = Math.ceil(READY_TO_DISPATCH / frames) || 0;
+  const dispatchedInc = Math.ceil(DISPATCHED / frames) || 0;
+  const deliveredInc = Math.ceil(DELIVERED / frames) || 0;
+
+  // // Old ones
+  const userInc = Math.ceil(1900 / frames) || 0; // static for now
 
   let currentFrame = 0;
 
   const timer = setInterval(() => {
     currentFrame++;
 
-    setCustomerCount(prev =>
-      prev + customerIncrement > total ? total : prev + customerIncrement
-    );
+    // old states
+    setUserCount(prev => (prev + userInc > 1900 ? 1900 : prev + userInc));
 
-    setOrderCount(prev =>
-      prev + orderIncrement > PENDING ? PENDING : prev + orderIncrement
-    );
-
-    setDeliveryCount(prev =>
-      prev + deliveryIncrement > READY_TO_PICK ? READY_TO_PICK : prev + deliveryIncrement
-    );
-
-    setUserCount(prev =>
-      prev + userIncrement > 1900 ? 1900 : prev + userIncrement
-    );
+    // new states
+    setTotal(prev => (prev + totalInc > total ? total : prev + totalInc));
+    setReadyToPick(prev => (prev + readyToPickInc > READY_TO_PICK ? READY_TO_PICK : prev + readyToPickInc));
+    setPending(prev => (prev + pendingInc > PENDING ? PENDING : prev + pendingInc));
+    setCancelled(prev => (prev + cancelledInc > CANCELLED ? CANCELLED : prev + cancelledInc));
+    setCompleted(prev => (prev + completedInc > COMPLETED ? COMPLETED : prev + completedInc));
+    setPickedUpByPartner(prev => (prev + pickedUpByPartnerInc > PICKED_UP_BY_PARTNER ? PICKED_UP_BY_PARTNER : prev + pickedUpByPartnerInc));
+    setPickedUpByUser(prev => (prev + pickedUpByUserInc > PICKED_UP_BY_USER ? PICKED_UP_BY_USER : prev + pickedUpByUserInc));
+    setInService(prev => (prev + inServiceInc > IN_SERVICE ? IN_SERVICE : prev + inServiceInc));
+    setReadyToDispatch(prev => (prev + readyToDispatchInc > READY_TO_DISPATCH ? READY_TO_DISPATCH : prev + readyToDispatchInc));
+    setDispatched(prev => (prev + dispatchedInc > DISPATCHED ? DISPATCHED : prev + dispatchedInc));
+    setDelivered(prev => (prev + deliveredInc > DELIVERED ? DELIVERED : prev + deliveredInc));
 
     if (currentFrame >= frames) {
       clearInterval(timer);
@@ -95,6 +131,7 @@ useEffect(() => {
 
   return () => clearInterval(timer);
 }, [dashboardData]);
+
 
 
   useEffect(() =>{
@@ -121,74 +158,138 @@ if(isLoading){
   return (
     <>
     
-  <div className="h-[calc(95vh-80px)] overflow-y-auto overflow-x-hidden">
+  <div className=" md:overflow-y-auto overflow-x-hidden">
        
 
     <div className="bg-gray-100 p-6 h-auto md:min-h-[83vh] overflow-scroll overflow-x-hidden overflow-y-hidden">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {/* Users Card */}
-        <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
-          <div className="flex items-center mb-2">
-            <span className="text-green-500 font-medium">Users</span>
-          </div>
-          <h2 className="text-3xl font-bold text-gray-800">+{userCount.toLocaleString()}</h2>
-          <p className="text-gray-400 text-sm mt-1">Steady growth</p>
-        </div>
-       
-        {/* Customers Card */}
-        <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
-          <div className="flex items-center mb-2">
-            <div className="text-purple-700 mr-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-              </svg>
-            </div>
-            <span className="text-purple-700 font-medium">In Service</span>
-          </div>
-          <h2 className="text-3xl font-bold text-gray-800">{customerCount.toLocaleString()}</h2>
-          <p className="text-gray-400 text-sm mt-1">Increase by 20%</p>
-        </div>
 
-        {/* Orders Card */}
-        <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
-          <div className="flex items-center mb-2">
-            <div className="text-orange-500 mr-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                <path d="M2 12h20"></path>
-              </svg>
-            </div>
-            <span className="text-orange-500 font-medium">Pending</span>
-          </div>
-          <h2 className="text-3xl font-bold text-gray-800">{orderCount.toLocaleString()}</h2>
-          <p className="text-gray-400 text-sm mt-1">Increase by 60%</p>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      
+      {/* Users Card */}
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+        <div className="flex items-center mb-2">
+          <Users size={20} className="text-green-500 mr-2" />
+          <span className="text-green-500 font-medium">Users</span>
         </div>
-
-        {/* Delivery Card */}
-        <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
-          <div className="flex items-center mb-2">
-            <div className="text-purple-600 mr-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="1" y="3" width="15" height="13"></rect>
-                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
-                <circle cx="5.5" cy="18.5" r="2.5"></circle>
-                <circle cx="18.5" cy="18.5" r="2.5"></circle>
-              </svg>
-            </div>
-            <span className="text-purple-600 font-medium">Ready To Dispatch</span>
-          </div>
-          <h2 className="text-3xl font-bold text-gray-800">{deliveryCount.toLocaleString()}</h2>
-          <p className="text-gray-400 text-sm mt-1">Decrease by 2%</p>
-        </div>
-
+        <h2 className="text-3xl font-bold text-gray-800">+{userCount.toLocaleString()}</h2>
+        <p className="text-gray-400 text-sm mt-1">Steady growth</p>
       </div>
 
+      {/* Total Orders */}
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+        <div className="flex items-center mb-2">
+          <Package size={20} className="text-blue-600 mr-2" />
+          <span className="text-blue-600 font-medium">Total Orders</span>
+        </div>
+        <h2 className="text-3xl font-bold text-gray-800">{total.toLocaleString()}</h2>
+        <p className="text-gray-400 text-sm mt-1">All time orders</p>
+      </div>
+
+      {/* Pending Orders */}
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+        <div className="flex items-center mb-2">
+          <Clock size={20} className="text-orange-500 mr-2" />
+          <span className="text-orange-500 font-medium">Pending</span>
+        </div>
+        <h2 className="text-3xl font-bold text-gray-800">{pending.toLocaleString()}</h2>
+        <p className="text-gray-400 text-sm mt-1">Awaiting action</p>
+      </div>
+
+      {/* Ready To Pick */}
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+        <div className="flex items-center mb-2">
+          <ClipboardCheck size={20} className="text-purple-600 mr-2" />
+          <span className="text-purple-600 font-medium">Ready To Pick</span>
+        </div>
+        <h2 className="text-3xl font-bold text-gray-800">{readyToPick.toLocaleString()}</h2>
+        <p className="text-gray-400 text-sm mt-1">Prepared for pickup</p>
+      </div>
+
+      {/* Cancelled */}
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+        <div className="flex items-center mb-2">
+          <XCircle size={20} className="text-red-500 mr-2" />
+          <span className="text-red-500 font-medium">Cancelled</span>
+        </div>
+        <h2 className="text-3xl font-bold text-gray-800">{cancelled.toLocaleString()}</h2>
+        <p className="text-gray-400 text-sm mt-1">Customer cancellations</p>
+      </div>
+
+      {/* Completed */}
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+        <div className="flex items-center mb-2">
+          <CheckCircle2 size={20} className="text-green-600 mr-2" />
+          <span className="text-green-600 font-medium">Completed</span>
+        </div>
+        <h2 className="text-3xl font-bold text-gray-800">{completed.toLocaleString()}</h2>
+        <p className="text-gray-400 text-sm mt-1">Successfully finished</p>
+      </div>
+
+      {/* Picked Up By Partner */}
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+        <div className="flex items-center mb-2">
+          <Truck size={20} className="text-indigo-500 mr-2" />
+          <span className="text-indigo-500 font-medium">Picked By Partner</span>
+        </div>
+        <h2 className="text-3xl font-bold text-gray-800">{pickedUpByPartner.toLocaleString()}</h2>
+        <p className="text-gray-400 text-sm mt-1">Out for service</p>
+      </div>
+
+      {/* Picked Up By User */}
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+        <div className="flex items-center mb-2">
+          <UserCheck size={20} className="text-teal-500 mr-2" />
+          <span className="text-teal-500 font-medium">Picked By User</span>
+        </div>
+        <h2 className="text-3xl font-bold text-gray-800">{pickedUpByUser.toLocaleString()}</h2>
+        <p className="text-gray-400 text-sm mt-1">User pickup</p>
+      </div>
+
+      {/* In Service */}
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+        <div className="flex items-center mb-2">
+          <Settings size={20} className="text-purple-700 mr-2" />
+          <span className="text-purple-700 font-medium">In Service</span>
+        </div>
+        <h2 className="text-3xl font-bold text-gray-800">{inService.toLocaleString()}</h2>
+        <p className="text-gray-400 text-sm mt-1">Currently processing</p>
+      </div>
+
+      {/* Ready To Dispatch */}
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+        <div className="flex items-center mb-2">
+          <Send size={20} className="text-yellow-600 mr-2" />
+          <span className="text-yellow-600 font-medium">Ready To Dispatch</span>
+        </div>
+        <h2 className="text-3xl font-bold text-gray-800">{readyToDispatch.toLocaleString()}</h2>
+        <p className="text-gray-400 text-sm mt-1">Waiting for dispatch</p>
+      </div>
+
+      {/* Dispatched */}
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+        <div className="flex items-center mb-2">
+          <PackageCheck size={20} className="text-blue-500 mr-2" />
+          <span className="text-blue-500 font-medium">Dispatched</span>
+        </div>
+        <h2 className="text-3xl font-bold text-gray-800">{dispatched.toLocaleString()}</h2>
+        <p className="text-gray-400 text-sm mt-1">On the way</p>
+      </div>
+
+      {/* Delivered */}
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+        <div className="flex items-center mb-2">
+          <Check size={20} className="text-green-700 mr-2" />
+          <span className="text-green-700 font-medium">Delivered</span>
+        </div>
+        <h2 className="text-3xl font-bold text-gray-800">{delivered.toLocaleString()}</h2>
+        <p className="text-gray-400 text-sm mt-1">Successfully delivered</p>
+      </div>
+    </div>
+
+
+
 {/* Bottom Row */}
-<div className="grid grid-cols-1 md:grid-cols-2 gap-20 md:gap-4">
+<div className="grid grid-cols-1 md:grid-cols-2 gap-20 md:gap-4 mb-6">
               <div className="bg-white p-6 rounded-md shadow-sm h-72">
           <h3 className="text-gray-700 text-lg font-medium mb-6">Product categories</h3>
           <div className="flex justify-center">
@@ -253,7 +354,7 @@ if(isLoading){
               strokeWidth={3}
               dot={{ r: 5, stroke: "#3B82F6", strokeWidth: 2, fill: "#fff" }}
               activeDot={{ r: 8, fill: "#3B82F6" }}
-              isAnimationActive={true}   // ✅ Sirf ek baar animate hoga
+              isAnimationActive={true}   
             />
           </LineChart>
         </ResponsiveContainer>

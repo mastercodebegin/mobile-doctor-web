@@ -6,7 +6,7 @@ import { CreateModalNumber, FetchAllModalNumber, FetchBrandIdModalNumber, Remove
 import ConfirmationModal from "../../components/ConfirmationModal";
 import { GetAllSubCategory } from "../AddSubCategory/SubCategorySlice";
 import { GetAllBrand } from "../AddBrand/BrandSlice";
-import { DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, SelectClass, ShowModalMainClass, ShowModelCloseButtonClass, ShowVarientButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass, ThemeTextColor } from "../../helper/ApplicationConstants";
+import { ClearFilter, DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, SelectClass, ShowModalMainClass, ShowModelCloseButtonClass, ShowVarientButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass, ThemeTextColor } from "../../helper/ApplicationConstants";
 import Pagination from "../../helper/Pagination";
 import { toast } from "react-toastify";
 import { GetAllCategory } from "../AddCategory/AddCategorySlice";
@@ -520,7 +520,7 @@ const MobileNumberPage = () => {
               {selectedBrand && (
                 <button
                   onClick={handleClear}
-                  className="text-red-400 hover:text-red-600 text-sm bg-red-50 px-2 py-1 rounded"
+                  className={ClearFilter}
                 >
                   Clear Filter
                 </button>

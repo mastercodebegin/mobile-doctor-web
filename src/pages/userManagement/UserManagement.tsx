@@ -574,8 +574,18 @@ const UserManagement = () => {
                 <>
                   {/* Title */}
                   <h2 className="text-3xl font-semibold text-center mb-6">
-                    {isEditMode ? "Update Variant" : "Add Variant"}
+                    {isEditMode ? "Update User" : "Create User"}
                   </h2>
+
+
+                    <select name="role" value={formData.role || ''} onChange={handleInputChange} className="input mb-4">
+                      <option value="">Select Role</option>
+                      {roleData?.map((role: any) => (
+                        <option key={role.id} value={role.id}>
+                          {role.name}
+                        </option>
+                      ))}
+                    </select>
 
                   {/* Basic Info */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -592,8 +602,17 @@ const UserManagement = () => {
                     />
                     <input name="homeAddress" value={formData.homeAddress} onChange={handleInputChange} placeholder="Home Address" className="input" />
                     <input name="aadharNumber" value={formData.aadharNumber} onChange={handleInputChange} placeholder="Aadhar Number" className="input" />
-                    <input name="businessName" value={formData.businessName} onChange={handleInputChange} placeholder="Business Name" className="input" />
-                    <input name="businessAddress" value={formData.businessAddress} onChange={handleInputChange} placeholder="Business Address" className="input" />
+  {(() => {
+    const selectedRole = roleData?.find((role: any) => role.id == formData.role);
+    const isManagerRole = selectedRole?.name?.toLowerCase() === 'manager';
+    
+    return isManagerRole && (
+      <>
+        <input name="businessName" value={formData.businessName} onChange={handleInputChange} placeholder="Business Name" className="input" />
+        <input name="businessAddress" value={formData.businessAddress} onChange={handleInputChange} placeholder="Business Address" className="input" />
+      </>
+    );
+  })()}
                     <input name="pinCode" value={formData.pinCode} onChange={handleInputChange} placeholder="Pincode" className="input" />
                     <input name="gstNumber" value={formData.gstNumber} onChange={handleInputChange} placeholder="GST Number" className="input" />
                     <select name="state" value={formData.state} onChange={handleInputChange} className="input">
@@ -608,15 +627,7 @@ const UserManagement = () => {
                       <option value="Indore">Indore</option>
                       <option value="Dewas">Dewas</option>
                       <option value="Ujjain">Ujjain</option>
-                    </select>
-                    <select name="role" value={formData.role || ''} onChange={handleInputChange} className="input">
-                      <option value="">Select Role</option>
-                      {roleData?.map((role: any) => (
-                        <option key={role.id} value={role.id}>
-                          {role.name}
-                        </option>
-                      ))}
-                    </select>
+                    </select>                  
                   </div>
 
                   <>

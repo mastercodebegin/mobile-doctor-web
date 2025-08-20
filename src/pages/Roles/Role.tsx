@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import Loading from "../../components/Loading";
 import ConfirmationModal from "../../components/ConfirmationModal";
-import { EditClass, EditIcon, inputClass, SearchIcon, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
+import { ClearFilter, EditClass, EditIcon, inputClass, SearchIcon, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
 import Pagination from "../../helper/Pagination";
 import { toast } from "react-toastify";
 import { CreateRole, GetAllRoles, GetRoleById, restore, Update, UpdtaeRole } from './RoleSlice';
@@ -160,7 +160,7 @@ const Role = () => {
 
                         <button
                             onClick={handleClearFilter}
-                            className="px-3 py-1.5 text-sm font-medium text-red-500 border border-red-500 hover:bg-red-600 hover:text-white rounded-md transition-all"
+                            className={ClearFilter}
                         >
                             Clear Filter
                         </button>

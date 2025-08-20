@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
 import Pagination from '../../helper/Pagination';
-import { DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, InventoryView, pageSize, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass, ThemeBackgroundColor } from '../../helper/ApplicationConstants';
+import { ClearFilter, DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, InventoryView, pageSize, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass, ThemeBackgroundColor } from '../../helper/ApplicationConstants';
 import { toast } from 'react-toastify';
 import Loading from '../../components/Loading';
 import { GetAllCategory } from '../AddCategory/AddCategorySlice';
@@ -281,8 +281,8 @@ const ProductPart = () => {
   }
 
   const handleCloseModal = () => {
-    setShowModal(false);
     setIsEditMode(false);
+    setShowModal(false);
     setIsReFillMode(false);
     setIsOrderUseMode(false);
     setQuantity(0);
@@ -291,6 +291,7 @@ const ProductPart = () => {
     setSelectedProductPartLabel(null);
     setSelectedModel(null);
     setSelectedInventoryForReFill(null);
+    dispatch(Update(null))
   }
 
   const handleEditUser = (user: any) => {
@@ -453,17 +454,17 @@ const ProductPart = () => {
                           if (record.new) {
                             qtyChangeDisplay = `+${newQty}`;
                             qtyChangeColor = 'text-blue-600';
-                            statusBadge = { label: 'INITIAL', color: 'text-blue-500' };
+                            statusBadge = { label: 'Initial', color: 'text-blue-500' };
                             totalQtyDisplay = newQty;
                           } else if (record.refill) {
                             qtyChangeDisplay = `+${ReFillQty}`;
                             qtyChangeColor = 'text-green-600';
-                            statusBadge = { label: 'IN', color: 'text-green-500' };
+                            statusBadge = { label: 'In', color: 'text-green-500' };
                             totalQtyDisplay = NewReFillQty;
                           } else if (record.unitRepair) {
                             qtyChangeDisplay = `${prevQty} - 1`;
                             qtyChangeColor = 'text-red-600';
-                            statusBadge = { label: 'OUT', color: 'text-yellow-500' };
+                            statusBadge = { label: 'Out', color: 'text-yellow-500' };
                             totalQtyDisplay = newQty;
                           } else {
                             qtyChangeDisplay = '--';
@@ -484,9 +485,13 @@ const ProductPart = () => {
                                 </span>
                               </td>
                               <td className="px-4 py-2 align-middle">
-                                {record.user ? `${record.user.firstName} ${record.user.lastName}` : '--'}
-                              </td>
-                              <td className="px-4 py-2 align-middle">{record.notes || '--'}</td>
+  {(() => {
+    // First check record.user, then fallback to record.inventory.user
+    const user = record?.user || record?.inventory?.user;
+    return user ? `${user.firstName} ${user.lastName ?? ""}`.trim() : '--';
+  })()}
+</td>
+                              <td className="px-4 py-2 align-middle">{record.inventory.notes || '--'}</td>
                             </tr>
                           );
                         })}
@@ -715,7 +720,7 @@ const ProductPart = () => {
             {(filterCategory || filterSubCategory) && (
               <button
                 onClick={handleClearFilter}
-                className="text-red-400 hover:text-red-600 text-sm bg-red-50 px-2 py-1 rounded"
+                className={ClearFilter}
               >
                 Clear Filter
               </button>

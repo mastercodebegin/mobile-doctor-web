@@ -8,6 +8,14 @@ interface ResponseDetails {
   total: number;
   READY_TO_PICK: number;
   PENDING: number;
+  CANCELLED: number;
+  COMPLETED: number;
+  PICKED_UP_BY_PARTNER: number;
+  PICKED_UP_BY_USER: number;
+  IN_SERVICE: number;
+  READY_TO_DISPATCH: number;
+  DISPATCHED: number;
+  DELIVERED: number;
 }
 
 interface DashboardResponse {

@@ -5,7 +5,7 @@ import { GetAllSubCategory } from '../AddSubCategory/SubCategorySlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
 import { toast } from 'react-toastify';
-import { EditClass, EditIcon, getStatusBadgeClass, inputClass, pageSize, SearchIcon, ShowModalMainClass, SubmitButtonClass, TableDataClass, TableHadeClass } from '../../helper/ApplicationConstants';
+import { ClearFilter, EditClass, EditIcon, getStatusBadgeClass, inputClass, pageSize, SearchIcon, ShowModalMainClass, SubmitButtonClass, TableDataClass, TableHadeClass } from '../../helper/ApplicationConstants';
 import Pagination from '../../helper/Pagination';
 import { GetAllRepairUnitOrderByUserId, update, UpdateOrder } from './OrderSlice';
 import DatePicker from '../../components/DatePicker';
@@ -189,10 +189,6 @@ const Order = () => {
         }
       }
       else if (isUpdating || isEditMode) {
-        if (!unitRepairStatus || !description || !price) {
-          toast.warn("Fill All Details!!")
-        };
-
         setShowFilters(false)
         console.log("✅ UPDATE FLOW");
 
@@ -332,24 +328,15 @@ const Order = () => {
 
       <div className="md:overflow-y-hidden overflow-x-hidden" >
 
-        <div className="mt-10 flex items-center justify-between px-8">
+        <div className="mt-10 flex items-center justify-start px-8">
 
           {/* Left Section */}
-          <div className='flex items-center justify-start gap-x-5'>
+          <div className='flex items-center justify-start gap-x-50'>
             <button title='Email' type='button' className={"p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-all"} onClick={() => {
               setSearchModel(true)
             }}>
               {SearchIcon}
             </button>
-              <button
-                onClick={handleClearFilter}
-                className={`px-3 py-1.5 text-sm font-medium border rounded-md transition-all ${(showFilters)
-                    ? "text-red-500 border-red-500 hover:bg-red-600 hover:text-white cursor-pointer"
-                    : "text-gray-400 border-gray-300 cursor-not-allowed opacity-50"
-                  }`}
-              >
-                Clear Filter
-              </button>
           </div>
 
 
@@ -359,15 +346,6 @@ const Order = () => {
               value={filterDate}
               onChange={handleDateChange}
             />
-
-            {(filterDate?.startDate || filterDate?.endDate) && (
-              <button
-                onClick={handleClearFilter}
-                className="text-red-400 hover:text-red-600 text-sm bg-red-50 px-2 py-1 rounded"
-              >
-                Clear Date
-              </button>
-            )}
           </div>
 
           {/* Right Section */}
@@ -387,14 +365,12 @@ const Order = () => {
               ))}
             </select>
 
-            {(unitRepairStatus) && (
               <button
                 onClick={handleClearFilter}
-                className="text-red-400 hover:text-red-600 text-sm bg-red-50 px-2 py-1 rounded"
+                className={ClearFilter}
               >
                 Clear Filter
               </button>
-            )}
           </div>
         </div>
 
