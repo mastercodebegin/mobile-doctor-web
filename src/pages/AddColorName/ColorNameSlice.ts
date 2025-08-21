@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getRequestMethod, postRequestMethod, postRequestMethodWithBodyAndParam} from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
 
-const storedData = localStorage.getItem("colores");
+const storedData = localStorage.getItem("color-name");
 
 interface User {
     id : string;
@@ -20,7 +20,7 @@ interface AddColor {
 const initialState : AddColor = {
 isLoading : false,
 isSuccess : false,
-colorData : storedData ? JSON.parse(storedData) : [],
+colorData : [],
 Edit : {Color : { id : "", color : "", colorCode : ""}, isEdit : false},
 }
 
@@ -35,6 +35,9 @@ const ColorNameSlice = createSlice({
                 colorData : storedData ? JSON.parse(storedData) : [],
                 Edit : {Color : {}, isEdit : false}
             }
+        },
+          SetInitialData: (state, action) => {
+            state.colorData = action.payload;
         },
         Update : (state, action) =>{
             return{
@@ -75,6 +78,7 @@ const ColorNameSlice = createSlice({
             state.isLoading = false
             state.isSuccess = true
             state.colorData = [...state.colorData, action.payload]
+             localStorage.setItem("color-name", JSON.stringify(state.colorData));
         })
         .addCase(CreateColor.rejected, (state , action) =>{
             state.isLoading = false
@@ -104,7 +108,7 @@ const ColorNameSlice = createSlice({
 })
 
 export default ColorNameSlice.reducer
-export const {restore , Update, Remove} = ColorNameSlice.actions
+export const {restore , Update, Remove, SetInitialData} = ColorNameSlice.actions
 
 
 // Get All-Colors

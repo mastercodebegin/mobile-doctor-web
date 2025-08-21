@@ -148,7 +148,8 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
       });
       
       // Update your state with the files
-      setSelectedFiles(fileArray); // Make sure this state exists
+       setSelectedFiles([...selectedFiles, ...fileArray]);
+       e.target.value = null;
     } else {
       console.log("⚠️ No files selected!");
       setSelectedFiles([]);

@@ -5,7 +5,7 @@ import Loading from "../../components/Loading"
 import ConfirmationModal from "../../components/ConfirmationModal"
 import Pagination from "../../helper/Pagination"
 import { AppDispatch, RootState } from "../../redux/store"
-import { CreateColor, GetAllColors, Remove, restore, Update, UpdateColorName } from "./ColorNameSlice"
+import { CreateColor, GetAllColors, Remove, restore, SetInitialData, Update, UpdateColorName } from "./ColorNameSlice"
 import { toast } from "react-toastify"
 
 const ColorName = () => {
@@ -13,7 +13,7 @@ const ColorName = () => {
 const [showConfirmModal , setShowConfirmModal] = useState(false)
 
 const {colorData , isLoading , Edit} = useSelector((state : RootState) => state.ColorNameSlice)
-
+console.log(colorData)
 const dispatch = useDispatch<AppDispatch>()
 const [showModal , setShowModal] = useState(false)
 const [colorName, setColorName] = useState("")
@@ -120,9 +120,7 @@ const handleDeleteUser = async (id : string) =>{
   // Save to localStorage whenever data changes
   useEffect(() => {
     setIsLoaded(true);
-    if(colorData.length === 0) {
         dispatch(GetAllColors())
-    }
   }, [dispatch]);
 
   useEffect(() => {
@@ -138,12 +136,22 @@ const handleDeleteUser = async (id : string) =>{
     }
   }, [Edit]);
 
-  // Save to localStorage whenever colorData changes
+  // // Save to localStorage whenever colorData changes
+  // useEffect(() => {
+  //   if(colorData.length > 0) {
+  //       localStorage.setItem("color-name", JSON.stringify(colorData));
+  //   }
+  // }, [colorData]);
+
   useEffect(() => {
-    if(colorData.length > 0) {
-        localStorage.setItem("colores", JSON.stringify(colorData));
+    setIsLoaded(true);
+    const storedData = localStorage.getItem("color-name");
+    if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        dispatch(SetInitialData(parsedData));
     }
-  }, [colorData]);
+    dispatch(GetAllColors());
+}, [dispatch]);
 
   if (isLoading) {
     return <Loading />

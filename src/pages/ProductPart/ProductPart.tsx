@@ -789,7 +789,7 @@ const ProductPart = () => {
                           <td className={TableDataClass}>{user.id}</td>
                           <td className={TableDataClass}>
                             <div className='flex items-center space-x-2' >
-                              <img src={IphoneImage || 'https://tse4.mm.bing.net/th/id/OIP.FVpPrz3IlNVDLpKMLC3D2wHaHa?pid=Api&P=0&h=180'} className="w-15 h-15 object-contain border border-gray-300 rounded-md" alt="Iphone Image" />
+                              <img src={IphoneImage || 'https://tse4.mm.bing.net/th/id/OIP.FVpPrz3IlNVDLpKMLC3D2wHaHa?pid=Api&P=0&h=180'} className="w-20 h-20 object-contain rounded-md" alt="Iphone Image" />
                               <span>
                                 <h4 className='text-black' >{user.productPart.subCategory.name}</h4>
                                 <p>{user.productPart.subCategory.category.name}</p>

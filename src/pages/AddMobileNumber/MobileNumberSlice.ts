@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { getRequestMethod, postRequestMethod, putRequestMethodWithBodyAndParam } from "../../util/CommonService";
+import { getRequestMethod, getRequestMethodWithParam, postRequestMethod, putRequestMethodWithBodyAndParam } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
 
 const storedData = localStorage.getItem("MobileNumber")
@@ -133,7 +133,7 @@ const initialState: MobileNumber = {
   },
   AllModalNumberData: storedData ? JSON.parse(storedData) : [],
   BrandModalNumberData: storedData ? JSON.parse(storedData) : [],
-  MobileNumberData: []
+  MobileNumberData: storedData ? JSON.parse(storedData) : [],
 };
 
 const MobileNumberSlice = createSlice({
@@ -310,6 +310,23 @@ const MobileNumberSlice = createSlice({
         state.isSuccess = false
         console.log("Modal Number Update Failed:", action.payload)
       })
+
+      // fetch by sub-category
+      .addCase(FetchModalBySubCategory.pending, (state, action) =>{
+        state.isLoading = true
+        state.isSuccess = false
+        console.log("Fetching Data is Pending :---", action.payload)
+      })
+      .addCase(FetchModalBySubCategory.fulfilled, (state, action) =>{
+        state.isLoading = false
+        state.isSuccess = true
+        state.MobileNumberData = action.payload
+      })
+      .addCase(FetchModalBySubCategory.rejected, (state, action) =>{
+        state.isLoading = false
+        state.isSuccess = false
+        console.log("Product Model Number Data Fetch by Sub-Category id is Rejected :--", action.payload)
+      })
   }
 })
 
@@ -320,7 +337,6 @@ export const { Remove, Update, restore } = MobileNumberSlice.actions
 export const FetchAllModalNumber = createAsyncThunk("FETCH/ALL/MODAL-NUMBER", async (_, thunkAPI) => {
   try {
     const response = await getRequestMethod(UrlConstants.GET_ALL_MODAL_NUMBER)
-    // console.log(response)
     return response
   } catch (error: any) {
     const message = error.response.data.message
@@ -385,7 +401,7 @@ export const UpdateModalNumber = createAsyncThunk(
   }
 );
 
-// Method 2: Using getRequestMethod with URL parameter (ALTERNATIVE)
+// getRequestMethod with URL parameter (ALTERNATIVE)
 export const FetchBrandIdModalNumber = createAsyncThunk(
   'mobileNumber/fetchByBrandId',
   async (brandId: number | string, { rejectWithValue }) => {
@@ -399,6 +415,24 @@ export const FetchBrandIdModalNumber = createAsyncThunk(
     } catch (error: any) {
       console.error("Brand fetch error:", error);
       return rejectWithValue(error.message || "Failed to fetch brand models");
+    }
+  }
+);
+
+// Fetch Modal by Sub-Category Thunk
+export const FetchModalBySubCategory = createAsyncThunk(
+  "FETCH/MODAL/NUMBER/BY/SUB-CATEGORY/ID",
+  async (id: any, thunkAPI) => {
+    try {
+      const response = await getRequestMethodWithParam(
+        { id },  // <-- params object
+        UrlConstants.GET_MODAL_NUMBER_BY_SC_ID
+      );
+      console.log("Response Data :--", response);
+      return response;
+    } catch (error: any) {
+      console.error("Modal fetch error:", error);
+      return thunkAPI.rejectWithValue(error.message || "Failed to fetch modal numbers");
     }
   }
 );

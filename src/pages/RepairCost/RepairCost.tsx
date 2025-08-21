@@ -5,7 +5,7 @@ import Pagination from "../../helper/Pagination";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import Loading from "../../components/Loading";
-import { FetchAllModalNumber } from "../AddMobileNumber/MobileNumberSlice";
+import { FetchAllModalNumber, FetchModalBySubCategory } from "../AddMobileNumber/MobileNumberSlice";
 import { GetAllModalIssues, GetAllProductPartsBySubCategory } from "../ModalIssues/ModalIssuesSlice";
 import { GetAllRepairCost, GetRepairCostByModalId, CreateRepairCost, setEditRepairCost, UpdateRepairCost, GetRepairCostBySubCategoryId } from "./RepairCostSlice";
 import { GetAllSubCategory, GetAllSubCategoryById } from "../AddSubCategory/SubCategorySlice";
@@ -33,7 +33,6 @@ const RepairCost = () => {
 
   // Filtered data for dropdowns
   const [filteredSubCategories, setFilteredSubCategories] = useState<any[]>([]);
-  const [filteredProductParts, setFilteredProductParts] = useState<any[]>([]);
 
   // Form states
   const [formCategory, setFormCategory] = useState("");
@@ -42,7 +41,7 @@ const RepairCost = () => {
   const [formFilteredSubCategories, setFormFilteredSubCategories] = useState<any[]>([]);
   const [formFilteredProductParts, setFormFilteredProductParts] = useState<any[]>([]);
 
-  const { AllModalNumberData } = useSelector((state: RootState) => state.MobileNumberSlice);
+  const { MobileNumberData } = useSelector((state: RootState) => state.MobileNumberSlice);
   const { ModalIssuesData } = useSelector((state: RootState) => state.ModalIssuesSlice);
   const { RepairCostData, isLoading, Edit } = useSelector((state: RootState) => state.RepairCostSlice);
   const { data } = useSelector((state: RootState) => state.AddCategorySlice);
@@ -120,7 +119,6 @@ const RepairCost = () => {
   });
 
   const [formData, setFormData] = useState(getDefaultFormData());
-  const [showSpecifications, setShowSpecifications] = useState(false);
 
   // Handle category selection from dropdown
   const handleCategorySelect = (categoryId: string) => {
@@ -147,7 +145,7 @@ const RepairCost = () => {
 
    if (subCategoryId) {
       dispatch(GetRepairCostBySubCategoryId({ subCategoryId: Number(subCategoryId) }));
-      dispatch(GetAllProductPartsBySubCategory(Number(subCategoryId)));
+      dispatch(FetchModalBySubCategory(subCategoryId))
       setIsFiltered(true);
       setCurrentPage(1)
   };
@@ -172,7 +170,6 @@ const RepairCost = () => {
     setSelectedModalNumber("");
     setIsFiltered(false);
     setFilteredSubCategories([]);
-    setFilteredProductParts([]);
     dispatch(GetAllRepairCost());
     setCurrentPage(1);
   };
@@ -204,6 +201,7 @@ const RepairCost = () => {
 
     if (subCategoryId) {
       dispatch(GetAllProductPartsBySubCategory(Number(subCategoryId)));
+      dispatch(FetchModalBySubCategory(subCategoryId))
     }
 
     // Update form data
@@ -248,7 +246,7 @@ const RepairCost = () => {
       handleFormProductPartSelect(value);
     } else if (name === 'modalNumber') {
       setFormModalNumber(value); // Add this line
-      const selectedModal = AllModalNumberData.find(item => item.id == value);
+      const selectedModal = MobileNumberData.find(item => item.id == value);
 
       if (selectedModal) {
         setFormData(prev => ({
@@ -256,14 +254,12 @@ const RepairCost = () => {
           productModelNumber: selectedModal
         }));
         setFormModalNumber(value);
-        setShowSpecifications(true);
       } else {
         setFormData(prev => ({
           ...prev,
           productModelNumber: getDefaultFormData().productModelNumber
         }));
         setFormModalNumber("");
-        setShowSpecifications(false);
       }
     }
   };
@@ -273,7 +269,6 @@ const RepairCost = () => {
     setShowModal(false);
     setIsEditMode(false);
     setFormData(getDefaultFormData());
-    setShowSpecifications(false);
     setFormCategory("");
     setFormSubCategory("");
     setFormProductPart("");
@@ -356,6 +351,7 @@ console.log("Edit.isEdit:", Edit.isEdit);
       console.log("Create result:", result);
 
       setShowConfirmModal(false);
+      toast.success("Added Successfully!!")
       handleCloseModal();
 
       // Refresh data based on current filter state
@@ -409,7 +405,6 @@ const handleEditUser = async (user: any) => {
 
   // ✅ Set edit mode
   setIsEditMode(true);
-  setShowSpecifications(!!user?.productModelNumber?.id);
   setShowModal(true);
 
   // ✅ Store edit data in Redux
@@ -429,15 +424,6 @@ const handleEditUser = async (user: any) => {
       setFilteredSubCategories([]);
     }
   }, [selectedCategory, SubCategoriesData]);
-
-  // Filter product parts based on selected subcategory
-  useEffect(() => {
-    if (selectedSubCategory && ModalIssuesData) {
-      setFilteredProductParts(ModalIssuesData);
-    } else {
-      setFilteredProductParts([]);
-    }
-  }, [selectedSubCategory, ModalIssuesData]);
 
   // Filter subcategories for form
   useEffect(() => {
@@ -522,7 +508,7 @@ const handleEditUser = async (user: any) => {
       disabled={!selectedSubCategory}
     >
       <option value="">Select Modal Number</option>
-      {AllModalNumberData?.map((modal) => (
+      {MobileNumberData?.map((modal) => (
         <option key={modal.id} value={modal.id}>
           {modal.name}
         </option>
@@ -719,7 +705,7 @@ const handleEditUser = async (user: any) => {
                     disabled={!formSubCategory}
                   >
                     <option value="">Choose Modal Number</option>
-                    {AllModalNumberData?.map((item) => (
+                    {MobileNumberData?.map((item) => (
                       <option key={item?.id} value={item?.id}>{item?.name}</option>
                     ))}
                   </select>

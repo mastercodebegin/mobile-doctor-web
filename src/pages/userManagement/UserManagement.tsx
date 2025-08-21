@@ -740,7 +740,12 @@ const UserManagement = () => {
                       <hr className="my-4 border-gray-300" />
 
                       {/* GST and Gumasta Documents */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {(() => {
+                        const selectedRole = roleData?.find((role: any) => role.id == formData.role);
+                        const isManagerRole = selectedRole?.name?.toLowerCase() === 'manager';
+                        return isManagerRole && (
+                          <>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* GST Document */}
                         <div className="mb-6">
                           <label className="block font-medium mb-2">GST Certificate</label>
@@ -803,6 +808,10 @@ const UserManagement = () => {
                           )}
                         </div>
                       </div>
+                          </>
+                        )
+                      })()}
+                      
                     </div>
                   </>
                 </>
