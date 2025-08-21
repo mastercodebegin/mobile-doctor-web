@@ -1,3 +1,4 @@
+import { enUS } from 'date-fns/locale';
 import React, { useState } from 'react'
 import { DateRangePicker } from 'react-date-range';
 
@@ -91,6 +92,7 @@ const DatePicker = ({ value, onChange }) => {
               className="border-0"
               rangeColors={['#3b82f6']}
               showDateDisplay={false}
+              locale={enUS}
             />
             
             {/* Action Buttons */}
