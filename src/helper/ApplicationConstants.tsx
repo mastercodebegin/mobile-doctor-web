@@ -24,7 +24,7 @@ export const TableHadeClass = `py-4 px-6 text-left text-sm font-medium ${ThemeTe
 
 export const ShowModalMainClass = "fixed inset-0 z-50 flex items-center justify-center bg-transparent/30 backdrop-blur-sm"
 
-export const SelectClass = "w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+export const SelectClass = "w-full border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
 
 export const ClearFilter = "px-3 py-1.5 text-sm font-medium border rounded-md transition-all text-red-500 border-red-500 hover:bg-red-600 hover:text-white cursor-pointer"
 

@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useRef, useState } from "react";
+import ForgetPassword from "../../components/ForgetPassword";
 
 interface NavbarProps {
   onToggleSidebar: () => void;
@@ -18,6 +19,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [openP, setOpenP] = useState(false)
 
   const handleClearLoginState = () => {
     localStorage.removeItem("authToken");
@@ -133,9 +135,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
             <div className="flex flex-col p-2">
               <button
                 className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-400 transition text-sm"
-                onClick={() => {
-                  // TODO: open change-password modal/page
-                }}
+                onClick={() => setOpenP(true)}
               >
                 <KeyRound size={18} />
                 Change Password
@@ -152,6 +152,8 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
           </div>
         )}
       </div>
+
+      {openP && <ForgetPassword setOpenP={setOpenP} />}
     </div>
   );
 };

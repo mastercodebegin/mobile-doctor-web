@@ -453,7 +453,7 @@ const Order = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                      <td colSpan={9} className="py-4 mx-auto text-center text-gray-500">
                         {unitRepairStatus ? `No orders found for status: ${unitRepairStatus.replace(/_/g, ' ')}` : 'No orders found'}
                       </td>
                     </tr>

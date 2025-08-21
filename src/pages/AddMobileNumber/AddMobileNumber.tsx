@@ -564,7 +564,7 @@ const MobileNumberPage = () => {
                     <th scope="col" className={TableHadeClass}>Brand</th>
                     <th scope="col" className={TableHadeClass}>Edit</th>
                     <th scope="col" className={TableHadeClass}>Delete</th>
-                    <th scope="col" className={TableHadeClass}>Show Variant</th>
+                    <th scope="col" className={TableHadeClass}>Variant</th>
                   </tr>
                 </thead>
 

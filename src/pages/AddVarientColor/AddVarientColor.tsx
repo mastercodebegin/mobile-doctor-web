@@ -9,7 +9,7 @@ import { GetAllSubCategory } from "../AddSubCategory/SubCategorySlice";
 import { GetAllBrand } from "../AddBrand/BrandSlice";
 import { GetAllColors } from "../AddColorName/ColorNameSlice";
 import { CreateVariantColor } from "./VariantColorSlice";
-import { FetchBrandIdModalNumber } from "../AddMobileNumber/MobileNumberSlice";
+import { FetchModalBySubCategory } from "../AddMobileNumber/MobileNumberSlice";
 import { FetchVariantByModalId } from "../AddVarient/VarientSlice";
 import { toast } from "react-toastify";
 import ConfirmationModal from "../../components/ConfirmationModal";
@@ -60,7 +60,7 @@ const AddVarientColor = () => {
   const { data: categoryData } = useSelector((state: RootState) => state.AddCategorySlice);
   const { SubCategoriesData } = useSelector((state: RootState) => state.SubCategorySlice);
   const { BrandData } = useSelector((state: RootState) => state.BrandSlice);
-  const { BrandModalNumberData } = useSelector((state: RootState) => state.MobileNumberSlice);
+  const { MobileNumberData } = useSelector((state: RootState) => state.MobileNumberSlice);
   const { AllVariantData } = useSelector((state: RootState) => state.variantSlice);
   const { colorData } = useSelector((state: RootState) => state.ColorNameSlice);
   const { AllVariantColorData, isLoading } = useSelector((state: RootState) => state.VariantColorSlice);
@@ -75,12 +75,10 @@ const AddVarientColor = () => {
     (subCat) => subCat.category?.id === parseInt(formData.category)
   ) || [];
 
-  const filteredModalNumbers = BrandModalNumberData?.filter(
-    (modal) => modal.brand.id === parseInt(formData.brand)
-  ) || [];
+
+  const filteredModalNumbers = MobileNumberData || [];
 
   const filteredVariants = AllVariantData || [];
-
 
   const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -131,9 +129,11 @@ const AddVarientColor = () => {
       });
       setSelectedFiles([]);
 
-      if (value) {
-        dispatch(FetchBrandIdModalNumber(parseInt(value)) as any);
-      }
+          if (value) {
+      // Fetch modal numbers by subCategory ID
+      const subCategoryId = formData.subCategory ? parseInt(formData.subCategory) : 0;
+      dispatch(FetchModalBySubCategory(subCategoryId) as any);
+    }
     }
 
     else if (name === "modalNumber") {
@@ -184,9 +184,7 @@ const AddVarientColor = () => {
       console.log("Selected color:", selectedColor);
     }
   };
-
-
-  // ✅ Enhanced File Change Handler
+ 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     console.log("🔍 File input change triggered");
@@ -566,7 +564,8 @@ const AddVarientColor = () => {
 
       {showModal && (
         <div className={ShowModalMainClass}>
-          <div className="bg-white rounded-2xl shadow-xl p-8 w-[90%] max-w-md relative max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-xl p-8 w-[90%] max-w-4xl relative max-h-[90vh] overflow-y-auto">
+
             {/* Close Icon */}
             <button
               className="absolute top-4 right-5 text-2xl font-bold text-gray-500 hover:text-black"
@@ -686,10 +685,11 @@ const AddVarientColor = () => {
                   ))}
                 </select>
               </div>
+              </div>
 
               {/* File Upload Section */}
-              {variantColorData.colorName.id && (
-                <div>
+              {variantColorData.colorName.id > 0 && (
+                <div className="mt-3" >
                   <label className="block font-medium mb-1">Upload Files</label>
                   <input
                     type="file"
@@ -701,7 +701,7 @@ const AddVarientColor = () => {
                   />
                 </div>
               )}
-            </div>
+            
 
             {/* File Preview List */}
             {selectedFiles.length > 0 && (
