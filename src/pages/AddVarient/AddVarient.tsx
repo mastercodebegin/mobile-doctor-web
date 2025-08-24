@@ -279,8 +279,7 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
             colorCode : colorItem.colorName.colorCode || "",
             is_deleted : colorItem.colorName.is_deleted ?? false,
           },
-          modalImages : selectedFiles.map((file, idx) => ({
-            id : idx,
+          modalImages : selectedFiles.map((file) => ({
             imageName : file.name.replace(/\s+/g, '_'),
             is_deleted : false,
           }))

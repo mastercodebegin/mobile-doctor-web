@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
 import Pagination from '../../helper/Pagination';
-import { ClearFilter, DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, InventoryView, pageSize, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass, ThemeBackgroundColor } from '../../helper/ApplicationConstants';
+import { ArrowDown, ArrowUp, ClearFilter, DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, InventoryView, pageSize, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass, ThemeBackgroundColor } from '../../helper/ApplicationConstants';
 import { toast } from 'react-toastify';
 import Loading from '../../components/Loading';
 import { GetAllCategory } from '../AddCategory/AddCategorySlice';
@@ -491,7 +491,12 @@ const ProductPart = () => {
     return user ? `${user.firstName} ${user.lastName ?? ""}`.trim() : '--';
   })()}
 </td>
-                              <td className="px-4 py-2 align-middle">{record.inventory.notes || '--'}</td>
+                              <td className="px-4 py-2 align-middle">
+  {statusBadge.label === "Initial" 
+    ? record?.inventory?.notes || '--' 
+    : record?.notes || '--'}
+</td>
+
                             </tr>
                           );
                         })}
@@ -828,21 +833,7 @@ const ProductPart = () => {
                               onClick={() => handleHistoryToggle(user.id)}
                               className={EditClass}
                             >
-                              {history === user.id ? (
-                                <>
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 20V4m0 0l6 6m-6-6L6 10" />
-                                  </svg>
-                                </>
-                              ) : (
-                                <>
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m0 0l-6-6m6 6l6-6" />
-                                  </svg>
-                                </>
-                              )}
+                              {history === user.id ? ( ArrowUp ) : ( ArrowDown )}
                             </button>
                           </td>
                           <td className={TableDataClass}>

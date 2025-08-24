@@ -2,14 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import Loading from "../../components/Loading";
-import { CreateModalNumber, FetchAllModalNumber, FetchBrandIdModalNumber, Remove, restore, Update, UpdateModalNumber } from "./MobileNumberSlice";
+import { CreateModalNumber, FetchAllModalNumber, FetchBrandIdModalNumber, Remove, restore, Update, UpdateModalNumber, ViewVariantData } from "./MobileNumberSlice";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import { GetAllSubCategory } from "../AddSubCategory/SubCategorySlice";
 import { GetAllBrand } from "../AddBrand/BrandSlice";
-import { ClearFilter, DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, SelectClass, ShowModalMainClass, ShowModelCloseButtonClass, ShowVarientButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass, ThemeTextColor } from "../../helper/ApplicationConstants";
+import { ArrowDown, ArrowUp, ClearFilter, DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, SelectClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass, ThemeTextColor } from "../../helper/ApplicationConstants";
 import Pagination from "../../helper/Pagination";
 import { toast } from "react-toastify";
 import { GetAllCategory } from "../AddCategory/AddCategorySlice";
+import IphoneImage from "../../assets/Laptop_Image.png"
 
 const MobileNumberPage = () => {
   // State declarations
@@ -20,9 +21,15 @@ const MobileNumberPage = () => {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [selectedBrand, setSelectedBrand] = useState<string>("");
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+const [showImages, setShowImages] = useState(false);
+const [cachedVariants, setCachedVariants] = useState({}); // userId -> variant data
+const [currentVariantId, setCurrentVariantId] = useState(null);
 
   // Redux selectors
-  const { AllModalNumberData, BrandModalNumberData, Edit, isLoading } = useSelector((state: RootState) => state.MobileNumberSlice);
+  const { AllModalNumberData, BrandModalNumberData, Edit, isLoading, viewVariant } = useSelector((state: RootState) => state.MobileNumberSlice);
+  const isVariantLoading = viewVariant?.isLoading || false
   const { data } = useSelector((state: RootState) => state.AddCategorySlice);
   const { SubCategoriesData } = useSelector((state: RootState) => state.SubCategorySlice);
   const { BrandData } = useSelector((state: RootState) => state.BrandSlice);
@@ -222,6 +229,19 @@ const MobileNumberPage = () => {
     setShowModal(true);
   };
 
+    const handleBrandChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    console.log("Brand dropdown changed:", value, typeof value);
+
+    // Make sure value is not empty string
+    if (value && value !== "") {
+      setSelectedBrand(value);
+    } else {
+      setSelectedBrand("");
+      // Reset to show all data
+      dispatch(FetchAllModalNumber());
+    }
+  };
 
   // ✅ ENHANCED: Updated handleSaveClick for proper edit functionality
   const handleSaveClick = async () => {
@@ -353,6 +373,12 @@ const MobileNumberPage = () => {
     dispatch(restore());
   }
 
+    const handleClear = () => {
+    setSelectedBrand("");
+    setCurrentPage(1);
+    dispatch(FetchAllModalNumber());
+  };
+
   // ✅ FIXED: Updated handleEditUser to properly populate form data
   const handleEditUser = (user: any) => {
     console.log("Editing user:", user);
@@ -416,8 +442,164 @@ const MobileNumberPage = () => {
     dispatch(Remove(userId));
   };
 
-  // Animation for table rows
-  const [isLoaded, setIsLoaded] = useState(false);
+// View-Variant Section
+const handleVariantToggle = (userId: number) => {
+  // If same variant is clicked, close it
+  if (showVariantId === userId) {
+    setShowVariantId(null);
+    return;
+  }
+
+  // If same variant is already open, don't make API call
+  if (currentVariantId === userId) {
+    console.log(`Same variant already open: ${userId}, skipping API call`);
+    setShowVariantId(userId);
+    return;
+  }
+
+  // Set current variant
+  setShowVariantId(userId);
+  setCurrentVariantId(userId);
+
+  // Make API call for new variant
+  console.log(`Opening new variant: ${userId}, making API call`);
+  dispatch(ViewVariantData(userId));
+};
+
+
+const renderVariantRow = () => {
+  const variants = cachedVariants[showVariantId] || []; // Access data safely
+
+  return (
+    <tr className="bg-gray-50">
+      <td colSpan={8} className="px-6 py-4">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          {isVariantLoading ? (
+            // Loading Spinner (same style as history)
+            <div className="flex justify-center items-center py-8">
+              <div className="relative flex flex-col items-center justify-center">
+                <div
+                  className="w-16 h-16 border border-white rounded-full animate-spin"
+                  style={{ animationDuration: '2s' }}
+                >
+                  <div
+                    className="absolute inset-0 border-3 border-transparent border-y-cyan-600 border-l-cyan-600 rounded-full animate-spin"
+                    style={{ animationDuration: '2s' }}
+                  />
+                </div>
+                <p className="text-center text-gray-600 mt-4">Loading variant details...</p>
+              </div>
+            </div>
+          ) : !variants || variants.length === 0 ? (
+            // Empty State
+            <div className="text-center text-red-500 py-8">
+              <p className="text-lg">📱 Variant Details Not Available</p>
+              <p className="text-sm text-gray-500 mt-2">
+                No variant data found for this model
+              </p>
+            </div>
+          ) : (
+            // Actual Variant Details Table
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className={TableHadeClass}>Ram</th>
+                    <th scope="col" className={TableHadeClass}>Rom</th>
+                    <th scope="col" className={TableHadeClass}>Selfie Camera</th>
+                    <th scope="col" className={TableHadeClass}>Main Camera</th>
+                    <th scope="col" className={TableHadeClass}>Battery</th>
+                    <th scope="col" className={TableHadeClass}>Network</th>
+                    <th scope="col" className={TableHadeClass}>Color</th>
+                    <th scope="col" className={TableHadeClass}>Images</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {variants?.map((variant) => {
+                    return (
+                      <tr key={`variant-${variant?.id}`} className="border-b border-gray-200 last:border-b-0 h-16">
+                        <td className="p-2">{variant?.ram ?? '--'}</td>
+                        <td className="p-2">{variant?.rom ?? '--'}</td>
+                        <td className="p-2">{variant?.selfieCamera ?? '--'}</td>
+                        <td className="p-2">{variant?.mainCamera ?? '--'}</td>
+                        <td className="p-2">{variant?.battery ?? '--'}</td>
+                        <td className="p-2">{variant?.network ?? '--'}</td>
+                        <td className="p-2">
+                          <div className="flex flex-wrap gap-3">
+                            {variant?.variantColors?.length ? (
+                              variant?.variantColors.map((colorObj: any, index: number) => (
+                                <div key={index} className="flex items-center gap-2">
+                                  <span
+                                    className="inline-block w-5 h-5 rounded-full border"
+                                    style={{ backgroundColor: colorObj.colorName?.colorCode }}
+                                  ></span>
+                                  <span>{colorObj.colorName?.color}</span>
+                                </div>
+                              ))
+                            ) : (
+                              <span className="text-gray-400">No colors available</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="p-2">
+                          <button
+                            onClick={() =>
+                              setShowImages((prev: any) => ({
+                                ...prev,
+                                [variant.id]: !prev[variant.id],
+                              }))
+                            }
+                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                          >
+                            {showImages?.[variant.id] ? 'Hide Images' : 'Show Images'}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+
+              {/* Images Section - Show for each variant that has showImages enabled */}
+              {variants?.map((variant) => (
+                showImages?.[variant.id] && (
+                  <div key={`images-${variant.id}`} className="mt-4 border-t pt-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">
+                      Images for Variant {variant.id}
+                    </h4>
+                    <div className="flex flex-wrap gap-4">
+                      {variant?.variantColors?.flatMap((colorObj: any) =>
+                        colorObj.modalImages?.map((img: any, idx: number) => (
+                          <img
+                            key={`${variant.id}-${idx}`}
+                            src={`${img.imageName} ?? ${IphoneImage}`}
+                            alt={img.imageName}
+                            className="w-24 h-24 object-cover border rounded"
+                          />
+                        )) || []
+                      )}
+                    </div>
+                  </div>
+                )
+              ))}
+            </div>
+          )}
+        </div>
+      </td>
+    </tr>
+  );
+};
+
+// Keep this useEffect as is
+useEffect(() => {
+  if (viewVariant?.data && currentVariantId) {
+    setCachedVariants(prev => ({
+      ...prev,
+      [currentVariantId]: viewVariant.data
+    }));
+  }
+}, [viewVariant, currentVariantId]);
+  
 
   useEffect(() => {
     setIsLoaded(true);
@@ -456,20 +638,6 @@ const MobileNumberPage = () => {
     }
   }, [selectedBrand, dispatch]);
 
-  // 3. CHECK: Your dropdown onChange handler
-  const handleBrandChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    console.log("Brand dropdown changed:", value, typeof value);
-
-    // Make sure value is not empty string
-    if (value && value !== "") {
-      setSelectedBrand(value);
-    } else {
-      setSelectedBrand("");
-      // Reset to show all data
-      dispatch(FetchAllModalNumber());
-    }
-  };
 
   // 6. DEBUG: Add state logging
   useEffect(() => {
@@ -480,12 +648,6 @@ const MobileNumberPage = () => {
     console.log("BrandModalNumberData:", BrandModalNumberData?.length);
   }, [selectedBrand, BrandData, AllModalNumberData, BrandModalNumberData]);
 
-
-  const handleClear = () => {
-    setSelectedBrand("");
-    setCurrentPage(1);
-    dispatch(FetchAllModalNumber());
-  };
 
   // Reset pagination when brand changes
   useEffect(() => {
@@ -622,43 +784,16 @@ const MobileNumberPage = () => {
                           </td>
                           <td className={TableDataClass}>
                             <button
-                              onClick={() => setShowVariantId(showVariantId === user?.id ? null : user?.id)}
-                              className={`${ShowVarientButtonClass}`}
+                              onClick={() => handleVariantToggle(user.id)}
+                              className={`${EditClass}`}
                             >
-                              {showVariantId === user?.id ? "Hide Variant" : "View Variant"}
+                              {showVariantId === user?.id ? ArrowUp : ArrowDown }
                             </button>
                           </td>
                         </tr>
 
                         {/* variant Row */}
-                        {showVariantId === user?.id && (
-                          <tr key={`variant-${user?.id}`}>
-                            <td colSpan={8}>
-                              <div className="bg-gray-50 p-6">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                  {(() => {
-                                    const variant = user?.productSpecification;
-                                    if (!variant) return null;
-
-                                    const variantFields = [
-                                      { label: "Platform", value: variant.platform },
-                                      { label: "RAM", value: variant.ram },
-                                      { label: "ROM", value: variant.rom },
-                                      { label: "Network", value: variant.network },
-                                    ];
-
-                                    return variantFields.map((field, i) => (
-                                      <div key={i} className="p-4 bg-white rounded shadow-sm border border-gray-200">
-                                        <div className="text-sm font-medium text-green-600">{field.label}</div>
-                                        <div className="text-sm text-gray-800 mt-1">{field.value}</div>
-                                      </div>
-                                    ));
-                                  })()}
-                                </div>
-                              </div>
-                            </td>
-                          </tr>
-                        )}
+                        {showVariantId === user?.id && renderVariantRow()}
                       </React.Fragment>
                     ))
                   )}

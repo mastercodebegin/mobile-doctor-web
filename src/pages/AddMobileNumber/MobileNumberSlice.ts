@@ -80,9 +80,17 @@ interface EditModalNumber {
   is_deleted: boolean | null;
 }
 
+interface ViewVariant {
+   isLoading: boolean;
+  isSuccess: boolean;
+  data: Record<number, any[]>; 
+  pagination: Record<number, any>; 
+}
+
 interface MobileNumber {
   isLoading: boolean;
   isSuccess: boolean;
+  viewVariant: ViewVariant;
   Edit: {
     modalNumber: EditModalNumber;
     isEdit: boolean;
@@ -96,6 +104,12 @@ interface MobileNumber {
 const initialState: MobileNumber = {
   isLoading: false,
   isSuccess: false,
+  viewVariant: {
+isLoading: false,
+isSuccess: false,
+data: [],
+pagination: {},
+  },
   Edit: {
     modalNumber: {
       id: 0,
@@ -327,6 +341,24 @@ const MobileNumberSlice = createSlice({
         state.isSuccess = false
         console.log("Product Model Number Data Fetch by Sub-Category id is Rejected :--", action.payload)
       })
+
+      // fetch view-variant
+      .addCase(ViewVariantData.pending, (state, action) =>{
+        state.viewVariant.isLoading = true
+        state.viewVariant.isSuccess = false
+        console.log("View-Variant Data is Pending :---", action.payload)
+      })
+      .addCase(ViewVariantData.fulfilled, (state, action) =>{
+        state.viewVariant.isLoading = false
+        state.viewVariant.isSuccess = true
+        state.viewVariant.data = action.payload
+      })
+      .addCase(ViewVariantData.rejected, (state, action) =>{
+        state.viewVariant.isLoading = false
+        state.viewVariant.isSuccess = false
+        console.log("View-Variant Data Fetching is Rejected with :--", action.payload)
+      })
+
   }
 })
 
@@ -436,3 +468,15 @@ export const FetchModalBySubCategory = createAsyncThunk(
     }
   }
 );
+
+// view-variant thunk
+export const ViewVariantData = createAsyncThunk("VIEW/VARINAT/DATA", async (id:number, thunkAPI) =>{
+  try {
+    const response = await getRequestMethod( `${UrlConstants.GET_VIEW_VARIANT}/${id}`);
+    console.log("Response Data :--", response);
+    return response
+  } catch (error: any) {
+    const message = error?.response?.data?.message || error.message;
+      return thunkAPI.rejectWithValue(message);
+  }
+})
