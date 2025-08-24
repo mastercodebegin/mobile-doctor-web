@@ -84,7 +84,6 @@ interface ViewVariant {
    isLoading: boolean;
   isSuccess: boolean;
   data: Record<number, any[]>; 
-  pagination: Record<number, any>; 
 }
 
 interface MobileNumber {
@@ -108,7 +107,6 @@ const initialState: MobileNumber = {
 isLoading: false,
 isSuccess: false,
 data: [],
-pagination: {},
   },
   Edit: {
     modalNumber: {
