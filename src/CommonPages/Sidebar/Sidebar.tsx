@@ -15,6 +15,11 @@ import {
   DollarSign,
   Archive,
   ShoppingCart,
+  Map,
+  Earth,
+  MapPinned,
+  LocateFixed,
+  Split,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { SidebarColors } from "../../helper/ApplicationConstants";
@@ -61,6 +66,16 @@ const InventoryLinks = [
 ];
 
 // ==========================
+// Location Dropdown Links
+// ==========================
+const LocationLinks = [
+  {name: "Country", to: "/country", icon: Earth, ...SidebarColors.location.country },
+  {name: "State", to: "/state", icon: Map, ...SidebarColors.location.state },
+  {name: "City", to: "/city", icon: MapPinned, ...SidebarColors.location.country },
+  {name: "Branch", to: "/branch", icon: Split, ...SidebarColors.location.branch },
+]
+
+// ==========================
 // All Main Menu Items
 // ==========================
 const menuItems = [
@@ -73,6 +88,7 @@ const menuItems = [
   { type: "link", to: "/orders", label: "Orders", icon: Users, ...SidebarColors.orders },
   { type: "link", to: "/support-ticket", label: "Support Ticket", icon: Users, ...SidebarColors.supportTicket },
   { type: "link", to: "/role", label: "User Role", icon: Users, ...SidebarColors.role },
+  { type: "dropdown", label: "Location", icon: LocateFixed, color: SidebarColors.dropdown.location.color, children: LocationLinks },
 ];
 
 interface SidebarProps {
@@ -83,6 +99,7 @@ interface SidebarProps {
 export default function Sidebar({ collapsed, onNavigate }: SidebarProps) {
   const [addProductOpen, setAddProductOpen] = useState(false);
   const [inventoryOpen, setInventoryOpen] = useState(false);
+  const [locationOpen, setLocationOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const [activeLink, setActiveLink] = useState(location.pathname);
@@ -90,11 +107,7 @@ export default function Sidebar({ collapsed, onNavigate }: SidebarProps) {
   // Get user role from Redux - handle both object and string formats
   const userRole = useSelector((state: RootState) => state.UserLoginSlice.data?.role);
   const role = typeof userRole === 'object' && userRole?.name ? userRole.name : (typeof userRole === 'string' ? userRole : 'admin');
-  
-  // // Debug: Console log to check the role value
-  // console.log("Raw user role from Redux:", userRole);
-  // console.log("Processed role:", role);
-  // console.log("Role config for this role:", roleMenuConfig[role]);
+
 
   const handleLinkClick = (to: string) => {
     setActiveLink(to);
@@ -239,7 +252,8 @@ export default function Sidebar({ collapsed, onNavigate }: SidebarProps) {
             if (item.type === "dropdown") {
               const isAddProduct = item.label === "Add Product";
               const isInventory = item.label === "Inventory";
-              const isOpen = isAddProduct ? addProductOpen : inventoryOpen;
+              const isLocation = item.label === "Location";
+              const isOpen = isAddProduct ? addProductOpen : isInventory ? inventoryOpen : locationOpen;
 
               return (
                 <div key={item.label}>
@@ -250,6 +264,7 @@ export default function Sidebar({ collapsed, onNavigate }: SidebarProps) {
                     onClick={() => {
                       if (isAddProduct) setAddProductOpen(!addProductOpen);
                       if (isInventory) setInventoryOpen(!inventoryOpen);
+                      if(isLocation) setLocationOpen(!locationOpen)
                     }}
                   >
                     {item.label}

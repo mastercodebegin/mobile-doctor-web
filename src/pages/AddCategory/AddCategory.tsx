@@ -9,16 +9,14 @@ import Pagination from "../../helper/Pagination";
 import { toast } from "react-toastify";
 
 const AddCategory = () => {
-
-  const [showConfirmModal, setShowConfirmModal] = useState(false); 
-
+  
   const { data, isLoading, Edit } = useSelector((state: RootState) => state.AddCategorySlice)
-
   const dispatch = useDispatch<AppDispatch >()
+  
+  const [showConfirmModal, setShowConfirmModal] = useState(false); 
   const [showModal, setShowModal] = useState(false)
   const [category, setCategory] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
-
   const [currentPage, setCurrentPage] = useState(1);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
 
@@ -68,7 +66,6 @@ const AddCategory = () => {
     setShowModal(false);
     setCategory("");
     setIsEditMode(false);
-    dispatch(restore(null)); 
   };
 
   const handleConfirmSave = () => {

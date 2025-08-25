@@ -27,6 +27,10 @@ import Products from "./pages/Products/Products";
 import Order from "./pages/Orders/Order";
 import SupportTicket from "./pages/SupportTicket/SupportTicket";
 import Role from "./pages/Roles/Role";
+import Country from "./pages/Country/Country";
+import State from "./pages/State/State";
+import City from "./pages/City/City";
+import Branch from "./pages/Branch/Branch";
 
 function App() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
@@ -134,6 +138,10 @@ function App() {
               <Route path="/orders" element={<Order />} />
               <Route path="/support-ticket" element={<SupportTicket />} />
               <Route path="/role" element={<Role />} />
+              <Route path="/country" element={<Country />} />
+              <Route path="/state" element={<State />} />
+              <Route path="/city" element={<City />} />
+              <Route path="/branch" element={<Branch />} />
             </Route>
           </Routes>
         </div>

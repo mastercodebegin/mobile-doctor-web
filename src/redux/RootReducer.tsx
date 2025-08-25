@@ -15,6 +15,10 @@ import InventorySlice from "../pages/ProductPart/ProductPartSlice"
 import OrderSlice from "../pages/Orders/OrderSlice"
 import SupportTicketSlice from "../pages/SupportTicket/SupportTicketSlice"
 import RoleSlice from "../pages/Roles/RoleSlice"
+import CountrySlice from "../pages/Country/CountrySlice"
+import StateSlice from "../pages/State/StateSlice"
+import CitySlice from "../pages/City/CitySlice"
+import BranchSlice from "../pages/Branch/BranchSlice"
 
 const RootReducer = ({
     ErrorModalWindowSlice,
@@ -34,6 +38,10 @@ const RootReducer = ({
     OrderSlice,
     SupportTicketSlice,
     RoleSlice,
+    CountrySlice,
+    StateSlice,
+    CitySlice,
+    BranchSlice,
 })
 
 

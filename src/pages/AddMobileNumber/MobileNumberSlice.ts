@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getRequestMethod, getRequestMethodWithParam, postRequestMethod, putRequestMethodWithBodyAndParam } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
 
-const storedData = localStorage.getItem("MobileNumber")
+const storedData = localStorage.getItem("Modal-Numbers")
 
 // ✅ Product Specification (as per given API response)
 interface ProductSpecification {

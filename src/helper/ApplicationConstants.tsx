@@ -85,9 +85,16 @@ export const SidebarColors = {
     productPart: { bgColor: 'bg-blue-50', color: '#3B82F6' },
     products: { bgColor: 'bg-blue-50', color: '#3B82F6' },
   },
+  location: {
+    country: { bgColor: 'bg-blue-50', color: '#3B82F6' },
+    state: { bgColor: 'bg-blue-50', color: '#3B82F6' },
+    city: { bgColor: 'bg-blue-50', color: '#3B82F6' },
+    branch: { bgColor: 'bg-blue-50', color: '#3B82F6' },
+  },
   dropdown: {
     addProduct: { bgColor: 'bg-green-50', color: '#10B981' },
     inventory: { bgColor: 'bg-green-50', color: '#10B981' },
+    location: { bgColor: 'bg-green-50', color: '#10B981' },
   },
 };
 

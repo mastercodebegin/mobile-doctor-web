@@ -297,7 +297,6 @@ const AddSubCategory = () => {
 
       {showModal && (
         <>
-
           <div className={ShowModalMainClass}>
             <div className="bg-white rounded-2xl shadow-xl p-8 w-[90%] max-w-xl relative">
               <h2 className="text-3xl font-semibold text-center mb-6">
@@ -368,7 +367,7 @@ const AddSubCategory = () => {
           <ConfirmationModal
             isOpen={showConfirmModal}
             title="Confirm Sub Category Creation"
-            message={`Are you sure you want to add the category "${subCategoryName}"?`}
+            message={`Are you sure you want to add the sub-category "${subCategoryName}"?`}
             onConfirm={handleConfirmSave}
             onCancel={() => setShowConfirmModal(false)}
           />
