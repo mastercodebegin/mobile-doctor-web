@@ -517,7 +517,7 @@ const renderVariantRow = () => {
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {variants?.map((variant) => {
                     return (
-                      <tr key={`variant-${variant?.id}`} className="border-b border-gray-200 last:border-b-0 h-16">
+                      <tr key={`variant-${variant?.id}`} className="border-b border-gray-200 text-center last:border-b-0 h-16">
                         <td className="p-2">{variant?.ram ?? '--'}</td>
                         <td className="p-2">{variant?.rom ?? '--'}</td>
                         <td className="p-2">{variant?.selfieCamera ?? '--'}</td>
@@ -530,7 +530,7 @@ const renderVariantRow = () => {
                               variant?.variantColors.map((colorObj: any, index: number) => (
                                 <div key={index} className="flex items-center gap-2">
                                   <span
-                                    className="inline-block w-5 h-5 rounded-full border"
+                                    className="inline-block w-5 h-5 rounded-full border border-gray-300"
                                     style={{ backgroundColor: colorObj.colorName?.colorCode }}
                                   ></span>
                                   <span>{colorObj.colorName?.color}</span>
