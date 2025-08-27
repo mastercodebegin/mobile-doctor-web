@@ -17,9 +17,6 @@ const Dashboard = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch<AppDispatch>()
 
-    // State for animating numbers
-  const [userCount, setUserCount] = useState(0);
-
   // State for ResponseDetails
 const [total, setTotal] = useState<number>(0);
 const [readyToPick, setReadyToPick] = useState<number>(0);
@@ -85,7 +82,8 @@ useEffect(() => {
     READY_TO_DISPATCH,
     DISPATCHED,
     DELIVERED,
-  } = dashboardData.responseDetails;
+  } = dashboardData.responseDetails.ordersCounts;
+
 
   // Increments per frame
   const totalInc = Math.ceil(total / frames) || 0;
@@ -100,16 +98,11 @@ useEffect(() => {
   const dispatchedInc = Math.ceil(DISPATCHED / frames) || 0;
   const deliveredInc = Math.ceil(DELIVERED / frames) || 0;
 
-  // // Old ones
-  const userInc = Math.ceil(1900 / frames) || 0; // static for now
 
   let currentFrame = 0;
 
   const timer = setInterval(() => {
     currentFrame++;
-
-    // old states
-    setUserCount(prev => (prev + userInc > 1900 ? 1900 : prev + userInc));
 
     // new states
     setTotal(prev => (prev + totalInc > total ? total : prev + totalInc));
@@ -131,6 +124,8 @@ useEffect(() => {
 
   return () => clearInterval(timer);
 }, [dashboardData]);
+
+  const userCountsByRole = dashboardData?.responseDetails?.userCountsByRole || {};
 
 
 
@@ -166,14 +161,23 @@ if(isLoading){
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       
       {/* Users Card */}
-      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
-        <div className="flex items-center mb-2">
-          <Users size={20} className="text-green-500 mr-2" />
-          <span className="text-green-500 font-medium">Users</span>
-        </div>
-        <h2 className="text-3xl font-bold text-gray-800">+{userCount.toLocaleString()}</h2>
-        <p className="text-gray-400 text-sm mt-1">Steady growth</p>
-      </div>
+      {/* Dynamic User Roles Cards */}
+{Object.entries(userCountsByRole).map(([role, count]) => (
+  <div
+    key={role}
+    className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103"
+  >
+    <div className="flex items-center mb-2">
+      <Users size={20} className="text-green-500 mr-2" />
+      <span className="text-green-500 font-medium capitalize">
+        {role}
+      </span>
+    </div>
+    <h2 className="text-3xl font-bold text-gray-800">{count.toLocaleString()}</h2>
+    <p className="text-gray-400 text-sm mt-1">Users with {role} role</p>
+  </div>
+))}
+
 
       {/* Total Orders */}
       <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">

@@ -4,7 +4,7 @@ import { UrlConstants } from "../../util/practice/UrlConstants";
 
 const storedData = localStorage.getItem("dashboard")
 
-interface ResponseDetails {
+interface OrdersCounts {
   total: number;
   READY_TO_PICK: number;
   PENDING: number;
@@ -16,6 +16,17 @@ interface ResponseDetails {
   READY_TO_DISPATCH: number;
   DISPATCHED: number;
   DELIVERED: number;
+}
+
+interface UserCountsByRole {
+manager: number;
+admin: number;
+customer: number
+}
+
+interface ResponseDetails {
+ordersCounts: OrdersCounts;
+userCountsByRole: UserCountsByRole;
 }
 
 interface DashboardResponse {
