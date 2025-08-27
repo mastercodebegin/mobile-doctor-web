@@ -64,7 +64,7 @@ GET_ALL_CITIES: 'cities/getAll',
 GET_CITIES_BY_ID: 'cities/findByPK',
 GET_CITIES_BY_STATE_ID: 'cities/getCitiesByStateId',
 ADD_CITIES: 'cities/create',
-GET_ALL_BRANCH: '',
+GET_ALL_BRANCH: 'centre/getAll',
 GET_BRANCH_BY_ID: 'centre/findById',
 ADD_BRANCH: 'centre/create',
 
