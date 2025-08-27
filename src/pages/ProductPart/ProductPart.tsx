@@ -6,11 +6,11 @@ import { ArrowDown, ArrowUp, ClearFilter, DeleteClass, DeleteIcon, EditClass, Ed
 import { toast } from 'react-toastify';
 import Loading from '../../components/Loading';
 import { GetAllCategory } from '../AddCategory/AddCategorySlice';
-import { GetAllSubCategory, GetAllSubCategoryById } from '../AddSubCategory/SubCategorySlice';
-import { GetAllModalIssues } from '../ModalIssues/ModalIssuesSlice';
+import { GetAllSubCategoryById } from '../AddSubCategory/SubCategorySlice';
+import { GetAllProductPartsBySubCategory } from '../ModalIssues/ModalIssuesSlice';
 import { CreateInventory, DeleteInventory, GetAllProductPart, GetAllProductPartBySubCategoryId, Update, UpdateInventory, ReFillInventory, InventoryHistory, OrderInventoryUse, clearHistoryCache } from './ProductPartSlice';
 import ConfirmationModal from '../../components/ConfirmationModal';
-import { FetchAllModalNumber } from '../AddMobileNumber/MobileNumberSlice';
+import { FetchModalBySubCategory } from '../AddMobileNumber/MobileNumberSlice';
 import IphoneImage from "../../assets/Laptop_Image.png";
 
 const ProductPart = () => {
@@ -22,8 +22,8 @@ const ProductPart = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  const [filterSubCategory, setFilterSubCategory] = useState<any>(null);
   const [filterCategory, setFilterCategory] = useState<any>(null);
+  const [filterSubCategory, setFilterSubCategory] = useState<any>(null);
   const [selectedModel, setSelectedModel] = useState<any>(null)
   const [selectedProductPartLabel, setSelectedProductPartLabel] = useState<any>(null)
   const [quantity, setQuantity] = useState<any>(0);
@@ -44,20 +44,19 @@ const ProductPart = () => {
   const { SubCategoriesData } = useSelector((state: RootState) => state.SubCategorySlice)
   const { data } = useSelector((state: RootState) => state.AddCategorySlice)
   const { ModalIssuesData } = useSelector((state: RootState) => state.ModalIssuesSlice);
-  const {AllModalNumberData} = useSelector((state: RootState) => state.MobileNumberSlice);
+  const { MobileNumberData } = useSelector((state: RootState) => state.MobileNumberSlice);
 
   const usersPerPage = 5;
   const paginatedUsers = ProductPartData.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage)
 
-  // Filter Category Change - Top Left Filter
-  const handleFilterCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  // 2. Update the unified category handler
+  const handleFilterCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>, context = 'filter') => {
     const selectedValue = e.target.value;
 
     if (selectedValue === "") {
       setFilterCategory(null);
       setFilterSubCategory(null);
       setCurrentPage(1);
-      dispatch(GetAllModalIssues());
       return;
     }
 
@@ -65,44 +64,88 @@ const ProductPart = () => {
     setFilterCategory(selectedCat);
     setFilterSubCategory(null);
 
-    // API call to get subcategories by category ID
+    // Reset modal model selection if in modal context
+    if (context === 'modal') {
+      setSelectedModel(null);
+    } else {
+      setCurrentPage(1);
+    }
+
+    // API call to get subcategories by category ID (same for both contexts)
     dispatch(GetAllSubCategoryById(selectedCat.id))
       .unwrap()
       .then((res: any) => {
-        console.log("Filter SubCategories Response:", res);
-        setCurrentPage(1);
+        console.log(context === 'modal' ? "Modal SubCategories Response:" : "Filter SubCategories Response:", res);
+        if (context === 'filter') {
+          setCurrentPage(1);
+        }
       })
       .catch((err: any) => {
-        console.log("Filter SubCategories API Error:", err);
+        console.log(context === 'modal' ? "Modal SubCategories API Error:" : "Filter SubCategories API Error:", err);
         toast.error("Failed to fetch subcategories");
       });
   };
 
-  // Filter SubCategory Change - Top Left Filter
-  const handleFilterSubCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  // 3. Update the unified subcategory handler
+  const handleFilterSubCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>, context = 'filter') => {
     const selectedValue = e.target.value;
 
     if (selectedValue === "") {
       setFilterSubCategory(null);
       setCurrentPage(1);
+
+      // Reset modal model if in modal context
+      if (context === 'modal') {
+        setSelectedModel(null);
+      }
       return;
     }
 
     const selectedSubCat = JSON.parse(selectedValue);
     setFilterSubCategory(selectedSubCat);
 
-    // API call to fetch modal issues by subcategory
-    dispatch(GetAllProductPartBySubCategoryId({ subCategoryId: selectedSubCat.id }))
-      .unwrap()
-      .then((res: any) => {
-        console.log("Filtered Data Response:", res);
-        setCurrentPage(1);
-      })
-      .catch((err: any) => {
-        console.log("Filter API Error:", err);
-        toast.error("Failed to fetch filtered data");
-      });
+    if (context === 'modal') {
+      // Modal context - fetch modal numbers AND product parts
+      setSelectedModel(null);
+
+      // First API call - fetch modal numbers
+      dispatch(FetchModalBySubCategory(selectedSubCat.id))
+        .unwrap()
+        .then((res: any) => {
+          console.log("Modal Numbers Response:", res);
+        })
+        .catch((err: any) => {
+          console.log("Modal Numbers API Error:", err);
+          toast.error("Failed to fetch modal numbers");
+        });
+
+      // Second API call - fetch product parts for dropdown
+      dispatch(GetAllProductPartsBySubCategory(selectedSubCat.id))
+        .unwrap()
+        .then((res: any) => {
+          console.log("Product Parts Response:", res);
+        })
+        .catch((err: any) => {
+          console.log("Product Parts API Error:", err);
+          toast.error("Failed to fetch product parts");
+        });
+
+    } else {
+      // UI filter context - fetch product parts
+      dispatch(GetAllProductPartBySubCategoryId({ subCategoryId: selectedSubCat.id }))
+        .unwrap()
+        .then((res: any) => {
+          console.log("Filtered Data Response:", res);
+          setCurrentPage(1);
+        })
+        .catch((err: any) => {
+          console.log("Filter API Error:", err);
+          toast.error("Failed to fetch filtered data");
+        });
+    }
   };
+
+
 
   // Clear filter function
   const handleClearFilter = () => {
@@ -483,17 +526,17 @@ const ProductPart = () => {
                                 </span>
                               </td>
                               <td className="px-4 py-2 align-middle">
-  {(() => {
-    // First check record.user, then fallback to record.inventory.user
-    const user = record?.user || record?.inventory?.user;
-    return user ? `${user.firstName} ${user.lastName ?? ""}`.trim() : '--';
-  })()}
-</td>
+                                {(() => {
+                                  // First check record.user, then fallback to record.inventory.user
+                                  const user = record?.user || record?.inventory?.user;
+                                  return user ? `${user.firstName} ${user.lastName ?? ""}`.trim() : '--';
+                                })()}
+                              </td>
                               <td className="px-4 py-2 align-middle">
-  {statusBadge.label === "Initial" 
-    ? record?.inventory?.notes || '--' 
-    : record?.notes || '--'}
-</td>
+                                {statusBadge.label === "Initial"
+                                  ? record?.inventory?.notes || '--'
+                                  : record?.notes || '--'}
+                              </td>
 
                             </tr>
                           );
@@ -547,8 +590,8 @@ const ProductPart = () => {
                                       key={pageIndex}
                                       onClick={() => handleNextPrevClick(user.id, pageIndex)}
                                       className={`relative inline-flex items-center px-3.5 py-1 text-sm font-medium rounded-md ${currentPage === pageIndex
-                                          ? `z-10 ${ThemeBackgroundColor} text-white`
-                                          : 'bg-white text-gray-500 hover:bg-gray-200'
+                                        ? `z-10 ${ThemeBackgroundColor} text-white`
+                                        : 'bg-white text-gray-500 hover:bg-gray-200'
                                         }`}
                                     >
                                       {pageIndex + 1}
@@ -562,8 +605,8 @@ const ProductPart = () => {
                                 <button
                                   onClick={() => handleNextPrevClick(user.id, currentPage + 1)}
                                   className={`relative inline-flex hover:rounded-md items-center px-2 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors duration-200 ${currentPage >= totalPages - 1
-                                      ? 'bg-gray-100 border-gray-300 hover:bg-gray-100 text-gray-400 cursor-not-allowed'
-                                      : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50 cursor-pointer'
+                                    ? 'bg-gray-100 border-gray-300 hover:bg-gray-100 text-gray-400 cursor-not-allowed'
+                                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50 cursor-pointer'
                                     }`}
                                 >
                                   Next
@@ -638,7 +681,7 @@ const ProductPart = () => {
           currentPage: paginationData.number || 0,
           totalPages: paginationData.totalPages || 0,
           totalElements: paginationData.totalElements || 0,
-          data: History.data[userId] || [],  
+          data: History.data[userId] || [],
         };
       });
 
@@ -650,9 +693,7 @@ const ProductPart = () => {
   useEffect(() => {
     setIsLoaded(true);
     dispatch(GetAllProductPart());
-    dispatch(FetchAllModalNumber());
     dispatch(GetAllCategory());
-    dispatch(GetAllSubCategory());
   }, [])
 
   // // Sync data to localStorage whenever InventoryData changes
@@ -690,10 +731,11 @@ const ProductPart = () => {
 
         <div className="mt-10 flex items-center justify-between">
           <div className="flex items-center gap-2">
+
             {/* Category Filter */}
             <select
               value={filterCategory ? JSON.stringify(filterCategory) : ""}
-              onChange={handleFilterCategoryChange}
+              onChange={(e) => handleFilterCategoryChange(e, 'filter')} // Add context parameter
               className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="" disabled>Filter by Category</option>
@@ -705,20 +747,20 @@ const ProductPart = () => {
             </select>
 
             {/* SubCategory Filter - Only show when category is selected */}
-            {filterCategory && (
+        {filterCategory && (
               <select
-                value={filterSubCategory ? JSON.stringify(filterSubCategory) : ""}
-                onChange={handleFilterSubCategoryChange}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="" disabled>Filter by SubCategory</option>
-                {SubCategoriesData?.filter(subCat => subCat.category?.id === filterCategory?.id)?.map((subCat) => (
-                  <option key={subCat.id} value={JSON.stringify(subCat)}>
-                    {subCat.name}
-                  </option>
-                ))}
-              </select>
-            )}
+              value={filterSubCategory ? JSON.stringify(filterSubCategory) : ""}
+              onChange={(e) => handleFilterSubCategoryChange(e, 'filter')} // Add context parameter
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="" disabled>Filter by SubCategory</option>
+              {SubCategoriesData?.filter(subCat => subCat.category?.id === filterCategory?.id)?.map((subCat) => (
+                <option key={subCat.id} value={JSON.stringify(subCat)}>
+                  {subCat.name}
+                </option>
+              ))}
+            </select>
+        )}
 
             {(filterCategory || filterSubCategory) && (
               <button
@@ -732,7 +774,11 @@ const ProductPart = () => {
 
           {/* Add Button */}
           <div className="flex items-center gap-4">
-            <button onClick={() => setShowModal(true)} className={SubmitButtonClass}>Add</button>
+            <button onClick={() => {
+              setShowModal(true);
+              setFilterCategory(null);
+              setFilterSubCategory(null)
+            }} className={SubmitButtonClass}>Add</button>
           </div>
         </div>
 
@@ -831,7 +877,7 @@ const ProductPart = () => {
                               onClick={() => handleHistoryToggle(user.id)}
                               className={EditClass}
                             >
-                              {history === user.id ? ( ArrowUp ) : ( ArrowDown )}
+                              {history === user.id ? (ArrowUp) : (ArrowDown)}
                             </button>
                           </td>
                           <td className={TableDataClass}>
@@ -887,8 +933,8 @@ const ProductPart = () => {
                 &times;
               </button>
 
-{/* Product-Model-Number Selection - Only for Add/Edit Mode */}
-{!isReFillMode && !isOrderUseMode && (
+              {/* Product-Model-Number Selection - Only for Add/Edit Mode */}
+              {/* {!isReFillMode && !isOrderUseMode && (
      <div className="mb-6">
                   <label className="block text-lg font-medium mb-2">Product Model Number</label>
                   <select
@@ -908,7 +954,65 @@ const ProductPart = () => {
                     ))}
                   </select>
                 </div>
-)}
+)} */}
+
+              {!isReFillMode && !isOrderUseMode && (
+                <>
+                  <div className="mb-6">
+                    <label className="block text-lg font-medium mb-2">Category</label>
+                    <select
+                      value={filterCategory ? JSON.stringify(filterCategory) : ""}
+                      onChange={(e) => handleFilterCategoryChange(e, 'modal')}
+                      className={`${inputClass} ${isEditMode ? "cursor-not-allowed bg-gray-100" : ""}`}
+                      disabled={isEditMode}
+                    >
+                      <option value="" disabled>Select Category</option>
+                      {data?.map((category) => (
+                        <option key={category.id} value={JSON.stringify(category)}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="mb-6">
+                    <label className="block text-lg font-medium mb-2">Sub Category</label>
+                    <select
+                      value={filterSubCategory ? JSON.stringify(filterSubCategory) : ""}
+                      onChange={(e) => handleFilterSubCategoryChange(e, 'modal')}
+                      className={`${inputClass} ${isEditMode ? "cursor-not-allowed bg-gray-100" : ""}`}
+                      disabled={isEditMode || !filterCategory}
+                    >
+                      <option value="" disabled>Select Sub Category</option>
+                      {SubCategoriesData?.filter(subCat => subCat.category?.id === filterCategory?.id)?.map((subCategory) => (
+                        <option key={subCategory.id} value={JSON.stringify(subCategory)}>
+                          {subCategory.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="mb-6">
+                    <label className="block text-lg font-medium mb-2">Product Model Number</label>
+                    <select
+                      value={selectedModel ? JSON.stringify(selectedModel) : ""}
+                      onChange={(e) => {
+                        const selectedObject = JSON.parse(e.target.value);
+                        setSelectedModel(selectedObject);
+                      }}
+                      className={`${inputClass} ${isEditMode ? "cursor-not-allowed bg-gray-100" : ""}`}
+                      disabled={isEditMode || !filterSubCategory}
+                    >
+                      <option value="" disabled>Select Model Number</option>
+                      {MobileNumberData?.map((model) => (
+                        <option key={model.id} value={JSON.stringify(model)}>
+                          {model.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              )}
 
 
               {/* Product-Part-Label Selection - Only for Add/Edit Mode */}
