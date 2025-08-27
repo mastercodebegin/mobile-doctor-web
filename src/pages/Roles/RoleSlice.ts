@@ -1,8 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getRequestMethod, getRequestMethodWithParam, postRequestMethod } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
+import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
-const storeData = localStorage.getItem("role")
+const storeData = LocalStorageManager.getData(STORAGE_KEYS.ROLE);
 
 interface User {
     id: string;
@@ -19,7 +20,7 @@ interface Role {
 const initialState: Role = {
     isLoading: false,
     isSuccess: false,
-    roleData : storeData ? JSON.parse(storeData) : [],
+    roleData : storeData,
     Edit: {role: { name: "" }, isEdit: false}
 }
 
@@ -37,7 +38,7 @@ reducers: {
                             return {
                                 isLoading: false,
                                 isSuccess: false,
-                                roleData: storeData ? JSON.parse(storeData) : [],
+                                roleData: [],
                                 Edit: { role: {}, isEdit: false }
                             }
                         }
@@ -51,7 +52,8 @@ state.isSuccess = false
 .addCase(GetAllRoles.fulfilled , (state , action) =>{
 state.isLoading = false;
 state.isSuccess = true;
-state.roleData = action.payload
+state.roleData = action.payload;
+LocalStorageManager.saveData(STORAGE_KEYS.ROLE, action.payload)
 })
 .addCase(GetAllRoles.rejected , (state , action) =>{
 state.isLoading = false;
@@ -66,7 +68,8 @@ state.isSuccess = false
 .addCase(GetRoleById.fulfilled , (state , action) =>{
 state.isLoading = false;
 state.isSuccess = true;
-state.roleData = action.payload
+state.roleData = action.payload;
+LocalStorageManager.saveData(STORAGE_KEYS.ROLE, action.payload)
 })
 .addCase(GetRoleById.rejected , (state , action) =>{
 state.isLoading = false;
@@ -81,7 +84,8 @@ state.isSuccess = false
 .addCase(CreateRole.fulfilled , (state , action) =>{
 state.isLoading = false;
 state.isSuccess = true;
-state.roleData = [...state.roleData , action.payload]
+state.roleData = [...state.roleData , action.payload];
+LocalStorageManager.saveData(STORAGE_KEYS.ROLE, [...state.roleData])
 })
 .addCase(CreateRole.rejected , (state , action) =>{
 state.isLoading = false
@@ -89,21 +93,22 @@ state.isSuccess = false
 console.log("Category Not Created..." , action.payload)
 })
 
-                      .addCase(UpdtaeRole.pending, (state) =>{
-                            state.isLoading = true
-                            state.isSuccess = false
-                        })
-                        .addCase(UpdtaeRole.fulfilled , (state , action) =>{
-                            state.isLoading = false
-                            state.isSuccess = true
-                            state.roleData = state.roleData.map((brand) => brand.id === action.payload?.id ? action.payload : brand)
-                            state.Edit = {isEdit : false, role : {name : ""}}
-                        })
-                        .addCase(UpdtaeRole.rejected , (state , action) =>{
-                             state.isLoading = false
-                state.isSuccess = false
-                console.log(action.payload || "Failed to update Brand")
-                        })
+  .addCase(UpdtaeRole.pending, (state) =>{
+  state.isLoading = true
+  state.isSuccess = false
+  })
+  .addCase(UpdtaeRole.fulfilled , (state , action) =>{
+  state.isLoading = false
+  state.isSuccess = true
+  state.roleData = state.roleData.map((brand) => brand.id === action.payload?.id ? action.payload : brand)
+  state.Edit = {isEdit : false, role : {name : ""}};
+  LocalStorageManager.saveData(STORAGE_KEYS.ROLE, [...state.roleData])
+  })
+  .addCase(UpdtaeRole.rejected , (state , action) =>{
+  state.isLoading = false
+  state.isSuccess = false
+  console.log(action.payload || "Failed to update Brand")
+  })
 
 }
 })

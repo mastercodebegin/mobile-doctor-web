@@ -54,7 +54,8 @@ const Order = () => {
     endDate: null
   });
   const usersPerPage = 5;
-  const paginatedUsers = Orders?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage)
+  const OrderArray = Array.isArray(Orders) ? Orders : Orders ? [Orders] : [];
+  const paginatedUsers = OrderArray?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage)
 
   // Status options - Add more as needed
   const statusOptions = [
@@ -312,11 +313,11 @@ const Order = () => {
   }, [unitRepairStatus, filterDate]);
 
   // Sync data to localStorage whenever Orders changes
-  useEffect(() => {
-    if (Orders.length > 0) {
-      localStorage.setItem('orders', JSON.stringify(Orders));
-    }
-  }, [Orders])
+  // useEffect(() => {
+  //   if (Orders.length > 0) {
+  //     localStorage.setItem('orders', JSON.stringify(Orders));
+  //   }
+  // }, [Orders])
 
   if (isLoading) {
     return <Loading />

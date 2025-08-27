@@ -2,8 +2,9 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { pageSize } from "../../helper/ApplicationConstants";
 import { getRequestMethodWithParam, postRequestMethod, putRequestMethod } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
+import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
-const storeData = localStorage.getItem('support-ticket')
+const storeData = LocalStorageManager.getData(STORAGE_KEYS.SUPPORT_TICKET);
 
 // Role interface
 interface Role {
@@ -54,7 +55,7 @@ interface SupportTicketState {
 const initialState: SupportTicketState = {
     isLoading: false,
     isSuccess: false,
-    SupportTicketData: storeData ? JSON.parse(storeData) : [],
+    SupportTicketData: storeData,
     Edit: {
         isEdit: false,
         supportTicket: {
@@ -107,7 +108,8 @@ const SupportTicketSlice = createSlice({
         .addCase(GetAllSupportTicket.fulfilled, (state, action) =>{
             state.isLoading = false
             state.isSuccess = true
-            state.SupportTicketData = action.payload.content
+            state.SupportTicketData = action.payload.content;
+            LocalStorageManager.saveData(STORAGE_KEYS.SUPPORT_TICKET, action.payload);
         })
         .addCase(GetAllSupportTicket.rejected, (state, action) =>{
             state.isLoading = false
@@ -124,7 +126,8 @@ const SupportTicketSlice = createSlice({
         .addCase(GetAllSupportTicketByTicketNumber.fulfilled, (state, action) =>{
             state.isLoading = false
             state.isSuccess = true
-            state.SupportTicketData = action.payload.content
+            state.SupportTicketData = action.payload.content;
+            LocalStorageManager.saveData(STORAGE_KEYS.SUPPORT_TICKET, action.payload);
         })
         .addCase(GetAllSupportTicketByTicketNumber.rejected, (state, action) =>{
             state.isLoading = false
@@ -141,7 +144,8 @@ const SupportTicketSlice = createSlice({
         .addCase(AddsupportTicket.fulfilled, (state, action) =>{
             state.isLoading = false
             state.isSuccess = true
-            state.SupportTicketData = [...state.SupportTicketData, action.payload]
+            state.SupportTicketData = [...state.SupportTicketData, action.payload];
+            LocalStorageManager.saveData(STORAGE_KEYS.SUPPORT_TICKET, [...state.SupportTicketData]);
         })
         .addCase(AddsupportTicket.rejected, (state, action) =>{
             state.isLoading = false
@@ -166,7 +170,7 @@ const SupportTicketSlice = createSlice({
             }
 
             // Sync to localStorage
-            localStorage.setItem('support-ticket', JSON.stringify(state.SupportTicketData));
+            LocalStorageManager.saveData(STORAGE_KEYS.SUPPORT_TICKET, [...state.SupportTicketData]);
 
             // Reset Edit State
             state.Edit = initialState.Edit

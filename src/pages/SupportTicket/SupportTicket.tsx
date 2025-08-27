@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { AppDispatch, RootState } from "../../redux/store";
 import { useDispatch, useSelector } from "react-redux";
 import Loading from "../../components/Loading";
@@ -31,7 +31,8 @@ const SupportTicket = () => {
   const { SupportTicketData, isLoading, Edit } = useSelector((state: RootState) => state.SupportTicketSlice)
 
   const usersPerPage = 5;
-  const paginatedUsers = SupportTicketData.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage)
+  const supportTicketArray = Array.isArray(SupportTicketData) ? SupportTicketData : SupportTicketData ? [SupportTicketData] : [];
+  const paginatedUsers = supportTicketArray?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage)
 
   const handleClearFilter = () => {
     setFilterNumber("");               
@@ -142,11 +143,11 @@ const handleEditUser = (ticket: any) => {
   }, [])
 
   // Sync data to localStorage whenever Support-Ticket changes
-  useEffect(() => {
-    if (SupportTicketData.length > 0) {
-      localStorage.setItem('orders', JSON.stringify(SupportTicketData));
-    }
-  }, [SupportTicketData])
+  // useEffect(() => {
+  //   if (SupportTicketData.length > 0) {
+  //     localStorage.setItem('orders', JSON.stringify(SupportTicketData));
+  //   }
+  // }, [SupportTicketData])
 
   useEffect(() => {
 if(Edit?.isEdit && Edit?.supportTicket) {

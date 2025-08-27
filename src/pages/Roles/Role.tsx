@@ -122,7 +122,6 @@ const Role = () => {
 
     useEffect(() => {
         setIsLoaded(true);
-        localStorage.setItem('brand', JSON.stringify(roleData))
         dispatch(GetAllRoles())
     }, [])
 

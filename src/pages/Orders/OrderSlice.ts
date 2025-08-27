@@ -1,8 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { postRequestMethod, putRequestMethod } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
+import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
-const storeData = localStorage.getItem('orders')
+const storeData = LocalStorageManager.getData(STORAGE_KEYS.ORDERS);
 
 interface IEditOrder {
   unitRepairStatus: "PENDING" | "COMPLETED" | "CANCELLED" | string;
@@ -20,14 +21,14 @@ interface EditOrder {
 export interface OrdersState {
   isLoading: boolean;
   isSuccess: boolean;
-  Orders: any[]; // or create a proper type if needed
+  Orders: any[]; 
   Edit:EditOrder
 }
 
 const initialState = {
     isLoading: false,
     isSuccess: false,
-    Orders: storeData ? JSON.parse(storeData) : [],
+    Orders: storeData,
      Edit: {
     isEdit: false,
     order: {
@@ -50,20 +51,6 @@ const OrderSlice = createSlice({
         }
     },
 
-//   reducers: {
-//     update: (state, action) => {
-//         // FIXED: Handle both initial edit data and update data
-//         state.Edit.order = {
-//             unitRepairStatus: action.payload.unitRepairStatus || "PENDING",
-//             orderId: action.payload.orderId,
-//             defectDescriptionByEngineer: action.payload.defectDescriptionByEngineer || action.payload.description || "",
-//             price: action.payload.price || "",
-//             orderCompletedOn: action.payload.orderCompletedOn || action.payload.completedOn || ""
-//         };
-//         state.Edit.isEdit = true;
-//     }
-// },
-
     extraReducers: (builder) =>{
         builder
          // Fetch By Id
@@ -75,7 +62,8 @@ const OrderSlice = createSlice({
                 .addCase(GetAllRepairUnitOrderByUserId.fulfilled, (state, action) =>{
                     state.isLoading = false
                     state.isSuccess = true
-                    state.Orders = action.payload?.content
+                    state.Orders = action.payload?.content;
+                    LocalStorageManager.saveData(STORAGE_KEYS.ORDERS, action.payload);
                 })
                 .addCase(GetAllRepairUnitOrderByUserId.rejected, (state, action) =>{
                     state.isLoading = false
@@ -111,7 +99,7 @@ const OrderSlice = createSlice({
                 }
               }
 
-              localStorage.setItem("orders", JSON.stringify(state.Orders));
+              LocalStorageManager.saveData(STORAGE_KEYS.ORDERS, [...state.Orders]);
 
               state.Edit = {
                  isEdit: false,
