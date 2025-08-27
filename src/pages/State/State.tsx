@@ -148,7 +148,6 @@ const handleClearFilter = () =>{
     
         useEffect(() => {
           setIsLoaded(true);
-          localStorage.setItem("state", JSON.stringify(stateData));
           dispatch(GetAllState());
           dispatch(GetAllCountries());
         }, []);

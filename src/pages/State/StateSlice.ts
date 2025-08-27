@@ -1,8 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getRequestMethod, postRequestMethod, putRequestMethod } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
+import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
-const storeData = localStorage.getItem("state");
+const storeData = LocalStorageManager.getData(STORAGE_KEYS.STATE);
 
 interface User {
   id: string | number;
@@ -37,7 +38,7 @@ interface State {
 const initialState: State = {
     isLoading: false,
     isSuccess: false,
-    stateData: storeData ? JSON.parse(storeData) : [],
+    stateData: storeData,
     Edit: {
         isEdit: false, 
         state: {
@@ -57,9 +58,11 @@ const StateSlice = createSlice({
      initialState,
      reducers: {
         Remove: (state, action) =>{
+            const updatedStateData = state.stateData.filter(item => item.id !== action.payload);
+            LocalStorageManager.saveData(STORAGE_KEYS.STATE, updatedStateData)
             return{
                 ...state,
-                stateData: state.stateData.filter(item => item.id !== action.payload)
+                stateData:  updatedStateData
             }
         },
         restore: (state) =>{
@@ -95,7 +98,8 @@ const StateSlice = createSlice({
           .addCase(GetAllState.fulfilled , (state , action) =>{
           state.isLoading = false;
           state.isSuccess = true;
-          state.stateData = action.payload
+          state.stateData = action.payload;
+          LocalStorageManager.saveData(STORAGE_KEYS.STATE, action.payload);
           })
           .addCase(GetAllState.rejected , (state , action) =>{
           state.isLoading = false;
@@ -110,7 +114,8 @@ const StateSlice = createSlice({
           .addCase(GetStateById.fulfilled , (state , action) =>{
           state.isLoading = false;
           state.isSuccess = true;
-          state.stateData = action.payload
+          state.stateData = action.payload;
+          LocalStorageManager.saveData(STORAGE_KEYS.STATE, action.payload);
           })
           .addCase(GetStateById.rejected , (state , action) =>{
           state.isLoading = false;
@@ -125,7 +130,8 @@ const StateSlice = createSlice({
           .addCase(GetStateByCountryId.fulfilled , (state , action) =>{
           state.isLoading = false;
           state.isSuccess = true;
-          state.stateData = action.payload
+          state.stateData = action.payload;
+          LocalStorageManager.saveData(STORAGE_KEYS.STATE, action.payload);
           })
           .addCase(GetStateByCountryId.rejected , (state , action) =>{
           state.isLoading = false;
@@ -140,7 +146,8 @@ const StateSlice = createSlice({
           .addCase(CreateState.fulfilled , (state , action) =>{
           state.isLoading = false;
           state.isSuccess = true;
-          state.stateData = [...state.stateData , action.payload]
+          state.stateData = [...state.stateData , action.payload];
+          LocalStorageManager.saveData(STORAGE_KEYS.STATE, [...state.stateData]);
           })
           .addCase(CreateState.rejected , (state , action) =>{
           state.isLoading = false
@@ -156,7 +163,8 @@ state.isSuccess = false
 state.isLoading = false
 state.isSuccess = true
 state.stateData = state.stateData.map((brand) => brand.id === action.payload?.id ? action.payload : brand)
-state.Edit = {isEdit : false, state : {id: 0, name: "", countries: null, isoCode: ''},}
+state.Edit = {isEdit : false, state : {id: 0, name: "", countries: null, isoCode: ''},};
+LocalStorageManager.saveData(STORAGE_KEYS.STATE, [...state.stateData]);;
                                                 })
 .addCase(UpdateState.rejected , (state , action) =>{
 state.isLoading = false

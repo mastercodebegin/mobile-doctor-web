@@ -1,8 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getRequestMethod, postRequestMethod, putRequestMethod } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
+import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
-const storeData = localStorage.getItem("city");
+const storeData = LocalStorageManager.getData(STORAGE_KEYS.CITY);
 
 interface User {
   id: number;
@@ -44,7 +45,7 @@ interface City {
 const initialState: City = {
     isLoading: false,
     isSuccess: false,
-    cityData: storeData ? JSON.parse(storeData) : [],
+    cityData: storeData,
     Edit: {isEdit: false, city: {id: 0, name: '', states: {id: 0, name: '', countries: {id: 0, name: '', isoCode: ''}}}}
 }
 
@@ -53,9 +54,11 @@ const CitySlice = createSlice({
      initialState,
     reducers: {
         Remove: (state, action) =>{
+            const updatedCityData = state.cityData.filter(item => item.id !== action.payload);
+            LocalStorageManager.saveData(STORAGE_KEYS.CITY, updatedCityData)
             return {
                 ...state,
-                cityData: state.cityData.filter(item => item.id !== action.payload)
+                cityData: updatedCityData
             }
         },
         Update: (state, action) =>{
@@ -95,7 +98,8 @@ const CitySlice = createSlice({
              .addCase(GetAllCities.fulfilled , (state , action) =>{
              state.isLoading = false;
              state.isSuccess = true;
-             state.cityData = action.payload
+             state.cityData = action.payload;
+             LocalStorageManager.saveData(STORAGE_KEYS.CITY, action.payload);
              })
              .addCase(GetAllCities.rejected , (state , action) =>{
              state.isLoading = false;
@@ -110,7 +114,8 @@ const CitySlice = createSlice({
              .addCase(GetCitiesById.fulfilled , (state , action) =>{
              state.isLoading = false;
              state.isSuccess = true;
-             state.cityData = action.payload
+             state.cityData = action.payload;
+             LocalStorageManager.saveData(STORAGE_KEYS.CITY, action.payload);
              })
              .addCase(GetCitiesById.rejected , (state , action) =>{
              state.isLoading = false;
@@ -125,7 +130,8 @@ const CitySlice = createSlice({
              .addCase(GetCitiesByStateId.fulfilled , (state , action) =>{
              state.isLoading = false;
              state.isSuccess = true;
-             state.cityData = action.payload
+             state.cityData = action.payload;
+             LocalStorageManager.saveData(STORAGE_KEYS.CITY, action.payload);
              })
              .addCase(GetCitiesByStateId.rejected , (state , action) =>{
              state.isLoading = false;
@@ -140,7 +146,8 @@ const CitySlice = createSlice({
              .addCase(CreateCities.fulfilled , (state , action) =>{
              state.isLoading = false;
              state.isSuccess = true;
-             state.cityData = [...state.cityData , action.payload]
+             state.cityData = [...state.cityData , action.payload];
+             LocalStorageManager.saveData(STORAGE_KEYS.CITY, [...state.cityData]);
              })
              .addCase(CreateCities.rejected , (state , action) =>{
              state.isLoading = false
@@ -156,12 +163,13 @@ const CitySlice = createSlice({
    state.isLoading = false
    state.isSuccess = true
    state.cityData = state.cityData.map((brand) => brand.id === action.payload?.id ? action.payload : brand)
-   state.Edit = {isEdit : false, city : {id: 0, name: "", states: null,},}
+   state.Edit = {isEdit : false, city : {id: 0, name: "", states: null,},};
+   LocalStorageManager.saveData(STORAGE_KEYS.CITY, [...state.cityData]);
                                                    })
    .addCase(UpdateCities.rejected , (state , action) =>{
    state.isLoading = false
    state.isSuccess = false
-   console.log(action.payload || "Failed to update Brand")
+   console.log(action.payload || "Failed to update Cities")
                                      })
        }
 })

@@ -185,7 +185,6 @@ const City = () => {
 
   useEffect(() => {
     setIsLoaded(true);
-    localStorage.setItem("city", JSON.stringify(stateData));
     dispatch(GetAllCountries());
     dispatch(GetAllCities());
   }, []);
@@ -391,7 +390,7 @@ const City = () => {
             {/* Reusable Pagination Component */}
             <Pagination
               currentPage={currentPage}
-              totalCount={stateData.length}
+              totalCount={cityData.length}
               itemsPerPage={usersPerPage}
               onPageChange={(page) => setCurrentPage(page)}
             />
@@ -418,7 +417,7 @@ const City = () => {
               </button>
 
 
-              {/* State Selection - FIXED DROPDOWN */}
+              {/* Country Selection - FIXED DROPDOWN */}
               <div className="mb-6">
                 <label className="block text-lg font-medium mb-2">Select Country</label>
                 <select

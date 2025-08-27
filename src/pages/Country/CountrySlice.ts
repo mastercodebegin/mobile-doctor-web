@@ -1,8 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getRequestMethod, postRequestMethod, putRequestMethod } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
+import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
-const storeData = localStorage.getItem("country")
+const storeData = LocalStorageManager.getData(STORAGE_KEYS.COUNTRY);
 
 interface User {
   id: number;
@@ -20,7 +21,7 @@ interface Country {
 const initialState: Country = {
     isLoading: false,
     isSuccess: false,
-    countryData: storeData ? JSON.parse(storeData) : [],
+    countryData: storeData,
     Edit: {country: {name: ""}, isEdit: false}
 }
 
@@ -43,9 +44,11 @@ const CountrySlice = createSlice({
             }
         },
         Remove: (state, action) =>{
+            const updateCountryData = state.countryData.filter(item => item.id !== action.payload);
+    LocalStorageManager.saveData(STORAGE_KEYS.COUNTRY, updateCountryData);
             return {
                 ...state,
-                countryData: state.countryData.filter(item => item.id !== action.payload)
+                countryData: updateCountryData
             }
         }
      },
@@ -58,7 +61,8 @@ const CountrySlice = createSlice({
   .addCase(GetAllCountries.fulfilled , (state , action) =>{
   state.isLoading = false;
   state.isSuccess = true;
-  state.countryData = action.payload
+  state.countryData = action.payload;
+  LocalStorageManager.saveData(STORAGE_KEYS.COUNTRY, action.payload);
   })
   .addCase(GetAllCountries.rejected , (state , action) =>{
   state.isLoading = false;
@@ -73,7 +77,8 @@ const CountrySlice = createSlice({
   .addCase(GetCountryById.fulfilled , (state , action) =>{
   state.isLoading = false;
   state.isSuccess = true;
-  state.countryData = action.payload
+  state.countryData = action.payload;
+  LocalStorageManager.saveData(STORAGE_KEYS.COUNTRY, action.payload);
   })
   .addCase(GetCountryById.rejected , (state , action) =>{
   state.isLoading = false;
@@ -88,13 +93,15 @@ const CountrySlice = createSlice({
   .addCase(CreateCountry.fulfilled , (state , action) =>{
   state.isLoading = false;
   state.isSuccess = true;
-  state.countryData = [...state.countryData , action.payload]
+  state.countryData = [...state.countryData , action.payload];
+  LocalStorageManager.saveData(STORAGE_KEYS.COUNTRY, [...state.countryData]);
   })
   .addCase(CreateCountry.rejected , (state , action) =>{
   state.isLoading = false
   state.isSuccess = false
   console.log("Country Not Created..." , action.payload)
   })
+
   
                         .addCase(UpdateCountry.pending, (state) =>{
                               state.isLoading = true
@@ -104,7 +111,8 @@ const CountrySlice = createSlice({
                               state.isLoading = false
                               state.isSuccess = true
                               state.countryData = state.countryData.map((brand) => brand.id === action.payload?.id ? action.payload : brand)
-                              state.Edit = {isEdit : false, country : {name : ""}}
+                              state.Edit = {isEdit : false, country : {name : ""}};
+                              LocalStorageManager.saveData(STORAGE_KEYS.COUNTRY, [...state.countryData]);
                           })
                           .addCase(UpdateCountry.rejected , (state , action) =>{
                                state.isLoading = false

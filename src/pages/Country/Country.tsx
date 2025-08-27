@@ -7,6 +7,7 @@ import { AppDispatch, RootState } from "../../redux/store"
 import Loading from "../../components/Loading"
 import { toast } from "react-toastify"
 import { CreateCountry, GetAllCountries, GetCountryById, Remove, restore, Update, UpdateCountry } from "./CountrySlice"
+import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager"
 
 const Country = () => {
   const { countryData, isLoading, Edit } = useSelector((state: RootState) => state.CountrySlice)
@@ -144,11 +145,12 @@ const Country = () => {
     }
   }, [Edit]);
 
-  // Save to localStorage whenever data changes
   useEffect(() => {
     setIsLoaded(true);
-    localStorage.setItem("country", JSON.stringify(countryData));
-    dispatch(GetAllCountries())
+    if (!LocalStorageManager.hasData(STORAGE_KEYS.COUNTRY)) {
+        dispatch(GetAllCountries());
+    }
+    dispatch(GetAllCountries())    
   }, []);
 
   if (isLoading) {
