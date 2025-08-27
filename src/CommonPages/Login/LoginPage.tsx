@@ -70,6 +70,8 @@ useEffect(() => {
     navigate("/orders", { replace: true });
   } else if (data?.role?.name === "admin") {
     navigate("/", { replace: true });
+  } else if (data?.role?.name === "manager") {
+    navigate("/", { replace: true });
   } else if (data?.role?.name === "vendor") {
     navigate("/product-part", {replace: true})
   }

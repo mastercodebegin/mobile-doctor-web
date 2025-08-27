@@ -1,8 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getRequestMethod, getRequestMethodWithParam, postRequestMethod, putRequestMethod, putRequestMethodWithParam } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
+import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
-const storeData = localStorage.getItem('product-part')
+const storeData = LocalStorageManager.getData(STORAGE_KEYS.PRODUCT_PART);
 
 // Category Interface
 interface Category {
@@ -105,7 +106,7 @@ interface ProductPartInterface {
 const initialState: ProductPartInterface = {
     isLoading: false,
     isSuccess: false,
-    ProductPartData: storeData ? JSON.parse(storeData) : [],
+    ProductPartData: storeData,
     History: {
   isLoading: false,
   isSuccess: false,
@@ -216,7 +217,8 @@ Update: (state,action) =>{
         .addCase(GetAllProductPart.fulfilled, (state, action) =>{
             state.isLoading = false
             state.isSuccess = true
-            state.ProductPartData = action.payload
+            state.ProductPartData = action.payload;
+            LocalStorageManager.saveData(STORAGE_KEYS.PRODUCT_PART, action.payload);
         })
         .addCase(GetAllProductPart.rejected, (state, action) =>{
             state.isLoading = false
@@ -233,7 +235,8 @@ Update: (state,action) =>{
         .addCase(GetAllProductPartBySubCategoryId.fulfilled, (state, action) =>{
             state.isLoading = false
             state.isSuccess = true
-            state.ProductPartData = action.payload
+            state.ProductPartData = action.payload;
+            LocalStorageManager.saveData(STORAGE_KEYS.PRODUCT_PART, action.payload);
         })
         .addCase(GetAllProductPartBySubCategoryId.rejected, (state, action) =>{
             state.isLoading = false
@@ -250,7 +253,8 @@ Update: (state,action) =>{
         .addCase(CreateInventory.fulfilled, (state, action) =>{
 state.isLoading = false
 state.isSuccess = true
-state.ProductPartData = [...state.ProductPartData, action.payload]
+state.ProductPartData = [...state.ProductPartData, action.payload];
+LocalStorageManager.saveData(STORAGE_KEYS.PRODUCT_PART, [...state.ProductPartData]);
         })
         .addCase(CreateInventory.rejected, (state, action) =>{
             state.isLoading = false
@@ -268,6 +272,7 @@ state.ProductPartData = [...state.ProductPartData, action.payload]
             state.isLoading = false;
         state.isSuccess = true;
         state.ProductPartData = state.ProductPartData.filter((item) => item.id !== action.payload)
+        LocalStorageManager.clearData(STORAGE_KEYS.PRODUCT_PART);
         localStorage.setItem('product-part', JSON.stringify(state.ProductPartData))
         })
         .addCase(DeleteInventory.rejected, (state,action) =>{
@@ -294,7 +299,7 @@ state.ProductPartData = [...state.ProductPartData, action.payload]
         }
 
          // Sync to localStorage
-        localStorage.setItem('product-part', JSON.stringify(state.ProductPartData));
+        LocalStorageManager.saveData(STORAGE_KEYS.PRODUCT_PART, [...state.ProductPartData]);
 
         // Reset Edit State
         state.Edit = initialState.Edit

@@ -443,8 +443,6 @@ const ProductPart = () => {
 
                           const prevQty = record.previousQuantity ?? 0;
                           const newQty = record.updatedQuantity ?? 0;
-                          const ReFillQty = record.quantity ?? 0;
-                          const NewReFillQty = record.inventory?.quantity ?? 0;
 
                           let qtyChangeDisplay = '';
                           let qtyChangeColor = '';
@@ -457,14 +455,14 @@ const ProductPart = () => {
                             statusBadge = { label: 'Initial', color: 'text-blue-500' };
                             totalQtyDisplay = newQty;
                           } else if (record.refill) {
-                            qtyChangeDisplay = `+${ReFillQty}`;
+                            qtyChangeDisplay = `+${newQty - prevQty}`;
                             qtyChangeColor = 'text-green-600';
                             statusBadge = { label: 'In', color: 'text-green-500' };
-                            totalQtyDisplay = NewReFillQty;
+                            totalQtyDisplay = newQty;
                           } else if (record.unitRepair) {
                             qtyChangeDisplay = `${prevQty} - 1`;
                             qtyChangeColor = 'text-red-600';
-                            statusBadge = { label: 'Out', color: 'text-yellow-500' };
+                            statusBadge = { label: 'Out', color: 'text-red-500' };
                             totalQtyDisplay = newQty;
                           } else {
                             qtyChangeDisplay = '--';
@@ -657,12 +655,12 @@ const ProductPart = () => {
     dispatch(GetAllSubCategory());
   }, [])
 
-  // Sync data to localStorage whenever InventoryData changes
-  useEffect(() => {
-    if (ProductPartData.length > 0) {
-      localStorage.setItem('product-part', JSON.stringify(ProductPartData));
-    }
-  }, [ProductPartData])
+  // // Sync data to localStorage whenever InventoryData changes
+  // useEffect(() => {
+  //   if (ProductPartData.length > 0) {
+  //     localStorage.setItem('product-part', JSON.stringify(ProductPartData));
+  //   }
+  // }, [ProductPartData])
 
   useEffect(() => {
     if (Edit?.isEdit && Edit?.inventory) {
