@@ -6,6 +6,7 @@ import { RootState } from '../redux/store'
 // Role configuration
 const roleMenuConfig: Record<string, string[] | "ALL"> = {
   admin: "ALL",
+  manager: "ALL",
   vendor: ["/product-part", "/products", "/orders"],
   customerExecutive: ["/orders", "/support-ticket"],
   customer: ["/orders", "/support-ticket"],
@@ -13,6 +14,7 @@ const roleMenuConfig: Record<string, string[] | "ALL"> = {
 
 const defaultRoutes: Record<string, string> = {
   admin: "/",
+  manager: "/",
   vendor: "/product-part", 
   customerExecutive: "/orders",
   customer: "/orders",

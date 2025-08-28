@@ -10,6 +10,8 @@ export const SubmitButtonClass = `${ThemeBackgroundColor} ${ThemeBackgroundHover
 
 export const InventoryView = `${ThemeBackgroundColor} ${ThemeBackgroundHoverColor} px-5 py-2 rounded-md  text-white transition`
 
+export const InventoryRefillUse = `px-5 py-2 text-cyan-500 hover:text-cyan-700 transition`
+
 export const ShowModelCloseButtonClass = "px-6 py-3 bg-gray-300 text-white rounded-full hover:bg-gray-400 transition"
 
 export const inputClass = "w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800";
@@ -49,16 +51,6 @@ export const SearchIcon = <svg
     strokeLinejoin="round"
     d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1116.65 5.65a7.5 7.5 0 010 10.6z"
   />
-</svg>
-
-export const ArrowUp = <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none"
-  viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-  <path strokeLinecap="round" strokeLinejoin="round" d="M12 20V4m0 0l6 6m-6-6L6 10" />
-</svg>
-
-export const ArrowDown = <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none"
-  viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m0 0l-6-6m6 6l6-6" />
 </svg>
 
 

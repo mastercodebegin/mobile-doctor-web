@@ -2,15 +2,16 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import Loading from "../../components/Loading";
-import { CreateModalNumber, FetchAllModalNumber, FetchBrandIdModalNumber, Remove, restore, Update, UpdateModalNumber, ViewVariantData } from "./MobileNumberSlice";
+import { CreateModalNumber, FetchAllModalNumber, FetchBrandIdModalNumber, FetchModalBySubCategory, Remove, restore, Update, UpdateModalNumber, ViewVariantData } from "./MobileNumberSlice";
 import ConfirmationModal from "../../components/ConfirmationModal";
-import { GetAllSubCategory } from "../AddSubCategory/SubCategorySlice";
+import { GetAllSubCategory, GetAllSubCategoryById } from "../AddSubCategory/SubCategorySlice";
 import { GetAllBrand } from "../AddBrand/BrandSlice";
-import { ArrowDown, ArrowUp, ClearFilter, DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, SelectClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass, ThemeTextColor } from "../../helper/ApplicationConstants";
+import { ClearFilter, DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, SelectClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass, ThemeTextColor } from "../../helper/ApplicationConstants";
 import Pagination from "../../helper/Pagination";
 import { toast } from "react-toastify";
 import { GetAllCategory } from "../AddCategory/AddCategorySlice";
 import IphoneImage from "../../assets/Laptop_Image.png"
+import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
 
 const MobileNumberPage = () => {
   // State declarations
@@ -19,26 +20,28 @@ const MobileNumberPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const [modalSubCategories, setModalSubCategories] = useState([]);
   const [selectedBrand, setSelectedBrand] = useState<string>("");
+  const [filterCategory, setFilterCategory] = useState<any>(null);
+  const [filterSubCategory, setFilterSubCategory] = useState<any>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
-const [showImages, setShowImages] = useState(false);
-const [cachedVariants, setCachedVariants] = useState({}); // userId -> variant data
-const [currentVariantId, setCurrentVariantId] = useState(null);
+  const [showImages, setShowImages] = useState(false);
+  const [cachedVariants, setCachedVariants] = useState({}); // userId -> variant data
+  const [currentVariantId, setCurrentVariantId] = useState(null);
 
   // Redux selectors
-  const { AllModalNumberData, BrandModalNumberData, Edit, isLoading, viewVariant } = useSelector((state: RootState) => state.MobileNumberSlice);
+  const { AllModalNumberData, BrandModalNumberData, MobileNumberData, Edit, isLoading, viewVariant } = useSelector((state: RootState) => state.MobileNumberSlice);
   const isVariantLoading = viewVariant?.isLoading || false
   const { data } = useSelector((state: RootState) => state.AddCategorySlice);
   const { SubCategoriesData } = useSelector((state: RootState) => state.SubCategorySlice);
   const { BrandData } = useSelector((state: RootState) => state.BrandSlice);
 
   const dispatch = useDispatch<AppDispatch>();
-
   const usersPerPage = 5;
-
-  const displayData = selectedBrand ? BrandModalNumberData : AllModalNumberData;
+  const displayData = selectedBrand ? BrandModalNumberData : filterSubCategory ? MobileNumberData : AllModalNumberData;
+  const paginatedUsers = displayData.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 
   const getSelectedBrandName = () => {
     if (!selectedBrand) return "";
@@ -100,9 +103,6 @@ const [currentVariantId, setCurrentVariantId] = useState(null);
     }
   };
 
-
-  const paginatedUsers = displayData.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
-
   // showVarients Form data
   const [showVarients, setShowVarients] = useState({
     platform: "",
@@ -121,18 +121,17 @@ const [currentVariantId, setCurrentVariantId] = useState(null);
     network: "",
   };
 
-  // ✅ ENHANCED: Updated getDefaultFormData to handle auto brand selection
-  const getDefaultFormData = (autoBrandId = null, autoBrandName = null) => ({
+    const getDefaultFormData = (autoBrandId = null, autoBrandName = null, autoCategoryId = null, autoCategoryName = null, autoSubCategoryId = null, autoSubCategoryName = null, autoSubCategoryObj = null) => ({
     modelNo: "",
     category: {
-      id: "",
-      name: "",
+      id: autoCategoryId || "",
+      name: autoCategoryName || "",
       is_deleted: false
     },
     subCategory: {
-      id: "",
-      name: "",
-      category: {
+      id: autoSubCategoryId || "",
+      name: autoSubCategoryName || "",
+      category: autoSubCategoryObj?.category || {
         id: "",
         name: "",
         is_deleted: false
@@ -151,7 +150,6 @@ const [currentVariantId, setCurrentVariantId] = useState(null);
   const [formData, setFormData] = useState(getDefaultFormData());
   const { modelNo, category, subCategory, brand } = formData;
 
-  // Updated handleChange function to handle nested object updates
   const handleChage = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
@@ -159,21 +157,10 @@ const [currentVariantId, setCurrentVariantId] = useState(null);
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
     else if (name === "category") {
-      const selectedCategory = data.find(cat => cat.id == value || cat?.id === parseInt(value));
-      console.log("Selected Category:", selectedCategory);
-
-      setFormData((prev) => ({
-        ...prev,
-        category: {
-          id: value,
-          name: selectedCategory?.name || "Category not found",
-          is_deleted: false
-        }
-      }));
+      handleModalCategoryChange(e); // Use new handler
     }
     else if (name === "subCategory") {
-      const selectedSubCategory = SubCategoriesData.find(subCat => subCat.id == value || subCat.id === parseInt(value));
-      console.log("Selected SubCategory:", selectedSubCategory);
+      const selectedSubCategory = modalSubCategories.find(subCat => subCat.id == value || subCat.id === parseInt(value));
 
       setFormData((prev) => ({
         ...prev,
@@ -191,7 +178,6 @@ const [currentVariantId, setCurrentVariantId] = useState(null);
     }
     else if (name === "brand") {
       const selectedBrand = BrandData.find(brand => brand.id == value || brand.id === parseInt(value));
-      console.log("Selected Brand:", selectedBrand);
 
       setFormData((prev) => ({
         ...prev,
@@ -212,24 +198,7 @@ const [currentVariantId, setCurrentVariantId] = useState(null);
     }
   };
 
-  // ✅ NEW: Function to handle Create Model button click
-  const handleCreateModelClick = () => {
-    if (selectedBrand && selectedBrand !== "") {
-      const selectedBrandData = BrandData?.find(brand => brand.id == selectedBrand);
-      if (selectedBrandData) {
-        setFormData(getDefaultFormData(selectedBrand, selectedBrandData.name));
-      } else {
-        setFormData(getDefaultFormData());
-      }
-    } else {
-      setFormData(getDefaultFormData());
-    }
-
-    setIsEditMode(false);
-    setShowModal(true);
-  };
-
-    const handleBrandChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleBrandChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     console.log("Brand dropdown changed:", value, typeof value);
 
@@ -243,7 +212,139 @@ const [currentVariantId, setCurrentVariantId] = useState(null);
     }
   };
 
-  // ✅ ENHANCED: Updated handleSaveClick for proper edit functionality
+  // 2. Update the unified category handler
+  const handleFilterCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>, context = 'filter') => {
+    const selectedValue = e.target.value;
+
+    if (selectedValue === "") {
+      setFilterCategory(null);
+      setFilterSubCategory(null);
+      setCurrentPage(1);
+      return;
+    }
+
+    const selectedCat = JSON.parse(selectedValue);
+    setFilterCategory(selectedCat);
+    setFilterSubCategory(null);
+
+    // API call to get subcategories by category ID (same for both contexts)
+    dispatch(GetAllSubCategoryById(selectedCat.id))
+      .unwrap()
+      .then((res: any) => {
+        console.log(context === 'modal' ? "Modal SubCategories Response:" : "Filter SubCategories Response:", res);
+        if (context === 'filter') {
+          setCurrentPage(1);
+        }
+      })
+      .catch((err: any) => {
+        console.log(context === 'modal' ? "Modal SubCategories API Error:" : "Filter SubCategories API Error:", err);
+        toast.error("Failed to fetch subcategories");
+      });
+  };
+
+  const handleFilterSubCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedValue = e.target.value;
+
+    if (selectedValue === "") {
+      setFilterSubCategory(null);
+      setCurrentPage(1);
+      return;
+    }
+
+    const selectedSubCat = JSON.parse(selectedValue);
+    setFilterSubCategory(selectedSubCat);
+
+    // Fetch data based on sub-category ID
+    dispatch(FetchModalBySubCategory(selectedSubCat.id))
+      .unwrap()
+      .then((res: any) => {
+        console.log("Filtered Data Response:", res);
+        setCurrentPage(1);
+      })
+      .catch((err: any) => {
+        console.log("Filter API Error:", err);
+        toast.error("Failed to fetch filtered data");
+      });
+  };
+
+  const handleModalCategoryChange = (e) => {
+    const { value } = e.target;
+
+    if (value === "") {
+      setFormData(prev => ({
+        ...prev,
+        category: { id: "", name: "", is_deleted: false },
+        subCategory: { id: "", name: "", category: { id: "", name: "", is_deleted: false }, is_deleted: false }
+      }));
+      setModalSubCategories([]);
+      return;
+    }
+
+    const selectedCategory = data.find(cat => cat.id == value || cat?.id === parseInt(value));
+
+    setFormData(prev => ({
+      ...prev,
+      category: {
+        id: value,
+        name: selectedCategory?.name || "Category not found",
+        is_deleted: false
+      },
+      // Reset subcategory when category changes
+      subCategory: {
+        id: "",
+        name: "",
+        category: {
+          id: value,
+          name: selectedCategory?.name || "Category not found",
+          is_deleted: false
+        },
+        is_deleted: false
+      }
+    }));
+
+    // Filter subcategories for the selected category
+    const filteredSubCategories = SubCategoriesData?.filter(subCat =>
+      subCat.category?.id === parseInt(value) || subCat.category?.id == value
+    ) || [];
+
+    setModalSubCategories(filteredSubCategories);
+  };
+
+    const handleCreateModelClick = () => {
+    let defaultData = getDefaultFormData();
+
+    // Auto-select based on current filters
+    if (selectedBrand && selectedBrand !== "") {
+      const selectedBrandData = BrandData?.find(brand => brand.id == selectedBrand);
+      defaultData = getDefaultFormData(selectedBrand, selectedBrandData?.name);
+    } else if (filterSubCategory) {
+      // Auto-select category and subcategory from filter
+      defaultData = getDefaultFormData(
+        null, null,
+        filterSubCategory.category.id?.toString(),
+        filterSubCategory.category.name,
+        filterSubCategory.id?.toString(),
+        filterSubCategory.name,
+        filterSubCategory
+      );
+      // Set modal subcategories for this category
+      setModalSubCategories(SubCategoriesData?.filter(subCat => subCat.category?.id === filterSubCategory.category?.id) || []);
+    } else if (filterCategory) {
+      // Auto-select only category from filter
+      defaultData = getDefaultFormData(
+        null, null,
+        filterCategory.id?.toString(),
+        filterCategory.name
+      );
+      // Set modal subcategories for this category
+      setModalSubCategories(SubCategoriesData?.filter(subCat => subCat.category?.id === filterCategory.id) || []);
+    }
+
+    setFormData(defaultData);
+    setIsEditMode(false);
+    setShowModal(true);
+  };
+
   const handleSaveClick = async () => {
     if (!formData.modelNo || !formData.brand.id || !formData.category.id) {
       alert("Please enter full details!!");
@@ -293,7 +394,6 @@ const [currentVariantId, setCurrentVariantId] = useState(null);
     }
   };
 
-  // ✅ Usage in handleConfirmSave with context info
   const handleConfirmSave = async () => {
     const contextInfo = getCurrentContextInfo();
 
@@ -368,33 +468,41 @@ const [currentVariantId, setCurrentVariantId] = useState(null);
     setShowModal(false);
     setSelectedBrand("");
     setIsEditMode(false);
-    setFormData(getDefaultFormData()); 
-    setShowVarients(defaultShowVarient); 
+    setFormData(getDefaultFormData());
+    setShowVarients(defaultShowVarient);
     dispatch(restore());
   }
 
-    const handleClear = () => {
+  const handleClear = () => {
     setSelectedBrand("");
+    setFilterCategory("");
+    setFilterSubCategory("")
     setCurrentPage(1);
     dispatch(FetchAllModalNumber());
   };
 
-  // ✅ FIXED: Updated handleEditUser to properly populate form data
   const handleEditUser = (user: any) => {
     console.log("Editing user:", user);
 
-    // ✅ Dispatch the correct data structure to Redux
+    // Set modal subcategories based on the user's category
+    if (user.categories?.id) {
+      const filteredSubCategories = SubCategoriesData?.filter(subCat =>
+        subCat.category?.id === user.categories.id
+      ) || [];
+      setModalSubCategories(filteredSubCategories);
+    }
+
+    // Rest of the existing code remains the same...
     dispatch(Update({
       id: user.id,
-      name: user.name, 
-      categories: user.categories, 
+      name: user.name,
+      categories: user.categories,
       subCategory: user.subCategory,
       brand: user.brand,
       productSpecification: user.productSpecification,
       is_deleted: user.is_deleted
     }));
 
-    // ✅ Set form data to match the user data structure
     setFormData({
       modelNo: user.name || "",
       category: {
@@ -425,7 +533,6 @@ const [currentVariantId, setCurrentVariantId] = useState(null);
       }
     });
 
-    // ✅ Set variants separately
     setShowVarients({
       network: user.productSpecification?.network || "",
       platform: user.productSpecification?.platform || "",
@@ -442,164 +549,164 @@ const [currentVariantId, setCurrentVariantId] = useState(null);
     dispatch(Remove(userId));
   };
 
-// View-Variant Section
-const handleVariantToggle = (userId: number) => {
-  // If same variant is clicked, close it
-  if (showVariantId === userId) {
-    setShowVariantId(null);
-    return;
-  }
+  // View-Variant Section
+  const handleVariantToggle = (userId: number) => {
+    // If same variant is clicked, close it
+    if (showVariantId === userId) {
+      setShowVariantId(null);
+      return;
+    }
 
-  // If same variant is already open, don't make API call
-  if (currentVariantId === userId) {
-    console.log(`Same variant already open: ${userId}, skipping API call`);
+    // If same variant is already open, don't make API call
+    if (currentVariantId === userId) {
+      console.log(`Same variant already open: ${userId}, skipping API call`);
+      setShowVariantId(userId);
+      return;
+    }
+
+    // Set current variant
     setShowVariantId(userId);
-    return;
-  }
+    setCurrentVariantId(userId);
 
-  // Set current variant
-  setShowVariantId(userId);
-  setCurrentVariantId(userId);
-
-  // Make API call for new variant
-  console.log(`Opening new variant: ${userId}, making API call`);
-  dispatch(ViewVariantData(userId));
-};
+    // Make API call for new variant
+    console.log(`Opening new variant: ${userId}, making API call`);
+    dispatch(ViewVariantData(userId));
+  };
 
 
-const renderVariantRow = () => {
-  const variants = cachedVariants[showVariantId] || []; // Access data safely
+  const renderVariantRow = () => {
+    const variants = cachedVariants[showVariantId] || []; // Access data safely
 
-  return (
-    <tr className="bg-gray-50">
-      <td colSpan={8} className="px-6 py-4">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          {isVariantLoading ? (
-            // Loading Spinner (same style as history)
-            <div className="flex justify-center items-center py-8">
-              <div className="relative flex flex-col items-center justify-center">
-                <div
-                  className="w-16 h-16 border border-white rounded-full animate-spin"
-                  style={{ animationDuration: '2s' }}
-                >
+    return (
+      <tr className="bg-gray-50">
+        <td colSpan={8} className="px-6 py-4">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            {isVariantLoading ? (
+              // Loading Spinner (same style as history)
+              <div className="flex justify-center items-center py-8">
+                <div className="relative flex flex-col items-center justify-center">
                   <div
-                    className="absolute inset-0 border-3 border-transparent border-y-cyan-600 border-l-cyan-600 rounded-full animate-spin"
+                    className="w-16 h-16 border border-white rounded-full animate-spin"
                     style={{ animationDuration: '2s' }}
-                  />
-                </div>
-                <p className="text-center text-gray-600 mt-4">Loading variant details...</p>
-              </div>
-            </div>
-          ) : !variants || variants.length === 0 ? (
-            // Empty State
-            <div className="text-center text-red-500 py-8">
-              <p className="text-lg">📱 Variant Details Not Available</p>
-              <p className="text-sm text-gray-500 mt-2">
-                No variant data found for this model
-              </p>
-            </div>
-          ) : (
-            // Actual Variant Details Table
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 text-sm">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th scope="col" className={TableHadeClass}>Ram</th>
-                    <th scope="col" className={TableHadeClass}>Rom</th>
-                    <th scope="col" className={TableHadeClass}>Selfie Camera</th>
-                    <th scope="col" className={TableHadeClass}>Main Camera</th>
-                    <th scope="col" className={TableHadeClass}>Battery</th>
-                    <th scope="col" className={TableHadeClass}>Network</th>
-                    <th scope="col" className={TableHadeClass}>Color</th>
-                    <th scope="col" className={TableHadeClass}>Images</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
-                  {variants?.map((variant) => {
-                    return (
-                      <tr key={`variant-${variant?.id}`} className="border-b border-gray-200 text-center last:border-b-0 h-16">
-                        <td className="p-2">{variant?.ram ?? '--'}</td>
-                        <td className="p-2">{variant?.rom ?? '--'}</td>
-                        <td className="p-2">{variant?.selfieCamera ?? '--'}</td>
-                        <td className="p-2">{variant?.mainCamera ?? '--'}</td>
-                        <td className="p-2">{variant?.battery ?? '--'}</td>
-                        <td className="p-2">{variant?.network ?? '--'}</td>
-                        <td className="p-2">
-                          <div className="flex flex-wrap gap-3">
-                            {variant?.variantColors?.length ? (
-                              variant?.variantColors.map((colorObj: any, index: number) => (
-                                <div key={index} className="flex items-center gap-2">
-                                  <span
-                                    className="inline-block w-5 h-5 rounded-full border border-gray-300"
-                                    style={{ backgroundColor: colorObj.colorName?.colorCode }}
-                                  ></span>
-                                  <span>{colorObj.colorName?.color}</span>
-                                </div>
-                              ))
-                            ) : (
-                              <span className="text-gray-400">No colors available</span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="p-2">
-                          <button
-                            onClick={() =>
-                              setShowImages((prev: any) => ({
-                                ...prev,
-                                [variant.id]: !prev[variant.id],
-                              }))
-                            }
-                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                          >
-                            {showImages?.[variant.id] ? 'Hide Images' : 'Show Images'}
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-
-              {/* Images Section - Show for each variant that has showImages enabled */}
-              {variants?.map((variant) => (
-                showImages?.[variant.id] && (
-                  <div key={`images-${variant.id}`} className="mt-4 border-t pt-4">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">
-                      Images for Variant {variant.id}
-                    </h4>
-                    <div className="flex flex-wrap gap-4">
-                      {variant?.variantColors?.flatMap((colorObj: any) =>
-                        colorObj.modalImages?.map((img: any, idx: number) => (
-                          <img
-                            key={`${variant.id}-${idx}`}
-                            src={`${img.imageName} ?? ${IphoneImage}`}
-                            alt={img.imageName}
-                            className="w-24 h-24 object-cover border rounded"
-                          />
-                        )) || []
-                      )}
-                    </div>
+                  >
+                    <div
+                      className="absolute inset-0 border-3 border-transparent border-y-cyan-600 border-l-cyan-600 rounded-full animate-spin"
+                      style={{ animationDuration: '2s' }}
+                    />
                   </div>
-                )
-              ))}
-            </div>
-          )}
-        </div>
-      </td>
-    </tr>
-  );
-};
+                  <p className="text-center text-gray-600 mt-4">Loading variant details...</p>
+                </div>
+              </div>
+            ) : !variants || variants.length === 0 ? (
+              // Empty State
+              <div className="text-center text-red-500 py-8">
+                <p className="text-lg">📱 Variant Details Not Available</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  No variant data found for this model
+                </p>
+              </div>
+            ) : (
+              // Actual Variant Details Table
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className={TableHadeClass}>Ram</th>
+                      <th scope="col" className={TableHadeClass}>Rom</th>
+                      <th scope="col" className={TableHadeClass}>Selfie Camera</th>
+                      <th scope="col" className={TableHadeClass}>Main Camera</th>
+                      <th scope="col" className={TableHadeClass}>Battery</th>
+                      <th scope="col" className={TableHadeClass}>Network</th>
+                      <th scope="col" className={TableHadeClass}>Color</th>
+                      <th scope="col" className={TableHadeClass}>Images</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 bg-white">
+                    {variants?.map((variant) => {
+                      return (
+                        <tr key={`variant-${variant?.id}`} className="border-b border-gray-200 text-center last:border-b-0 h-16">
+                          <td className="p-2">{variant?.ram ?? '--'}</td>
+                          <td className="p-2">{variant?.rom ?? '--'}</td>
+                          <td className="p-2">{variant?.selfieCamera ?? '--'}</td>
+                          <td className="p-2">{variant?.mainCamera ?? '--'}</td>
+                          <td className="p-2">{variant?.battery ?? '--'}</td>
+                          <td className="p-2">{variant?.network ?? '--'}</td>
+                          <td className="p-2">
+                            <div className="flex flex-wrap gap-3">
+                              {variant?.variantColors?.length ? (
+                                variant?.variantColors.map((colorObj: any, index: number) => (
+                                  <div key={index} className="flex items-center gap-2">
+                                    <span
+                                      className="inline-block w-5 h-5 rounded-full border border-gray-300"
+                                      style={{ backgroundColor: colorObj.colorName?.colorCode }}
+                                    ></span>
+                                    <span>{colorObj.colorName?.color}</span>
+                                  </div>
+                                ))
+                              ) : (
+                                <span className="text-gray-400">No colors available</span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="p-2">
+                            <button
+                              onClick={() =>
+                                setShowImages((prev: any) => ({
+                                  ...prev,
+                                  [variant.id]: !prev[variant.id],
+                                }))
+                              }
+                              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                            >
+                              {showImages?.[variant.id] ? 'Hide Images' : 'Show Images'}
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
 
-// Keep this useEffect as is
-useEffect(() => {
-  if (viewVariant?.data && currentVariantId) {
-    setCachedVariants(prev => ({
-      ...prev,
-      [currentVariantId]: viewVariant.data
-    }));
-  }
-}, [viewVariant, currentVariantId]);
-  
+                {/* Images Section - Show for each variant that has showImages enabled */}
+                {variants?.map((variant) => (
+                  showImages?.[variant.id] && (
+                    <div key={`images-${variant.id}`} className="mt-4 border-t pt-4">
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">
+                        Images for Variant {variant.id}
+                      </h4>
+                      <div className="flex flex-wrap gap-4">
+                        {variant?.variantColors?.flatMap((colorObj: any) =>
+                          colorObj.modalImages?.map((img: any, idx: number) => (
+                            <img
+                              key={`${variant.id}-${idx}`}
+                              src={`${img.imageName} ?? ${IphoneImage}`}
+                              alt={img.imageName}
+                              className="w-24 h-24 object-cover border rounded"
+                            />
+                          )) || []
+                        )}
+                      </div>
+                    </div>
+                  )
+                ))}
+              </div>
+            )}
+          </div>
+        </td>
+      </tr>
+    );
+  };
+
+  // Keep this useEffect as is
+  useEffect(() => {
+    if (viewVariant?.data && currentVariantId) {
+      setCachedVariants(prev => ({
+        ...prev,
+        [currentVariantId]: viewVariant.data
+      }));
+    }
+  }, [viewVariant, currentVariantId]);
+
 
   useEffect(() => {
     setIsLoaded(true);
@@ -638,21 +745,17 @@ useEffect(() => {
     }
   }, [selectedBrand, dispatch]);
 
-
-  // 6. DEBUG: Add state logging
   useEffect(() => {
-    console.log("🔍 Current states:");
-    console.log("selectedBrand:", selectedBrand);
-    console.log("BrandData:", BrandData);
-    console.log("AllModalNumberData:", AllModalNumberData?.length);
-    console.log("BrandModalNumberData:", BrandModalNumberData?.length);
-  }, [selectedBrand, BrandData, AllModalNumberData, BrandModalNumberData]);
-
+    if (filterSubCategory) {
+      console.log("Dispatching FetchModalBySubCategory with subCategoryId:", filterSubCategory.id);
+      dispatch(FetchModalBySubCategory(filterSubCategory.id));
+    }
+  }, [filterSubCategory, dispatch]);
 
   // Reset pagination when brand changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedBrand]);
+  }, [selectedBrand, filterCategory, filterSubCategory]);
 
   if (isLoading) {
     return <Loading />;
@@ -666,10 +769,13 @@ useEffect(() => {
           <div className="flex items-center gap-4">
             {/* Brand Filter Dropdown */}
             <div className="flex items-center gap-2">
+
+              {/* Brand Filter */}
               <select
                 value={selectedBrand}
                 onChange={handleBrandChange}
-                className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-[200px]"
+                disabled={filterCategory || filterSubCategory} // Disable when category/subcategory filter is active
+                className={`border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-[200px] ${(filterCategory || filterSubCategory) ? 'bg-gray-100 cursor-not-allowed' : ''}`}
               >
                 <option value="">All Brands</option>
                 {BrandData?.map((item) => (
@@ -679,7 +785,40 @@ useEffect(() => {
                 ))}
               </select>
 
-              {selectedBrand && (
+              {/* Category Filter */}
+              <select
+                value={filterCategory ? JSON.stringify(filterCategory) : ""}
+                onChange={(e) => handleFilterCategoryChange(e, 'filter')}
+                disabled={selectedBrand && selectedBrand !== ""} // Disable when brand filter is active
+                className={`px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${(selectedBrand && selectedBrand !== "") ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+              >
+                <option value="" disabled>Filter by Category</option>
+                {data?.map((category) => (
+                  <option key={category.id} value={JSON.stringify(category)}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+
+              {/* Sub-Category Filter */}
+              {filterCategory && (
+                <select
+                  value={filterSubCategory ? JSON.stringify(filterSubCategory) : ""}
+                  onChange={(e) => handleFilterSubCategoryChange(e)}
+                  disabled={selectedBrand && selectedBrand !== ""} // Disable when brand filter is active
+                  className={`px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${(selectedBrand && selectedBrand !== "") ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                >
+                  <option value="" disabled>Filter by SubCategory</option>
+                  {SubCategoriesData?.filter(subCat => subCat.category?.id === filterCategory?.id)?.map((subCat) => (
+                    <option key={subCat.id} value={JSON.stringify(subCat)}>
+                      {subCat.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+
+
+              {(selectedBrand || filterCategory || filterSubCategory) && (
                 <button
                   onClick={handleClear}
                   className={ClearFilter}
@@ -710,8 +849,6 @@ useEffect(() => {
                 }
               </h2>
             </div>
-
-
 
             {/* Table */}
             <div className="overflow-x-auto">
@@ -787,7 +924,7 @@ useEffect(() => {
                               onClick={() => handleVariantToggle(user.id)}
                               className={`${EditClass}`}
                             >
-                              {showVariantId === user?.id ? ArrowUp : ArrowDown }
+                              {showVariantId === user?.id ? <ArrowUpIcon /> : <ArrowDownIcon />}
                             </button>
                           </td>
                         </tr>
@@ -848,8 +985,16 @@ useEffect(() => {
                     />
                   </div>
 
+                  {/* Category */}
                   <div>
-                    <label className="block font-medium mb-2">Select Category</label>
+                    <label className="block font-medium mb-2">
+                      Select Category
+                      {(filterCategory || filterSubCategory) && (
+                        <span className="text-sm text-gray-600 ml-2">
+                          (Auto-selected from filter)
+                        </span>
+                      )}
+                    </label>
                     <select
                       className={SelectClass}
                       name="category"
@@ -863,26 +1008,50 @@ useEffect(() => {
                         </option>
                       ))}
                     </select>
+                    {(filterCategory || filterSubCategory) && category.id && (
+                      <p className="text-xs text-green-600 mt-1">
+                        ✓ This category is auto-selected from your current filter. You can change it if needed.
+                      </p>
+                    )}
                   </div>
 
+                  {/* Sub-Category */}
                   <div>
-                    <label className="block font-medium mb-2">Select Sub Category</label>
+                    <label className="block font-medium mb-2">
+                      Select Sub Category
+                      {filterSubCategory && (
+                        <span className="text-sm text-gray-600 ml-2">
+                          (Auto-selected from filter)
+                        </span>
+                      )}
+                    </label>
                     <select
                       className={SelectClass}
                       onChange={handleChage}
                       name="subCategory"
                       value={subCategory.id}
+                      disabled={!category.id} // Disable if no category selected
                     >
                       <option value="">Select Sub Category</option>
-                      {SubCategoriesData?.map((item) => (
+                      {modalSubCategories?.map((item) => (
                         <option key={item?.id} value={item?.id}>
                           {item?.name}
                         </option>
                       ))}
                     </select>
+                    {!category.id && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Please select a category first
+                      </p>
+                    )}
+                    {filterSubCategory && subCategory.id && (
+                      <p className="text-xs text-green-600 mt-1">
+                        ✓ This sub-category is auto-selected from your current filter. You can change it if needed.
+                      </p>
+                    )}
                   </div>
 
-
+                  {/* Brand */}
                   <div>
                     <label className="block font-medium mb-2">
                       Select Brand

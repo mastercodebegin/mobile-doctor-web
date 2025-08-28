@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
 import Pagination from '../../helper/Pagination';
-import { ArrowDown, ArrowUp, ClearFilter, DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, InventoryView, pageSize, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass, ThemeBackgroundColor } from '../../helper/ApplicationConstants';
+import { ArrowDown, ArrowUp, ClearFilter, DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, InventoryRefillUse, pageSize, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass, ThemeBackgroundColor } from '../../helper/ApplicationConstants';
 import { toast } from 'react-toastify';
 import Loading from '../../components/Loading';
 import { GetAllCategory } from '../AddCategory/AddCategorySlice';
@@ -12,6 +12,7 @@ import { CreateInventory, DeleteInventory, GetAllProductPart, GetAllProductPartB
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { FetchModalBySubCategory } from '../AddMobileNumber/MobileNumberSlice';
 import IphoneImage from "../../assets/Laptop_Image.png";
+import { ArrowDown01, ArrowDownIcon, ArrowUpIcon, MinusCircleIcon, PlusCircleIcon } from 'lucide-react';
 
 const ProductPart = () => {
 
@@ -144,8 +145,6 @@ const ProductPart = () => {
         });
     }
   };
-
-
 
   // Clear filter function
   const handleClearFilter = () => {
@@ -495,17 +494,17 @@ const ProductPart = () => {
                           if (record.new) {
                             qtyChangeDisplay = `+${newQty}`;
                             qtyChangeColor = 'text-blue-600';
-                            statusBadge = { label: 'Initial', color: 'text-blue-500' };
+                            statusBadge = { label: 'INITIAL', color: 'text-blue-500' };
                             totalQtyDisplay = newQty;
                           } else if (record.refill) {
                             qtyChangeDisplay = `+${newQty - prevQty}`;
                             qtyChangeColor = 'text-green-600';
-                            statusBadge = { label: 'In', color: 'text-green-500' };
+                            statusBadge = { label: 'IN', color: 'text-green-500' };
                             totalQtyDisplay = newQty;
                           } else if (record.unitRepair) {
                             qtyChangeDisplay = `${prevQty} - 1`;
                             qtyChangeColor = 'text-red-600';
-                            statusBadge = { label: 'Out', color: 'text-red-500' };
+                            statusBadge = { label: 'OUT', color: 'text-red-500' };
                             totalQtyDisplay = newQty;
                           } else {
                             qtyChangeDisplay = '--';
@@ -747,20 +746,20 @@ const ProductPart = () => {
             </select>
 
             {/* SubCategory Filter - Only show when category is selected */}
-        {filterCategory && (
+            {filterCategory && (
               <select
-              value={filterSubCategory ? JSON.stringify(filterSubCategory) : ""}
-              onChange={(e) => handleFilterSubCategoryChange(e, 'filter')} // Add context parameter
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="" disabled>Filter by SubCategory</option>
-              {SubCategoriesData?.filter(subCat => subCat.category?.id === filterCategory?.id)?.map((subCat) => (
-                <option key={subCat.id} value={JSON.stringify(subCat)}>
-                  {subCat.name}
-                </option>
-              ))}
-            </select>
-        )}
+                value={filterSubCategory ? JSON.stringify(filterSubCategory) : ""}
+                onChange={(e) => handleFilterSubCategoryChange(e, 'filter')} // Add context parameter
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="" disabled>Filter by SubCategory</option>
+                {SubCategoriesData?.filter(subCat => subCat.category?.id === filterCategory?.id)?.map((subCat) => (
+                  <option key={subCat.id} value={JSON.stringify(subCat)}>
+                    {subCat.name}
+                  </option>
+                ))}
+              </select>
+            )}
 
             {(filterCategory || filterSubCategory) && (
               <button
@@ -824,7 +823,7 @@ const ProductPart = () => {
                   </tr>
                 </thead>
                 {/* Table Body */}
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white text-center divide-y divide-gray-200">
                   {paginatedUsers.length > 0 ? (
                     paginatedUsers?.map((user, index) => (
                       <React.Fragment key={user?.id}>
@@ -867,9 +866,9 @@ const ProductPart = () => {
                           <td className={TableDataClass}>
                             <button
                               onClick={() => handleReFillClick(user)}
-                              className={InventoryView}
+                              className={`${InventoryRefillUse}`}
                             >
-                              ReFill
+                              <PlusCircleIcon size={28} />
                             </button>
                           </td>
                           <td className={TableDataClass}>
@@ -877,15 +876,20 @@ const ProductPart = () => {
                               onClick={() => handleHistoryToggle(user.id)}
                               className={EditClass}
                             >
-                              {history === user.id ? (ArrowUp) : (ArrowDown)}
+                              {history === user.id ? (
+                                <ArrowUpIcon size={28} />
+                              ) : (
+                                <ArrowDownIcon size={28} />
+                              )}
+
                             </button>
                           </td>
                           <td className={TableDataClass}>
                             <button
                               onClick={() => handleUseClick(user)}
-                              className={InventoryView}
+                              className={`${InventoryRefillUse}`}
                             >
-                              Use
+                              <MinusCircleIcon size={28} />
                             </button>
                           </td>
                         </tr>
@@ -933,29 +937,7 @@ const ProductPart = () => {
                 &times;
               </button>
 
-              {/* Product-Model-Number Selection - Only for Add/Edit Mode */}
-              {/* {!isReFillMode && !isOrderUseMode && (
-     <div className="mb-6">
-                  <label className="block text-lg font-medium mb-2">Product Model Number</label>
-                  <select
-                    value={selectedModel ? JSON.stringify(selectedModel) : ""}
-                    onChange={(e) => {
-                      const selectedObject = JSON.parse(e.target.value);
-                      setSelectedModel(selectedObject);
-                    }}
-                    className={`${inputClass} ${isEditMode ? "cursor-not-allowed bg-gray-100" : ""}`}
-                    disabled={isEditMode}
-                  >
-                    <option value="" disabled>Select Model Number</option>
-                    {AllModalNumberData?.map((category) => (
-                      <option key={category.id} value={JSON.stringify(category)}>
-                        {category.name} 
-                      </option>
-                    ))}
-                  </select>
-                </div>
-)} */}
-
+              {/* Category, Sub-Category, Product-Model-Number Selection - Only for Add/Edit Mode */}
               {!isReFillMode && !isOrderUseMode && (
                 <>
                   <div className="mb-6">
