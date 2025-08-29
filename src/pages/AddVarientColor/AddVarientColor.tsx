@@ -738,7 +738,7 @@ const AddVarientColor = () => {
                 className={SubmitButtonClass}
                 disabled={!variantColorData.colorName.id || selectedFiles.length === 0}
               >
-                {isLoading ? "Saving..." : "Create Variant-Color"}
+                {isLoading ? "Saving..." : "Continue Variant-Color"}
               </button>
             </div>
           </div>

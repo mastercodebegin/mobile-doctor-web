@@ -61,7 +61,6 @@ const AddCategory = () => {
     }
   };
 
-  // Updated modal close handler
   const handleCloseModal = () => {
     setShowModal(false);
     setCategory("");
@@ -264,7 +263,7 @@ const AddCategory = () => {
                 className={SubmitButtonClass}
                 disabled={isLoading}
               >
-                {isLoading ? 'Saving...' : (isEditMode ? 'UPDATE' : 'SAVE CHANGES')}
+                {isLoading ? 'Saving...' : (isEditMode ? 'UPDATE' : 'Continue')}
               </button>
             </div>
           </div>

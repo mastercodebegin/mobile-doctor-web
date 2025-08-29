@@ -138,7 +138,7 @@ useEffect(() => {
     navigate("/login", { replace: true });
   } else if (data?.role?.name === "customer") {
     navigate("/orders", { replace: true });
-  } else if (data?.role?.name === "admin") {
+  } else if (data?.role?.name === "admin" || data?.role?.name === "manager" ) {
     navigate("/", { replace: true });
   } else if (data?.role?.name === "vendor") {
     navigate("/product-part", {replace: true})

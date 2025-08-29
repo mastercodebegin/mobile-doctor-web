@@ -391,7 +391,7 @@ const handleClearFilter = () =>{
                   className={SubmitButtonClass}
                   disabled={isLoading}
                 >
-                  {isLoading ? 'Saving...' : (isEditMode ? 'UPDATE' : 'SAVE CHANGE')}
+                  {isLoading ? 'Saving...' : (isEditMode ? 'UPDATE' : 'Continue')}
                 </button>
               </div>
             </div>

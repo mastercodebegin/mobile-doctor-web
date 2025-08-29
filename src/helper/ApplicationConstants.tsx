@@ -64,6 +64,7 @@ export const SidebarColors = {
   orders: { bgColor: 'bg-blue-50', color: '#3B82F6' },
   supportTicket: { bgColor: 'bg-blue-50', color: '#3B82F6' },
   role: { bgColor: 'bg-blue-50', color: '#3B82F6' },
+  coupon: { bgColor: 'bg-blue-50', color: '#3B82F6' },
   addProduct: {
     category: { bgColor: 'bg-blue-50', color: '#3B82F6' },
     subCategory: { bgColor: 'bg-blue-50', color: '#3B82F6' },

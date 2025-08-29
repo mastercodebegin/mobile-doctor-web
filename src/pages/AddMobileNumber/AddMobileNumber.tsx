@@ -1121,7 +1121,7 @@ const MobileNumberPage = () => {
                     onClick={handleSaveClick}
                     className={SubmitButtonClass}
                   >
-                    {isEditMode ? "UPDATE CHANGES" : "SAVE CHANGES"}
+                    {isEditMode ? "UPDATE CHANGES" : "Continue"}
                   </button>
                 </div>
               </div>

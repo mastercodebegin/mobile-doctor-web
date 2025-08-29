@@ -34,6 +34,8 @@ const Order = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [loading, setLoading] = useState(false)
   const [searchModel, setSearchModel] = useState(false);
+  const [showDetailsModel, setShowDetailsModel] = useState(false);
+  const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
   const { Orders, isLoading, Edit } = useSelector((state: RootState) => state.OrderSlice);
   const [showFilters, setShowFilters] = useState(true);
   const [filterEmail, setFilterEmail] = useState<any>('')
@@ -241,6 +243,7 @@ const Order = () => {
     setIsEditMode(false);
     setLoading(false);
     setSearchModel(false);
+    setShowDetailsModel(false);
     setShowFilters(true);
     setFilterEmail("");
     setFilterOrderId("");
@@ -289,6 +292,16 @@ const Order = () => {
     const orderCompletedOn = user?.order?.completedOn ? new Date(user.order.completedOn).toISOString().split('T')[0] : "";
     setOrderCompletedOn(orderCompletedOn);
   };
+
+  const handlePrintDetails = () => {
+  const printContent = document.getElementById('order-details-print');
+  const originalContent = document.body.innerHTML;
+  
+  document.body.innerHTML = printContent.innerHTML;
+  window.print();
+  document.body.innerHTML = originalContent;
+  window.location.reload(); // Reload to restore event handlers
+};
 
   useEffect(() => {
     if (Edit.isEdit) {
@@ -392,6 +405,7 @@ const Order = () => {
                     <th scope="col" className={TableHadeClass}>Expected Delivery</th>
                     <th scope="col" className={TableHadeClass}>Description</th>
                     <th scope="col" className={TableHadeClass}>Edit</th>
+                    <th scope="col" className={TableHadeClass}>Details</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -444,12 +458,26 @@ const Order = () => {
 
                         {/* Description */}
                         <td className={TableDataClass}>{user?.defectDescriptionByEngineer || "N/A"}</td>
+                    
                         {/* Edit */}
                         <td className={TableDataClass}>
                           <button onClick={() => handleEditUser(user)} className={EditClass}>
                             {EditIcon}
                           </button>
                         </td>
+                   
+                        {/* Details */}
+                    <td className={TableDataClass}>
+  <button 
+    onClick={() => {
+      setSelectedOrderDetails(user);
+      setShowDetailsModel(true);
+    }} 
+    className={EditClass}
+  >
+    Details
+  </button>
+</td>
                       </tr>
                     ))
                   ) : (
@@ -599,6 +627,179 @@ const Order = () => {
           </div>
         </>
       )}
+
+    {showDetailsModel && selectedOrderDetails && (
+  <>
+    <div className={ShowModalMainClass}>
+      <div className="bg-white rounded-2xl shadow-xl p-8 w-[95%] max-w-4xl relative max-h-[90vh] overflow-y-auto">
+        
+        {/* Close Icon */}
+        <button
+          className="absolute top-4 right-5 text-2xl font-bold text-gray-500 hover:text-black z-10"
+          onClick={handleCloseModal}
+        >
+          &times;
+        </button>
+
+        <div id="order-details-print">
+          <h2 className="text-2xl font-bold mb-6 text-center">Order Details</h2>
+          
+          {/* Basic Order Info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-lg mb-3">Order Information</h3>
+              <p><span className="font-medium">Order ID:</span> {selectedOrderDetails.orderId}</p>
+              <p><span className="font-medium">Status:</span> 
+                <span className={`ml-2 px-2 py-1 rounded text-xs ${getStatusBadgeClass(selectedOrderDetails.unitRepairStatus)}`}>
+                  {selectedOrderDetails.unitRepairStatus?.replace(/_/g, ' ')}
+                </span>
+              </p>
+              <p><span className="font-medium">Price:</span> {selectedOrderDetails.price ? `₹${selectedOrderDetails.price}` : "N/A"}</p>
+              <p><span className="font-medium">IMEI Number:</span> {selectedOrderDetails.imeiNumber || "N/A"}</p>
+              <p><span className="font-medium">Online Order:</span> {selectedOrderDetails.onlineOrder ? "Yes" : "No"}</p>
+            </div>
+
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-lg mb-3">Product Information</h3>
+              <p><span className="font-medium">Brand:</span> {selectedOrderDetails.brand?.name}</p>
+              <p><span className="font-medium">Model:</span> {selectedOrderDetails.productModelNumber?.name}</p>
+              <p><span className="font-medium">Category:</span> {selectedOrderDetails.categories?.name}</p>
+              <p><span className="font-medium">Sub Category:</span> {selectedOrderDetails.subCategory?.name}</p>
+              {selectedOrderDetails.repairUnitImages?.length > 0 && (
+                <div className="mt-2">
+                  <span className="font-medium">Product Image:</span>
+                  <img
+                    src={`http://34.131.155.169:8080/uploads/${selectedOrderDetails.repairUnitImages[0]?.imageName}`}
+                    className="w-20 h-20 object-contain border border-gray-300 rounded-md mt-1"
+                    alt="Product"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Customer Information */}
+          <div className="bg-gray-50 p-4 rounded-lg mb-6">
+            <h3 className="font-semibold text-lg mb-3">Customer Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p><span className="font-medium">Name:</span> {selectedOrderDetails.customer?.firstName} {selectedOrderDetails.customer?.lastName}</p>
+                <p><span className="font-medium">Email:</span> {selectedOrderDetails.customer?.email}</p>
+                <p><span className="font-medium">Mobile:</span> {selectedOrderDetails.customer?.mobile}</p>
+              </div>
+              <div>
+                <p><span className="font-medium">Role:</span> {selectedOrderDetails.customer?.role?.name}</p>
+                <p><span className="font-medium">User Address:</span> {selectedOrderDetails.userAddress || "N/A"}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Descriptions */}
+          <div className="bg-gray-50 p-4 rounded-lg mb-6">
+            <h3 className="font-semibold text-lg mb-3">Descriptions</h3>
+            <p><span className="font-medium">User Description:</span> {selectedOrderDetails.userDefectDescription || "N/A"}</p>
+            <p><span className="font-medium">Engineer Description:</span> {selectedOrderDetails.defectDescriptionByEngineer || "N/A"}</p>
+            <p><span className="font-medium">Cancel Reason:</span> {selectedOrderDetails.cancelReason || "N/A"}</p>
+            <p><span className="font-medium">Delay Reason:</span> {selectedOrderDetails.delayReason || "N/A"}</p>
+          </div>
+
+          {/* Defective Part Information */}
+          {selectedOrderDetails.defectivePart && (
+            <div className="bg-gray-50 p-4 rounded-lg mb-6">
+              <h3 className="font-semibold text-lg mb-3">Defective Part Information</h3>
+              <p><span className="font-medium">Part Name:</span> {selectedOrderDetails.defectivePart.productPart?.name}</p>
+              <p><span className="font-medium">Part Price:</span> ₹{selectedOrderDetails.defectivePart.price}</p>
+              <p><span className="font-medium">Message:</span> {selectedOrderDetails.defectivePart.message}</p>
+            </div>
+          )}
+
+          {/* Manager Information */}
+          {selectedOrderDetails.createdByManager && (
+            <div className="bg-gray-50 p-4 rounded-lg mb-6">
+              <h3 className="font-semibold text-lg mb-3">Created By Manager</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p><span className="font-medium">Name:</span> {selectedOrderDetails.createdByManager.firstName} {selectedOrderDetails.createdByManager.lastName}</p>
+                  <p><span className="font-medium">Email:</span> {selectedOrderDetails.createdByManager.email}</p>
+                  <p><span className="font-medium">Mobile:</span> {selectedOrderDetails.createdByManager.mobile || "N/A"}</p>
+                </div>
+                <div>
+                  <p><span className="font-medium">Role:</span> {selectedOrderDetails.createdByManager.role?.name}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Dates Information */}
+          <div className="bg-gray-50 p-4 rounded-lg mb-6">
+            <h3 className="font-semibold text-lg mb-3">Important Dates</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p><span className="font-medium">Order Date:</span> {selectedOrderDetails.orderOn ? new Date(selectedOrderDetails.orderOn).toLocaleString() : "N/A"}</p>
+                <p><span className="font-medium">Pickup Schedule:</span> {selectedOrderDetails.pickupScheduleOn ? new Date(selectedOrderDetails.pickupScheduleOn).toLocaleString() : "N/A"}</p>
+                <p><span className="font-medium">Picked Up From User:</span> {selectedOrderDetails.pickedupUnitFromUserOn ? new Date(selectedOrderDetails.pickedupUnitFromUserOn).toLocaleString() : "N/A"}</p>
+                <p><span className="font-medium">Received From Partner:</span> {selectedOrderDetails.unitRecievedFromPartnerOn ? new Date(selectedOrderDetails.unitRecievedFromPartnerOn).toLocaleString() : "N/A"}</p>
+              </div>
+              <div>
+                <p><span className="font-medium">Delivered On:</span> {selectedOrderDetails.deliveredOn ? new Date(selectedOrderDetails.deliveredOn).toLocaleString() : "N/A"}</p>
+                <p><span className="font-medium">Cancelled On:</span> {selectedOrderDetails.cancelledOn ? new Date(selectedOrderDetails.cancelledOn).toLocaleString() : "N/A"}</p>
+                <p><span className="font-medium">Completed By Engineer:</span> {selectedOrderDetails.completedByEngineerOn ? new Date(selectedOrderDetails.completedByEngineerOn).toLocaleString() : "N/A"}</p>
+                <p><span className="font-medium">Expected Completion:</span> {selectedOrderDetails.expectedCompletedOn ? new Date(selectedOrderDetails.expectedCompletedOn).toLocaleString() : "N/A"}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Product Specifications */}
+          {selectedOrderDetails.productModelNumber?.productSpecification && (
+            <div className="bg-gray-50 p-4 rounded-lg mb-6">
+              <h3 className="font-semibold text-lg mb-3">Product Specifications</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <p><span className="font-medium">Network:</span> {selectedOrderDetails.productModelNumber.productSpecification.network}</p>
+                <p><span className="font-medium">Platform:</span> {selectedOrderDetails.productModelNumber.productSpecification.platform}</p>
+                <p><span className="font-medium">RAM:</span> {selectedOrderDetails.productModelNumber.productSpecification.ram}GB</p>
+                <p><span className="font-medium">ROM:</span> {selectedOrderDetails.productModelNumber.productSpecification.rom}GB</p>
+              </div>
+            </div>
+          )}
+
+          {/* Variant Information */}
+          {selectedOrderDetails.variant && (
+            <div className="bg-gray-50 p-4 rounded-lg mb-6">
+              <h3 className="font-semibold text-lg mb-3">Variant Information</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <p><span className="font-medium">RAM:</span> {selectedOrderDetails.variant.ram}GB</p>
+                <p><span className="font-medium">ROM:</span> {selectedOrderDetails.variant.rom}GB</p>
+                <p><span className="font-medium">Main Camera:</span> {selectedOrderDetails.variant.mainCamera}MP</p>
+                <p><span className="font-medium">Selfie Camera:</span> {selectedOrderDetails.variant.selfieCamera}MP</p>
+                <p><span className="font-medium">Battery:</span> {selectedOrderDetails.variant.battery}mAh</p>
+                <p><span className="font-medium">Network:</span> {selectedOrderDetails.variant.network}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex justify-end space-x-4 mt-6 pt-4 border-t">
+          <button 
+            type="button" 
+            onClick={handleCloseModal} 
+            className="bg-gray-300 text-black px-6 py-2 rounded hover:bg-gray-400"
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            onClick={handlePrintDetails}
+            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+          >
+            Print Details
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </>
+)}
 
       {/* Confirmation Modal */}
       {showConfirmModal && (

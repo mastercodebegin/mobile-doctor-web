@@ -68,5 +68,6 @@ export const STORAGE_KEYS = {
     STATE: 'state',
     CITY: 'city',
     BRANCH: 'branch',
+    COUPON: 'coupon',
     VENDOR: 'vendor',
 };

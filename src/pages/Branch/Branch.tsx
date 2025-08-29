@@ -98,12 +98,12 @@ const Branch = () => {
   // Updated handleSaveClick function
   const handleSaveClick = async () => {
     if (!branchName.trim()) {
-      alert("Please enter Branch name");
+      toast.warn("Please enter Branch name");
       return;
     }
 
     if (!selectedCountry || !selectedState || !selectedCity || !selectedUser) {
-      alert("Please select all required fields");
+      toast.warn("Please select all required fields");
       return;
     }
 
@@ -268,7 +268,7 @@ const Branch = () => {
 
           {/* Left Section */}
           <div className="flex items-center gap-2">
-            <h2>Branches</h2>
+            <h1 className="font-bold text-2xl" >Branches</h1>
           </div>
 
 
@@ -414,7 +414,7 @@ const Branch = () => {
           <div className={ShowModalMainClass}>
             <div className="bg-white rounded-2xl shadow-xl p-8 w-[90%] max-w-xl relative">
               <h2 className="text-3xl font-semibold text-center mb-6">
-                {isEditMode ? 'Edit City' : 'Add City'}
+                {isEditMode ? 'Edit Branch' : 'Add Branch'}
               </h2>
 
               {/* Close Icon */}
@@ -532,7 +532,7 @@ const Branch = () => {
                   className={SubmitButtonClass}
                   disabled={isLoading}
                 >
-                  {isLoading ? 'Saving...' : (isEditMode ? 'UPDATE' : 'SAVE CHANGE')}
+                  {isLoading ? 'Saving...' : (isEditMode ? 'UPDATE' : 'Continue')}
                 </button>
               </div>
             </div>

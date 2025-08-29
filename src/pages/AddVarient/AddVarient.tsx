@@ -871,7 +871,7 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
                 className={SubmitButtonClass}
                 disabled={isLoading}
               >
-                {isLoading ? 'Saving...' : (isEditMode ? 'Update Variant' : 'Save Variant')}
+                {isLoading ? 'Saving...' : (isEditMode ? 'Update Variant' : 'Continue Variant')}
               </button>
             </div>
           </div>

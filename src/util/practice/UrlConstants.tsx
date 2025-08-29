@@ -67,6 +67,8 @@ ADD_CITIES: 'cities/create',
 GET_ALL_BRANCH: 'centre/getAll',
 GET_BRANCH_BY_ID: 'centre/findById',
 ADD_BRANCH: 'centre/create',
+GET_ALL_COUPONS: 'coupon/getAllCoupons',
+ADD_COUPON: 'coupon/create',
 
 
 

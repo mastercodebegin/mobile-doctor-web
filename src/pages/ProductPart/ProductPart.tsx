@@ -12,7 +12,7 @@ import { CreateInventory, DeleteInventory, GetAllProductPart, GetAllProductPartB
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { FetchModalBySubCategory } from '../AddMobileNumber/MobileNumberSlice';
 import IphoneImage from "../../assets/Laptop_Image.png";
-import { ArrowDown01, ArrowDownIcon, ArrowUpIcon, MinusCircleIcon, PlusCircleIcon } from 'lucide-react';
+import { ArrowDown01, ArrowDownIcon, ArrowUpIcon, Minus, MinusCircleIcon, Plus, PlusCircleIcon } from 'lucide-react';
 
 const ProductPart = () => {
 
@@ -497,16 +497,16 @@ const ProductPart = () => {
                             statusBadge = { label: 'INITIAL', color: 'text-blue-500' };
                             totalQtyDisplay = newQty;
                           } else if (record.refill) {
-                            qtyChangeDisplay = `+${newQty - prevQty}`;
-                            qtyChangeColor = 'text-green-600';
-                            statusBadge = { label: 'IN', color: 'text-green-500' };
-                            totalQtyDisplay = newQty;
-                          } else if (record.unitRepair) {
-                            qtyChangeDisplay = `${prevQty} - 1`;
-                            qtyChangeColor = 'text-red-600';
-                            statusBadge = { label: 'OUT', color: 'text-red-500' };
-                            totalQtyDisplay = newQty;
-                          } else {
+  qtyChangeDisplay = `+${newQty - prevQty}`;
+  qtyChangeColor = 'text-green-600';
+  statusBadge = { label: <Plus size={20} className="text-green-500" />, color: 'text-green-500' };
+  totalQtyDisplay = newQty;
+} else if (record.unitRepair) {
+  qtyChangeDisplay = `${prevQty} - 1`;
+  qtyChangeColor = 'text-red-600';
+  statusBadge = { label: <Minus size={20} className="text-red-500" />, color: 'text-red-500' };
+  totalQtyDisplay = newQty;
+} else {
                             qtyChangeDisplay = '--';
                             qtyChangeColor = 'text-gray-600';
                             statusBadge = { label: 'Updated', color: 'bg-gray-100 text-gray-500' };
@@ -924,7 +924,7 @@ const ProductPart = () => {
       {showModal && (
         <>
           <div className={ShowModalMainClass}>
-            <div className="bg-white rounded-2xl shadow-xl p-8 max-w-xl w-[90%] relative">
+            <div className="bg-white rounded-2xl shadow-xl p-8 w-[95%] max-w-4xl relative max-h-[90vh] overflow-y-auto">
               <h2 className="text-3xl font-semibold text-center mb-6">
                 {isReFillMode ? "Re-Fill Inventory" : isEditMode ? "Edit Product Part" : "Add Product Part"}
               </h2>
@@ -1079,7 +1079,7 @@ const ProductPart = () => {
                   onClick={handleSaveClick}
                   className={SubmitButtonClass}
                 >
-                  {isReFillMode ? "ReFill" : isEditMode ? "Update" : "Save"}
+                  {isReFillMode ? "ReFill" : isEditMode ? "Update" : "Continue"}
                 </button>
               </div>
             </div>

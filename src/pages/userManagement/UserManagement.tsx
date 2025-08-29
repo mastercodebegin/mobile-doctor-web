@@ -829,7 +829,7 @@ const UserManagement = () => {
                   type="submit"
                   disabled={isLoading}
                   className={SubmitButtonClass}>
-                  {isEditMode ? 'Update' : 'Save'}
+                  {isEditMode ? 'Update' : 'Continue'}
                 </button>
               </div>
             </div>

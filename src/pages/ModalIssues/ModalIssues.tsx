@@ -476,7 +476,7 @@ const ModalIssues = () => {
                   className={SubmitButtonClass}
                   disabled={isLoading}
                 >
-                  {isLoading ? 'Saving...' : (isEditMode ? 'UPDATE' : 'SAVE CHANGES')}
+                  {isLoading ? 'Saving...' : (isEditMode ? 'UPDATE' : 'Continue')}
                 </button>
               </div>
             </div>

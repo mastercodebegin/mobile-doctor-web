@@ -767,7 +767,7 @@ const handleEditUser = async (user: any) => {
                     onClick={handleSaveClick}
                     disabled={!formData.price || !formData.message || !formCategory || !formSubCategory || !formProductPart || !formModalNumber}
                   >
-                    {isEditMode ? "Update Repair Cost" : "Add Repair Cost"}
+                    {isEditMode ? "Update Repair Cost" : "Continue Repair Cost"}
                   </button>
                 </div>
               </div>

@@ -401,7 +401,7 @@ if(Edit?.isEdit && Edit?.supportTicket) {
                   onClick={handleSaveClick}
                   className={SubmitButtonClass}
                 >
-                  {searchByTicket ? "Search" : (isEditMode ? "Update" : "Add")}
+                  {searchByTicket ? "Search" : (isEditMode ? "Update" : "Continue")}
                 </button>
               </div>
             </div>
