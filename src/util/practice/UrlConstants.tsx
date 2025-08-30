@@ -30,6 +30,7 @@ const UrlConstants = {
   UPDATE_STATE: 'states/update',
   UPDATE_CITIES: 'cities/update',
   UPDATE_BRANCH: 'centre/update',
+  UPDATE_COUPON: 'coupon/updateCoupon',
 
   GET_ALL_PRODUCT_PART_LABEL: 'ProductPart/getAllProductPart',
   GET_PRODUCT_PART_LABEL_BY_SUB_CATEGORY_ID: 'ProductPart/getPartItemBySubCategoryId',
@@ -81,6 +82,8 @@ ADD_COUPON: 'coupon/create',
   GET_PROFILE:'User/getMyProfile',
 CREATE_USER_BY_ADMIN: 'user/createUserByAdmin',
 GET_ALL_USER: 'user/getAllUser',
+GET_USER_BY_EMAIL: 'user/getUserByEmail',
+GET_USER_BY_ROLE_ID: 'user/getUsersListByRoleId',
 
   ADD_BRAND:'brand/addBrand',
   ADD_SUB_CATEGORY:'subCategory/addSubCategory',

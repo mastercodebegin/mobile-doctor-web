@@ -120,6 +120,7 @@ const BranchSlice = createSlice({
          Restore: (state) =>{
             return {
                 ...state,
+                branchData: [],
                 Edit: {isEdit: false, branch: null}
             }
          }

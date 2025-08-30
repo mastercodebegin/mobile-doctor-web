@@ -8,6 +8,7 @@ import Pagination from '../../helper/Pagination';
 import { toast } from 'react-toastify';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { GetAllRoles } from '../Roles/RoleSlice';
+import { GetCitiesByStateId } from '../City/CitySlice';
 
 const UserManagement = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -33,9 +34,12 @@ const UserManagement = () => {
 
   const { data, isLoading } = useSelector((state: RootState) => state.VendorSlice);
   const { roleData } = useSelector((state: RootState) => state.RoleSlice);
+  const { stateData } = useSelector((state: RootState) => state.StateSlice);
+  const { cityData } = useSelector((state: RootState) => state.CitySlice);
 
   const usersPerPage = 5;
-  const paginatedUsers = data.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
+  const roleArray = Array.isArray(data) ? data : data ? [data] : [];
+  const paginatedUsers = roleArray?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 
   const toggleSpecRow = (id: any) => {
     setOpenSpecRow(openSpecRow === id ? null : id);
@@ -75,6 +79,20 @@ const UserManagement = () => {
   const handleSearchIconClick = () => {
     setShowModal(true);
     setSearchByEmail(true);
+  };
+
+  const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      city: '', // Reset city when state changes
+    }));
+
+    // Fetch cities for the selected state
+    if (value) {
+      dispatch(GetCitiesByStateId(value));
+    }
   };
 
 
@@ -141,8 +159,14 @@ const UserManagement = () => {
         businessAddress: formData.businessAddress,
         pinCode: formData.pinCode,
         gstNumber: formData.gstNumber,
-        state: formData.state,
-        city: formData.city,
+        state: {
+          id: parseInt(formData.state) || 0,
+          name: stateData?.find(s => s.id === parseInt(formData.state))?.name || "",
+        },
+        city: {
+          id: parseInt(formData.city) || 0,
+          name: cityData?.find(c => c.id === parseInt(formData.city))?.name || "",
+        },
         password: formData.password || "HX36?@tz",
         createdOn: new Date().toISOString(),
         role: {
@@ -218,13 +242,16 @@ const UserManagement = () => {
     }
   };
 
-
-
   const handleCloseModal = () => {
     setShowModal(false);
     setShowConfirmModal(false);
     setIsEditMode(false);
-    setSearchByEmail(false)
+    setSearchByEmail(false);
+    setSelectedDocType('');
+    setFrontDoc(null);
+    setBackDoc(null);
+    setGstDoc(null);
+    setGumastaDoc(null);
     setFormData({})
   };
 
@@ -238,7 +265,7 @@ const UserManagement = () => {
 
   useEffect(() => {
     dispatch(GetAllVendors());
-    dispatch(GetAllRoles())
+    dispatch(GetAllRoles());
   }, []);
 
   if (isLoading) {
@@ -287,7 +314,7 @@ const UserManagement = () => {
               </select>
               {/* )} */}
 
-              {(filterStatus || searchByEmail) && (
+              {(filterStatus || !searchByEmail) && (
                 <button
                   onClick={handleClearFilter}
                   className="px-3 py-1.5 text-sm font-medium text-red-500 border border-red-500 hover:bg-red-600 hover:text-white rounded-md transition-all"
@@ -341,7 +368,7 @@ const UserManagement = () => {
 
                 {/* Table Body */}
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedUsers.length === 0 ? (
+                  {paginatedUsers?.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="text-center py-8">
                         <div className="text-gray-500">
@@ -350,7 +377,7 @@ const UserManagement = () => {
                       </td>
                     </tr>
                   ) : (
-                    paginatedUsers.map((vendor: any, idx) => {
+                    paginatedUsers?.map((vendor: any, idx) => {
                       const fullName = `${vendor.firstName ?? ''} ${vendor.lastName ?? ''}`.trim();
 
                       return (
@@ -408,64 +435,64 @@ const UserManagement = () => {
                                 <td colSpan={13}>
                                   <div className="bg-gray-50 p-6">
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                  {(() => {
-  const user = vendor.vendor;
-  const roleName = user?.role?.name?.toLowerCase();
+                                      {(() => {
+                                        const user = vendor.vendor;
+                                        const roleName = user?.role?.name?.toLowerCase();
 
-  // All possible fields
-  const allFields = [
-    { label: "First Name", value: user?.firstName || 'N/A' },
-    { label: "Last Name", value: user?.lastName || 'N/A' },
-    { label: "Mobile", value: user?.mobile || 'N/A' },
-    { label: "Email", value: user?.email || 'N/A' },
-    { label: "PAN Card", value: user?.panCard || 'N/A' },
-    { label: "Aadhar Number", value: user?.aadharNumber || 'N/A' },
-    { label: "Pin Code", value: user?.pinCode || 'N/A' },
-    { label: "State", value: user?.state || 'N/A' },
-    { label: "City", value: user?.city || 'N/A' },
-    { label: "Home Address", value: user?.homeAddress || 'N/A' },
-    { label: "Created On", value: user?.createdOn ? new Date(user.createdOn).toLocaleString() : 'N/A' },
-    { label: "Account Status", value: user?.accountStatus || 'N/A' },
-    { label: "Business Name", value: user?.businessName || 'N/A' },
-    { label: "Business Address", value: user?.businessAddress || 'N/A' },
-    { label: "GST Number", value: user?.gstNumber || 'N/A' },
-  ];
+                                        // All possible fields
+                                        const allFields = [
+                                          { label: "First Name", value: user?.firstName || 'N/A' },
+                                          { label: "Last Name", value: user?.lastName || 'N/A' },
+                                          { label: "Mobile", value: user?.mobile || 'N/A' },
+                                          { label: "Email", value: user?.email || 'N/A' },
+                                          { label: "PAN Card", value: user?.panCard || 'N/A' },
+                                          { label: "Aadhar Number", value: user?.aadharNumber || 'N/A' },
+                                          { label: "Pin Code", value: user?.pinCode || 'N/A' },
+                                          { label: "State", value: user?.state || 'N/A' },
+                                          { label: "City", value: user?.city || 'N/A' },
+                                          { label: "Home Address", value: user?.homeAddress || 'N/A' },
+                                          { label: "Created On", value: user?.createdOn ? new Date(user.createdOn).toLocaleString() : 'N/A' },
+                                          { label: "Account Status", value: user?.accountStatus || 'N/A' },
+                                          { label: "Business Name", value: user?.businessName || 'N/A' },
+                                          { label: "Business Address", value: user?.businessAddress || 'N/A' },
+                                          { label: "GST Number", value: user?.gstNumber || 'N/A' },
+                                        ];
 
-  let variantFields = [];
+                                        let variantFields = [];
 
-  if (roleName === 'vendor') {
-    // Vendor: Show ALL fields
-    variantFields = allFields;
-  } else if (roleName === 'customer') {
-    // Customer: Hide BusinessName, BusinessAddress, GstNumber, Aadhar, PanCard
-    variantFields = allFields.filter(field => 
-      !['Business Name', 'Business Address', 'GST Number', 'Aadhar Number', 'PAN Card'].includes(field.label)
-    );
-  } else {
-    // Other roles: Hide only BusinessName, BusinessAddress, GstNumber
-    variantFields = allFields.filter(field => 
-      !['Business Name', 'Business Address', 'GST Number'].includes(field.label)
-    );
-  }
+                                        if (roleName === 'vendor') {
+                                          // Vendor: Show ALL fields
+                                          variantFields = allFields;
+                                        } else if (roleName === 'customer') {
+                                          // Customer: Hide BusinessName, BusinessAddress, GstNumber, Aadhar, PanCard
+                                          variantFields = allFields.filter(field =>
+                                            !['Business Name', 'Business Address', 'GST Number', 'Aadhar Number', 'PAN Card'].includes(field.label)
+                                          );
+                                        } else {
+                                          // Other roles: Hide only BusinessName, BusinessAddress, GstNumber
+                                          variantFields = allFields.filter(field =>
+                                            !['Business Name', 'Business Address', 'GST Number'].includes(field.label)
+                                          );
+                                        }
 
-  return (
-    <>
-      {variantFields.map((field, i) => (
-        <div key={i} className="p-4 bg-white rounded shadow-sm border border-gray-200">
-          <div className="text-sm font-medium text-black">{field?.label}</div>
-          <div className={`text-sm text-gray-800 mt-1`}>
-            {field?.value}
-          </div>
-        </div>
-      ))}
-      <div className="p-4 bg-white rounded shadow-sm border border-gray-200">
-        <button onClick={() => toggleSpecImgRow(openSpecImgRow === vendor?.id ? null : vendor?.id)} className={ShowVarientButtonClass}>
-          {openSpecImgRow === vendor?.id ? 'Hide' : 'Show'} Images
-        </button>
-      </div>
-    </>
-  );
-})()}
+                                        return (
+                                          <>
+                                            {variantFields.map((field, i) => (
+                                              <div key={i} className="p-4 bg-white rounded shadow-sm border border-gray-200">
+                                                <div className="text-sm font-medium text-black">{field?.label}</div>
+                                                <div className={`text-sm text-gray-800 mt-1`}>
+                                                  {field?.value}
+                                                </div>
+                                              </div>
+                                            ))}
+                                            <div className="p-4 bg-white rounded shadow-sm border border-gray-200">
+                                              <button onClick={() => toggleSpecImgRow(openSpecImgRow === vendor?.id ? null : vendor?.id)} className={ShowVarientButtonClass}>
+                                                {openSpecImgRow === vendor?.id ? 'Hide' : 'Show'} Images
+                                              </button>
+                                            </div>
+                                          </>
+                                        );
+                                      })()}
 
 
 
@@ -537,7 +564,7 @@ const UserManagement = () => {
             {/* Pagination */}
             <Pagination
               currentPage={currentPage}
-              totalCount={data.length}
+              totalCount={data?.length}
               itemsPerPage={usersPerPage}
               onPageChange={setCurrentPage}
             />
@@ -578,14 +605,14 @@ const UserManagement = () => {
                   </h2>
 
 
-                    <select name="role" value={formData.role || ''} onChange={handleInputChange} className="input mb-4">
-                      <option value="">Select Role</option>
-                      {roleData?.map((role: any) => (
-                        <option key={role.id} value={role.id}>
-                          {role.name}
-                        </option>
-                      ))}
-                    </select>
+                  <select name="role" value={formData.role || ''} onChange={handleInputChange} className="input mb-4">
+                    <option value="">Select Role</option>
+                    {roleData?.map((role: any) => (
+                      <option key={role.id} value={role.id}>
+                        {role.name}
+                      </option>
+                    ))}
+                  </select>
 
                   {/* Basic Info */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -602,32 +629,46 @@ const UserManagement = () => {
                     />
                     <input name="homeAddress" value={formData.homeAddress} onChange={handleInputChange} placeholder="Home Address" className="input" />
                     <input name="aadharNumber" value={formData.aadharNumber} onChange={handleInputChange} placeholder="Aadhar Number" className="input" />
-  {(() => {
-    const selectedRole = roleData?.find((role: any) => role.id == formData.role);
-    const isManagerRole = selectedRole?.name?.toLowerCase() === 'manager';
-    
-    return isManagerRole && (
-      <>
-        <input name="businessName" value={formData.businessName} onChange={handleInputChange} placeholder="Business Name" className="input" />
-        <input name="businessAddress" value={formData.businessAddress} onChange={handleInputChange} placeholder="Business Address" className="input" />
-      </>
-    );
-  })()}
+                    {(() => {
+                      const selectedRole = roleData?.find((role: any) => role.id == formData.role);
+                      const isManagerRole = selectedRole?.name?.toLowerCase() === 'manager';
+
+                      return isManagerRole && (
+                        <>
+                          <input name="businessName" value={formData.businessName} onChange={handleInputChange} placeholder="Business Name" className="input" />
+                          <input name="businessAddress" value={formData.businessAddress} onChange={handleInputChange} placeholder="Business Address" className="input" />
+                        </>
+                      );
+                    })()}
                     <input name="pinCode" value={formData.pinCode} onChange={handleInputChange} placeholder="Pincode" className="input" />
                     <input name="gstNumber" value={formData.gstNumber} onChange={handleInputChange} placeholder="GST Number" className="input" />
-                    <select name="state" value={formData.state} onChange={handleInputChange} className="input">
-                      <option>Select State</option>
-                      <option value="Madhya Pradesh">Madhya Pradesh</option>
-                      <option value="Uttar Pradesh">Uttar Pradesh</option>
-                      <option value="Maharashtra">Maharashtra</option>
-                      <option value="Gujarat">Gujarat</option>
+                    <select
+                      name="state"
+                      value={formData.state || ''}
+                      onChange={handleStateChange}
+                      className="input"
+                    >
+                      <option value="">Select State</option>
+                      {stateData?.map((item: any) => (
+                        <option key={item.id} value={item.id}>
+                          {item.name}
+                        </option>
+                      ))}
                     </select>
-                    <select name="city" value={formData.city} onChange={handleInputChange} className="input">
-                      <option>Select City</option>
-                      <option value="Indore">Indore</option>
-                      <option value="Dewas">Dewas</option>
-                      <option value="Ujjain">Ujjain</option>
-                    </select>                  
+                    <select
+                      name="city"
+                      value={formData.city || ''}
+                      onChange={handleInputChange}
+                      className="input"
+                      disabled={!formData.state}
+                    >
+                      <option value="">Select City</option>
+                      {cityData?.map((item: any) => (
+                        <option key={item.id} value={item.id}>
+                          {item.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <>
@@ -745,73 +786,73 @@ const UserManagement = () => {
                         const isManagerRole = selectedRole?.name?.toLowerCase() === 'manager';
                         return isManagerRole && (
                           <>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* GST Document */}
-                        <div className="mb-6">
-                          <label className="block font-medium mb-2">GST Certificate</label>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            multiple={false}
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              setGstDoc(file || null);
-                            }}
-                            className="w-full border border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400 transition-colors"
-                          />
-                          {gstDoc && (
-                            <div className="mt-4">
-                              <div className="relative bg-gray-100 p-2 rounded-lg">
-                                <span className="text-sm text-gray-700 truncate block">
-                                  {gstDoc.name}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => setGstDoc(null)}
-                                  className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
-                                >
-                                  ×
-                                </button>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              {/* GST Document */}
+                              <div className="mb-6">
+                                <label className="block font-medium mb-2">GST Certificate</label>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  multiple={false}
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    setGstDoc(file || null);
+                                  }}
+                                  className="w-full border border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400 transition-colors"
+                                />
+                                {gstDoc && (
+                                  <div className="mt-4">
+                                    <div className="relative bg-gray-100 p-2 rounded-lg">
+                                      <span className="text-sm text-gray-700 truncate block">
+                                        {gstDoc.name}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => setGstDoc(null)}
+                                        className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                                      >
+                                        ×
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
-                            </div>
-                          )}
-                        </div>
 
-                        {/* Gumasta Document */}
-                        <div className="mb-6">
-                          <label className="block font-medium mb-2">Gumasta License</label>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            multiple={false}
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              setGumastaDoc(file || null);
-                            }}
-                            className="w-full border border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400 transition-colors"
-                          />
-                          {gumastaDoc && (
-                            <div className="mt-4">
-                              <div className="relative bg-gray-100 p-2 rounded-lg">
-                                <span className="text-sm text-gray-700 truncate block">
-                                  {gumastaDoc.name}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => setGumastaDoc(null)}
-                                  className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
-                                >
-                                  ×
-                                </button>
+                              {/* Gumasta Document */}
+                              <div className="mb-6">
+                                <label className="block font-medium mb-2">Gumasta License</label>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  multiple={false}
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    setGumastaDoc(file || null);
+                                  }}
+                                  className="w-full border border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400 transition-colors"
+                                />
+                                {gumastaDoc && (
+                                  <div className="mt-4">
+                                    <div className="relative bg-gray-100 p-2 rounded-lg">
+                                      <span className="text-sm text-gray-700 truncate block">
+                                        {gumastaDoc.name}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => setGumastaDoc(null)}
+                                        className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                                      >
+                                        ×
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             </div>
-                          )}
-                        </div>
-                      </div>
                           </>
                         )
                       })()}
-                      
+
                     </div>
                   </>
                 </>

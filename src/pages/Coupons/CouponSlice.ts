@@ -1,13 +1,15 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { getRequestMethodWithParam, postRequestMethod } from "../../util/CommonService";
+import { getRequestMethodWithParam, postRequestMethod, putRequestMethod } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
 import { pageSize } from "../../helper/ApplicationConstants";
+import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
 interface User {
     id: number;
     couponCode: string;
     discountInPercent: number;
-    expiredOn: string
+    expiredOn: string;
+    createdBy: string
 }
 
 interface Coupon {
@@ -20,7 +22,8 @@ Edit: {
         id: number;
         couponCode: string;
         discountInPercent: number
-        expiredOn: string
+        expiredOn: string;
+        createdBy: string
     }
 }
 }
@@ -35,8 +38,8 @@ const initialState:Coupon = {
         id: 0,
         couponCode: '',
         discountInPercent: 0,
-        expiredOn: ''
-
+        expiredOn: '',
+        createdBy: ''
         }
     }
 }
@@ -46,7 +49,25 @@ const CouponSlice = createSlice({
     initialState,
     reducers: {
 Remove: (state, action) =>{
-    
+const updatedCouponData = state.couponData.filter(item => item.id !== action.payload);
+LocalStorageManager.saveData(STORAGE_KEYS.COUPON, updatedCouponData);
+return {
+    ...state,
+    couponData: updatedCouponData
+}
+},
+Update: (state, action) =>{
+    state.Edit = {
+        isEdit: true,
+        coupon: action.payload
+    }
+},
+Restore: (state) =>{
+    return {
+        ...state,
+        couponData: [],
+        Edit: {isEdit: false, coupon: null}
+    }
 }
     },
     extraReducers: (builder) =>{
@@ -59,6 +80,7 @@ state.isSuccess = false
 state.isLoading = false;
 state.isSuccess = true;
 state.couponData = action.payload.content
+LocalStorageManager.saveData(STORAGE_KEYS.COUPON, action.payload)
 })
 .addCase(GetAllCoupons.rejected , (state , action) =>{
 state.isLoading = false;
@@ -75,6 +97,7 @@ state.isSuccess = false
 state.isLoading = false;
 state.isSuccess = true;
 state.couponData = [...state.couponData, action.payload.content]
+LocalStorageManager.saveData(STORAGE_KEYS.COUPON, [...state.couponData])
 })
 .addCase(CreateCoupon.rejected , (state , action) =>{
 state.isLoading = false;
@@ -82,11 +105,30 @@ state.isSuccess = false;
 console.log("Coupon Data Fetch Faield ----------", action.payload)
 })
 
+// Update
+.addCase(UpdateCoupon.pending  , (state ) =>{
+state.isLoading = true
+state.isSuccess = false
+})
+.addCase(UpdateCoupon.fulfilled , (state , action) =>{
+state.isLoading = false;
+state.isSuccess = true;
+state.couponData = state.couponData.map((coupon) => coupon.id === action.payload?.id ? action.payload : coupon);
+state.Edit = {isEdit: false, coupon: {id: 0, couponCode: "", discountInPercent: 0, expiredOn: "", createdBy: ""}};
+LocalStorageManager.saveData(STORAGE_KEYS.COUPON, [...state.couponData])
+})
+.addCase(UpdateCoupon.rejected , (state , action) =>{
+state.isLoading = false;
+state.isSuccess = false;
+console.log(action.payload || "Failed to update Coupon")
+})
+
     }
 })
 
 
 export default CouponSlice.reducer
+export const {Remove, Restore, Update} = CouponSlice.actions
 
 // Fetch All Coupons Thunk
 export const GetAllCoupons = createAsyncThunk("FETCH/ALL/COUPONS", async (_, thunkAPI) =>{
@@ -99,7 +141,7 @@ export const GetAllCoupons = createAsyncThunk("FETCH/ALL/COUPONS", async (_, thu
        console.log("Response Data :---", response) 
        return response
     } catch (error: any) {
-        console.error("UpdateBranch error:", error);
+        console.error("CreateBranch error:", error);
     const message = error?.response?.data?.message || error?.message || "Something went wrong";
     return thunkAPI.rejectWithValue(message);
     }
@@ -112,7 +154,20 @@ export const CreateCoupon = createAsyncThunk("CREATE/COUPON", async (requestData
         console.log("Response Data :---", response) 
        return response
     } catch (error: any) {
-               console.error("UpdateBranch error:", error);
+               console.error("CreateCoupon error:", error);
+    const message = error?.response?.data?.message || error?.message || "Something went wrong";
+    return thunkAPI.rejectWithValue(message);
+    }
+})
+
+// Update Coupon Thunk
+export const UpdateCoupon = createAsyncThunk("UPDATE/COUPON", async (updateData, thunkAPI) =>{
+    try {
+        const response = await putRequestMethod(updateData, UrlConstants.UPDATE_COUPON);
+        console.log("Update response:", response);
+    return response;
+    } catch (error: any) {
+             console.error("UpdateCoupon error:", error);
     const message = error?.response?.data?.message || error?.message || "Something went wrong";
     return thunkAPI.rejectWithValue(message);
     }

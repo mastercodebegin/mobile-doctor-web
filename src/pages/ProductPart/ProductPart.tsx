@@ -493,20 +493,20 @@ const ProductPart = () => {
 
                           if (record.new) {
                             qtyChangeDisplay = `+${newQty}`;
-                            qtyChangeColor = 'text-blue-600';
-                            statusBadge = { label: 'INITIAL', color: 'text-blue-500' };
+                            qtyChangeColor = 'text-yellow-400';
+                            statusBadge = { label: "Initial", color: 'text-yellow-400' };
                             totalQtyDisplay = newQty;
                           } else if (record.refill) {
-  qtyChangeDisplay = `+${newQty - prevQty}`;
-  qtyChangeColor = 'text-green-600';
-  statusBadge = { label: <Plus size={20} className="text-green-500" />, color: 'text-green-500' };
-  totalQtyDisplay = newQty;
-} else if (record.unitRepair) {
-  qtyChangeDisplay = `${prevQty} - 1`;
-  qtyChangeColor = 'text-red-600';
-  statusBadge = { label: <Minus size={20} className="text-red-500" />, color: 'text-red-500' };
-  totalQtyDisplay = newQty;
-} else {
+                            qtyChangeDisplay = `+${newQty - prevQty}`;
+                            qtyChangeColor = 'text-green-600';
+                            statusBadge = { label: "Refill", color: 'text-green-600' };
+                            totalQtyDisplay = newQty;
+                          } else if (record.unitRepair) {
+                            qtyChangeDisplay = `-1`;
+                            qtyChangeColor = 'text-red-600';
+                            statusBadge = { label: "Use", color: 'text-red-500' };
+                            totalQtyDisplay = newQty;
+                          } else {
                             qtyChangeDisplay = '--';
                             qtyChangeColor = 'text-gray-600';
                             statusBadge = { label: 'Updated', color: 'bg-gray-100 text-gray-500' };
@@ -520,10 +520,13 @@ const ProductPart = () => {
                               <td className={`px-4 py-2 align-middle font-medium ${qtyChangeColor}`}>{qtyChangeDisplay}</td>
                               <td className="px-4 py-2 align-middle">{totalQtyDisplay}</td>
                               <td className="px-4 py-2 align-middle">
-                                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${statusBadge.color}`}>
-                                  {statusBadge.label}
-                                </span>
+                                <span className={`px-2 py-1 text-xs font-bold rounded-lg ${statusBadge.color}`}>
+  {statusBadge.label}
+</span>
+
                               </td>
+
+
                               <td className="px-4 py-2 align-middle">
                                 {(() => {
                                   // First check record.user, then fallback to record.inventory.user
@@ -812,7 +815,7 @@ const ProductPart = () => {
                       Delete
                     </th>
                     <th scope="col" className={TableHadeClass}>
-                      ReFill
+                      Update
                     </th>
                     <th scope="col" className={TableHadeClass}>
                       View History
@@ -838,10 +841,10 @@ const ProductPart = () => {
                           <td className={TableDataClass}>
                             <div className='flex items-center space-x-2' >
                               <img src={IphoneImage || 'https://tse4.mm.bing.net/th/id/OIP.FVpPrz3IlNVDLpKMLC3D2wHaHa?pid=Api&P=0&h=180'} className="w-20 h-20 object-contain rounded-md" alt="Iphone Image" />
-                              <span>
+                              {/* <span>
                                 <h4 className='text-black' >{user.productPart.subCategory.name}</h4>
                                 <p>{user.productPart.subCategory.category.name}</p>
-                              </span>
+                              </span> */}
                             </div>
                           </td>
                           <td className={TableDataClass}>{user.productPart.name}</td>

@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { getRequestMethodWithParam, postRequestMethodForAddVariant } from "../../util/CommonService";
+import { getRequestMethodWithParam, postRequestMethod, postRequestMethodForAddVariant } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
 import { pageSize } from "../../helper/ApplicationConstants";
 
@@ -96,7 +96,7 @@ localStorage.setItem("card", JSON.stringify(state.data))
       .addCase(GetVendorByEmail.fulfilled, (state ,action) =>{
         state.isLoading = false
         state.isSuccess = true
-        state.data = action.payload.content
+        state.data = action.payload.responseDetails
       })
       .addCase(GetVendorByEmail.rejected, (state, action) =>{
         state.isLoading = false
@@ -113,7 +113,7 @@ localStorage.setItem("card", JSON.stringify(state.data))
       .addCase(GetVendorByRoleId.fulfilled, (state ,action) =>{
         state.isLoading = false
         state.isSuccess = true
-        state.data = action.payload.content
+        state.data = action.payload
       })
       .addCase(GetVendorByRoleId.rejected, (state, action) =>{
         state.isLoading = false
@@ -144,13 +144,13 @@ export default VendorSlice.reducer
 export const {Remove , Add} = VendorSlice.actions
 
 // Fetch All Users-Management
-export const GetAllVendors = createAsyncThunk("FETCH/ALL/VENTORS", async (_, thunkAPI) =>{
+export const GetAllVendors = createAsyncThunk("FETCH/ALL/USERS", async (_, thunkAPI) =>{
   try {
     const payload = {
       pageSize,
       pageNumber: 0
     }
-    const response = await getRequestMethodWithParam(payload , UrlConstants.GET_ALL_USER);
+    const response = await postRequestMethod(payload , UrlConstants.GET_ALL_USER);
     console.log("Response Data :--", response);
     return response
   } catch (error: any) {
@@ -163,11 +163,9 @@ export const GetAllVendors = createAsyncThunk("FETCH/ALL/VENTORS", async (_, thu
 export const GetVendorByEmail = createAsyncThunk("FETCH/VENDOR/BY/EMAIL", async (requestData: FormData, thunkAPI) =>{
   try {
     const payload = {
-      pageSize,
-      pageNumber: 0,
       email: requestData
     }
-     const response = await getRequestMethodWithParam(payload , UrlConstants.GET_ALL_USER);
+     const response = await getRequestMethodWithParam(payload , UrlConstants.GET_USER_BY_EMAIL);
     console.log("Response Data :--", response);
     return response
   } catch (error: any) {
@@ -180,11 +178,9 @@ export const GetVendorByEmail = createAsyncThunk("FETCH/VENDOR/BY/EMAIL", async 
 export const GetVendorByRoleId = createAsyncThunk("FETCH/VENDOR/BY/ROLE/ID", async (requestData, thunkAPI) =>{
   try {
     const payload = {
-      pageSize,
-      pageNumber: 0,
       roleId: requestData
     }
-     const response = await getRequestMethodWithParam(payload , UrlConstants.GET_ALL_USER);
+     const response = await getRequestMethodWithParam(payload , UrlConstants.GET_USER_BY_ROLE_ID);
     console.log("Response Data :--", response);
     return response
   } catch (error: any) {

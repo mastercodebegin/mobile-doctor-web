@@ -138,8 +138,16 @@ useEffect(() => {
     navigate("/login", { replace: true });
   } else if (data?.role?.name === "customer") {
     navigate("/orders", { replace: true });
-  } else if (data?.role?.name === "admin" || data?.role?.name === "manager" ) {
+  } else if (data?.role?.name === "admin") {
     navigate("/", { replace: true });
+  } else if (data?.role?.name === "manager") {
+    navigate("/", { replace: true });
+  }else if (data?.role?.name === "pickupPartner") {
+    navigate("/orders", { replace: true });
+  } else if (data?.role?.name === "engineer") {
+    navigate("/orders", { replace: true });
+  }  else if (data?.role?.name === "customerExecutive") {
+    navigate("/orders", { replace: true });
   } else if (data?.role?.name === "vendor") {
     navigate("/product-part", {replace: true})
   }

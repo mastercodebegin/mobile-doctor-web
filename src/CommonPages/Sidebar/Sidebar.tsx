@@ -32,19 +32,23 @@ import { RootState } from "../../redux/store";
 // ==========================
 const roleMenuConfig: Record<string, string[] | "ALL"> = {
   admin: "ALL",
-  manager: "ALL",
-  vendor: ["/product-part", "/products", "/orders"],
-  customerExecutive: ["/orders", "/support-ticket"],
   customer: ["/orders", "/support-ticket"],
+  manager: "ALL",
+  pickupPartner: ["/orders"],
+  engineer: ["/orders"],
+  customerExecutive: ["/orders", "/support-ticket"],
+  vendor: ["/product-part", "/products", "/orders"],
 };
 
 // Default routes for each role
 const defaultRoutes: Record<string, string> = {
   admin: "/",
-  manager: "/",
-  vendor: "/product-part",
-  customerExecutive: "/orders",
   customer: "/orders",
+  manager: "/",
+  pickupPartner: "/orders",
+  engineer: "/orders",
+  customerExecutive: "/orders",
+  vendor: "/product-part",
 };
 
 // ==========================

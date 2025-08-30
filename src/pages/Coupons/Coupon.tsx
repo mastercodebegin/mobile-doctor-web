@@ -5,7 +5,7 @@ import Pagination from '../../helper/Pagination';
 import { AppDispatch, RootState } from '../../redux/store';
 import { useDispatch, useSelector } from 'react-redux';
 import Loading from '../../components/Loading';
-import { CreateCoupon, GetAllCoupons } from './CouponSlice';
+import { CreateCoupon, GetAllCoupons, Remove, Update, UpdateCoupon } from './CouponSlice';
 import { toast } from 'react-toastify';
 
 const Coupon = () => {
@@ -21,7 +21,7 @@ const [expiredOn, setExpiredOn] = useState("");
 
       const dispatch = useDispatch<AppDispatch>()
 
-      const {couponData, isLoading} = useSelector((state: RootState) => state.CouponSlice)
+      const {couponData, isLoading, Edit} = useSelector((state: RootState) => state.CouponSlice)
       
       const usersPerPage = 5;
   const paginatedUsers = couponData.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
@@ -30,8 +30,34 @@ const [expiredOn, setExpiredOn] = useState("");
     if(!couponCode || !discountInPercent || !expiredOn) {
         toast.warn("Please Fill All Details!!")
     }
-    if(isEditMode) {
-toast.warn("Edit Mode On!")
+    if(isEditMode && Edit?.coupon?.id) {
+try {
+  const updateData = {
+    id: Edit?.coupon?.id,
+    couponCode: couponCode,
+    discountInPercent: discountInPercent,
+    expiredOn: expiredOn,
+    createdBy: {
+      id: Edit?.coupon?.createdBy?.id
+    },
+  };
+
+  dispatch(Update(updateData));
+  dispatch(UpdateCoupon(updateData))
+  .unwrap()
+            .then((res: any) => {
+              dispatch(GetAllCoupons());
+              toast.success(res.message || "Coupon updated successfully!");
+              handleCloseModal();
+            })
+            .catch((err: any) => {
+              console.error("Update failed:", err);
+              toast.error("Coupon update failed: " + err);
+            });
+} catch (error) {
+  toast.error("Failed to update Coupon");
+        console.error("Update error:", error);
+}
     } else {
         setShowConfirmModal(true)
     }
@@ -63,16 +89,38 @@ toast.warn("Edit Mode On!")
     setCouponCode("");
     setDiscountInPercent("");
     setExpiredOn("")
+    setIsEditMode(false);
   }
 
-  const handleEditUser = (user: any) =>{}
+  const handleEditUser = (user: any) =>{
+dispatch(Update(user));
+setCouponCode(user?.couponCode || "")
+setDiscountInPercent(user?.discountInPercent || 0);
+  setExpiredOn(user?.expiredOn || "");
 
-  const handleDeleteUser = (userId: number) =>{}
+  setIsEditMode(true);
+  setShowModal(true);
+  }
+
+  const handleDeleteUser = (userId: number) =>{
+        console.log(`Delete user with ID: ${userId}`);
+        dispatch(Remove(userId))
+  }
 
   useEffect(() =>{
     setIsLoaded(true);
 dispatch(GetAllCoupons())
   },[])
+
+  useEffect(() =>{
+if(Edit?.isEdit && Edit?.coupon) {
+  setIsEditMode(true);
+  setCouponCode(Edit?.coupon?.couponCode || "")
+  setDiscountInPercent(Edit?.coupon?.discountInPercent || 0);
+  setExpiredOn(Edit?.coupon?.expiredOn || "");
+  setShowModal(true);
+}
+  },[Edit])
 
     if (isLoading) {
       return <Loading />
@@ -98,82 +146,6 @@ dispatch(GetAllCoupons())
              <div className="bg-gray-50 p-4 mt-2 min-h-screen">
                <div className="max-w-6xl mx-auto bg-white rounded-lg shadow overflow-hidden">
                  {/* Table */}
-                 {/* <div className="overflow-x-auto">
-                   <table className="min-w-full divide-y divide-gray-200">
-                     <thead className="bg-white">
-                       <tr>
-                         <th scope="col" className={TableHadeClass}>
-                           #
-                         </th>
-                         <th scope="col" className={TableHadeClass}>
-                           Email
-                         </th>
-                         <th scope="col" className={TableHadeClass}>
-                           Mobile Number
-                         </th>
-                         <th scope="col" className={TableHadeClass}>
-                           Address
-                         </th>
-                         <th scope="col" className={TableHadeClass}>
-                           State
-                         </th>
-                         <th scope="col" className={TableHadeClass}>
-                           Edit
-                         </th>
-                         <th scope="col" className={TableHadeClass}>
-                           Delete
-                         </th>
-                       </tr>
-                     </thead>
-                     <tbody className="bg-white divide-y divide-gray-200">
-                       {paginatedUsers.map((user, index) => (
-                         <tr
-                           key={user.id}
-                           className={`transform transition-all duration-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-                             } ${hoveredRow === user.id ? 'bg-gray-50' : 'bg-white'}`}
-                           style={{ transitionDelay: `${index * 100}ms` }}
-                           onMouseEnter={() => setHoveredRow(user?.id)}
-                           onMouseLeave={() => setHoveredRow(null)}
-                         >
-     
-                           <td className={TableDataClass}>
-                             {user.id}
-                           </td>
-     
-                           <td className={TableDataClass}>
-                             <div className="text-sm font-medium text-gray-600">{user?.user?.email ?? "--"}</div>
-                           </td>
-     
-                           <td className={TableDataClass}>
-                             <div className="text-sm font-medium text-gray-600">{user?.user?.mobile ?? "--"}</div>
-                           </td>
-     
-                           <td className={TableDataClass}>
-                             <div className="text-sm font-medium text-gray-600">{user?.address ?? "--"}</div>
-                           </td>
-     
-                           <td className={TableDataClass}>
-                             <button
-                               onClick={() => handleEditUser(user)}
-                               className={EditClass}
-                             >
-                               {EditIcon}
-                             </button>
-                           </td>
-                           <td className={TableDataClass}>
-                             <button
-                               onClick={() => handleDeleteUser(user?.id)}
-                               className={DeleteClass}
-                             >
-                               {DeleteIcon}
-                             </button>
-                           </td>
-                         </tr>
-                       ))}
-                     </tbody>
-                   </table>
-                 </div> */}
-
                  <div className="overflow-x-auto">
   <table className="min-w-full divide-y divide-gray-200">
     {/* Table Header */}
