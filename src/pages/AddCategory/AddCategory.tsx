@@ -117,7 +117,7 @@ const AddCategory = () => {
   // Save to localStorage whenever data changes
   useEffect(() => {
     setIsLoaded(true);
-    localStorage.setItem("categories", JSON.stringify(data));
+    // localStorage.setItem("categories", JSON.stringify(data));
     dispatch(GetAllCategory())
   }, []);
 

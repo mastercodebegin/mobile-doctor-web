@@ -238,11 +238,11 @@ const ModalIssues = () => {
   }, [])
 
   // Sync data to localStorage whenever ModalIssuesData changes
-  useEffect(() => {
-    if (ModalIssuesData.length > 0) {
-      localStorage.setItem('modal-issues', JSON.stringify(ModalIssuesData));
-    }
-  }, [ModalIssuesData])
+  // useEffect(() => {
+  //   if (ModalIssuesData.length > 0) {
+  //     localStorage.setItem('modal-issues', JSON.stringify(ModalIssuesData));
+  //   }
+  // }, [ModalIssuesData])
 
   useEffect(() => {
     if (Edit?.isEdit && Edit?.modalIssue) {

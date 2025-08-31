@@ -135,7 +135,7 @@ const BranchSlice = createSlice({
                      state.isLoading = false;
                      state.isSuccess = true;
                      state.branchData = action.payload,
-                     LocalStorageManager.saveData(STORAGE_KEYS.BRANCH, action.payload);
+LocalStorageManager.saveData(STORAGE_KEYS.BRANCH, action.payload);
                      })
                      .addCase(GetAllBranch.rejected , (state , action) =>{
                      state.isLoading = false;
@@ -151,7 +151,7 @@ const BranchSlice = createSlice({
              state.isLoading = false;
              state.isSuccess = true;
              state.branchData = [...state.branchData , action.payload];
-             LocalStorageManager.saveData(STORAGE_KEYS.BRANCH, [...state.branchData]);
+LocalStorageManager.saveData(STORAGE_KEYS.BRANCH, [...state.branchData]);
              })
              .addCase(CreateBranch.rejected , (state , action) =>{
              state.isLoading = false
@@ -167,7 +167,7 @@ const BranchSlice = createSlice({
                 state.isSuccess = true
                 state.branchData = state.branchData.map((brand) => brand.id === action.payload?.id ? action.payload : brand)
                 state.Edit = {isEdit : false, branch : {id: 0, address: "", countries: null, states: null, cities: null, user: null},}
-                LocalStorageManager.saveData(STORAGE_KEYS.BRANCH, [...state.branchData]);
+LocalStorageManager.saveData(STORAGE_KEYS.BRANCH, [...state.branchData]);
                                                                 })
                 .addCase(UpdateBranch.rejected , (state , action) =>{
                 state.isLoading = false

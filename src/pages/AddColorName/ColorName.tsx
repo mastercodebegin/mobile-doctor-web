@@ -145,11 +145,11 @@ const handleDeleteUser = async (id : string) =>{
 
   useEffect(() => {
     setIsLoaded(true);
-    const storedData = localStorage.getItem("color-name");
-    if (storedData) {
-        const parsedData = JSON.parse(storedData);
-        dispatch(SetInitialData(parsedData));
-    }
+    // const storedData = localStorage.getItem("color-name");
+    // if (storedData) {
+    //     const parsedData = JSON.parse(storedData);
+    //     dispatch(SetInitialData(parsedData));
+    // }
     dispatch(GetAllColors());
 }, [dispatch]);
 

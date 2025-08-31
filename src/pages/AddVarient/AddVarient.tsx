@@ -483,7 +483,7 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
   }, [selectedModalNumber, dispatch]);
 
   useEffect(() => {
-    localStorage.setItem("Variant", JSON.stringify(AllVariantData))
+    // localStorage.setItem("Variant", JSON.stringify(AllVariantData))
     dispatch(FetchAllModalNumber());
     dispatch(GetAllColors());
   }, [dispatch]);

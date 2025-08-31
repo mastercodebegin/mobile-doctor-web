@@ -140,7 +140,7 @@ const AddSubCategory = () => {
 
   useEffect(() => {
     setIsLoaded(true);
-    localStorage.setItem("subcategories", JSON.stringify(SubCategoriesData));
+    // localStorage.setItem("subcategories", JSON.stringify(SubCategoriesData));
     dispatch(GetAllSubCategory());
     dispatch(GetAllCategory());
   }, []);

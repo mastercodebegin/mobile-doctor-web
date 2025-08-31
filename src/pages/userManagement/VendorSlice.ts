@@ -2,7 +2,9 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getRequestMethodWithParam, postRequestMethod, postRequestMethodForAddVariant } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
 import { pageSize } from "../../helper/ApplicationConstants";
+import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
+const storeData = LocalStorageManager.getData(STORAGE_KEYS.USER);
 
 // interfaces.ts
 interface VendorDocument {
@@ -51,7 +53,7 @@ interface VendorState {
 const initialState : VendorState = {
   isLoading : false,
         isSuccess : false,
-        data : [],
+        data : storeData,
 }
 
 const VendorSlice = createSlice({
@@ -80,6 +82,7 @@ localStorage.setItem("card", JSON.stringify(state.data))
         state.isLoading = false
         state.isSuccess = true
         state.data = action.payload.content
+        LocalStorageManager.saveData(STORAGE_KEYS.USER, action.payload);
       })
       .addCase(GetAllVendors.rejected, (state, action) =>{
         state.isLoading = false
@@ -97,6 +100,7 @@ localStorage.setItem("card", JSON.stringify(state.data))
         state.isLoading = false
         state.isSuccess = true
         state.data = action.payload.responseDetails
+        LocalStorageManager.saveData(STORAGE_KEYS.USER, action.payload);
       })
       .addCase(GetVendorByEmail.rejected, (state, action) =>{
         state.isLoading = false
@@ -114,6 +118,7 @@ localStorage.setItem("card", JSON.stringify(state.data))
         state.isLoading = false
         state.isSuccess = true
         state.data = action.payload
+        LocalStorageManager.saveData(STORAGE_KEYS.USER, action.payload);
       })
       .addCase(GetVendorByRoleId.rejected, (state, action) =>{
         state.isLoading = false
@@ -131,6 +136,7 @@ localStorage.setItem("card", JSON.stringify(state.data))
         state.isLoading = false
         state.isSuccess = true
         state.data = [...state.data, action.payload]
+        LocalStorageManager.saveData(STORAGE_KEYS.USER, [...state.data]);
       })
       .addCase(CreateVendor.rejected, (state, action) =>{
         state.isLoading = false

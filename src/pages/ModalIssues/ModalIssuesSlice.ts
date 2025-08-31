@@ -1,8 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getRequestMethod, getRequestMethodWithParam, postRequestMethod, putRequestMethod } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
+import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
-const storeData = localStorage.getItem('modal-issues')
+const storeData = LocalStorageManager.getData(STORAGE_KEYS.MODAL_ISSUE);
 
 interface Category {
   id: number;
@@ -34,7 +35,7 @@ interface ModalIssues {
 const initialState: ModalIssues = {
   isLoading: false,
   isSuccess: false,
-  ModalIssuesData: storeData ? JSON.parse(storeData) : [],
+  ModalIssuesData: storeData,
   Edit: {
     modalIssue: {
       id: 0,
@@ -89,8 +90,12 @@ const ModalIssuesSlice = createSlice({
       };
     },
     Remove: (state, action) => {
-      state.ModalIssuesData = state.ModalIssuesData.filter(item => item.id !== action.payload)
-      localStorage.setItem('modal-issues', JSON.stringify(state.ModalIssuesData));
+      const updateModalIssueData = state.ModalIssuesData.filter(item => item.id !== action.payload)
+      LocalStorageManager.saveData(STORAGE_KEYS.MODAL_ISSUE, updateModalIssueData)
+      return {
+        ...state,
+        ModalIssuesData: updateModalIssueData
+      }
     },
     Update: (state, action) => {
       state.Edit = { modalIssue: action.payload, isEdit: true }
@@ -107,7 +112,7 @@ const ModalIssuesSlice = createSlice({
         state.isSuccess = true
         if (action.payload && action.payload.length > 0) {
           state.ModalIssuesData = action.payload
-          localStorage.setItem('modal-issues', JSON.stringify(action.payload));
+          LocalStorageManager.saveData(STORAGE_KEYS.MODAL_ISSUE, action.payload);
         }
       })
       .addCase(GetAllModalIssues.rejected, (state, action) => {
@@ -125,7 +130,8 @@ const ModalIssuesSlice = createSlice({
         state.isLoading = false
         state.isSuccess = true
         state.ModalIssuesData = action.payload
-        localStorage.setItem('modal-issues', JSON.stringify(action.payload))
+        LocalStorageManager.saveData(STORAGE_KEYS.MODAL_ISSUE, action.payload);
+        
       })
       .addCase(GetAllProductPartsBySubCategory.rejected, (state, action) => {
         state.isLoading = false
@@ -142,7 +148,7 @@ const ModalIssuesSlice = createSlice({
         state.isLoading = false
         state.isSuccess = true
         state.ModalIssuesData.push(action.payload)
-        localStorage.setItem('modal-issues', JSON.stringify(state.ModalIssuesData));
+        LocalStorageManager.saveData(STORAGE_KEYS.MODAL_ISSUE, [...state.ModalIssuesData]);
       })
       .addCase(CreateModalIssue.rejected, (state, action) => {
         state.isLoading = false
@@ -170,7 +176,7 @@ const ModalIssuesSlice = createSlice({
         }
 
         // Sync to localStorage
-        localStorage.setItem('modal-issues', JSON.stringify(state.ModalIssuesData));
+        LocalStorageManager.saveData(STORAGE_KEYS.MODAL_ISSUE, [...state.ModalIssuesData]);
 
         // Reset Edit state
         state.Edit = {

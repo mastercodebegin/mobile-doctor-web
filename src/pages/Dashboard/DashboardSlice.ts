@@ -1,8 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getRequestMethod, getRequestMethodWithParam } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
+import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
-const storedData = localStorage.getItem("dashboard")
+const storeData = LocalStorageManager.getData(STORAGE_KEYS.DASHBAORD);
 
 interface OrdersCounts {
   total: number;
@@ -55,8 +56,8 @@ interface DashboardState {
 const initialState: DashboardState = {
     isLoading: false,
     isSuccess: false,
-    dashboardData: storedData ? JSON.parse(storedData) : [],
-    productVisitData: storedData ? JSON.parse(storedData) : [
+    dashboardData: storeData,
+    productVisitData: storeData ? storeData : [
   { period: 'Tue', count: 75 },
   { period: 'Wed', count: 50 },
   { period: 'Thu', count: 65 },
@@ -81,6 +82,7 @@ const DashboardSlice = createSlice({
             state.isLoading = false
             state.isSuccess = true
             state.dashboardData = action.payload
+            LocalStorageManager.saveData(STORAGE_KEYS.DASHBAORD, action.payload);
         })
         .addCase(GetAllOrderCount.rejected, (state, action) =>{
             state.isLoading = false
@@ -97,6 +99,7 @@ const DashboardSlice = createSlice({
             state.isLoading = false
             state.isSuccess = true
             state.productVisitData = action.payload.responseDetails
+            LocalStorageManager.saveData(STORAGE_KEYS.DASHBAORD, action.payload);
         })
         .addCase(GetAllOrdersInGraph.rejected, (state, action) =>{
             state.isLoading = false

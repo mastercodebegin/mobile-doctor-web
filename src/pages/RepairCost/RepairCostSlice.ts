@@ -1,6 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getRequestMethod, getRequestMethodWithParam, postRequestMethod, putRequestMethod } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
+import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
+
+const storeData = LocalStorageManager.getData(STORAGE_KEYS.REPAIR_COST);
 
 interface BasicInfo {
   id: number;
@@ -61,10 +64,10 @@ interface RepairCostState {
 }
 
 const initialState: RepairCostState = {
-  RepairCostData: [],
   isLoading: false,
   isSuccess: false,
   error: null,
+  RepairCostData: storeData,
   Edit: {
     isEdit: false,
     repairCost: {
@@ -164,7 +167,7 @@ setEditRepairCost: (state, action) => {
           } else {
             state.RepairCostData = [];
           }
-          localStorage.setItem('Repair-Cost', JSON.stringify(state.RepairCostData));
+          LocalStorageManager.saveData(STORAGE_KEYS.REPAIR_COST, action.payload);
         } else {
           state.RepairCostData = [];
         }
@@ -200,7 +203,7 @@ setEditRepairCost: (state, action) => {
           } else {
             state.RepairCostData = [];
           }
-          localStorage.setItem('Repair-Cost', JSON.stringify(state.RepairCostData));
+          LocalStorageManager.saveData(STORAGE_KEYS.REPAIR_COST, action.payload);
         } else {
           state.RepairCostData = [];
         }
@@ -242,10 +245,7 @@ setEditRepairCost: (state, action) => {
     }
 
     // Save in localStorage
-    localStorage.setItem(
-      "Repair-Cost",
-      JSON.stringify(state.RepairCostData)
-    );
+    LocalStorageManager.saveData(STORAGE_KEYS.REPAIR_COST, action.payload);
   } else {
     state.RepairCostData = [];
   }
@@ -283,7 +283,7 @@ setEditRepairCost: (state, action) => {
           if (newRepairCost) {
             // Add to beginning of array for better UX
             state.RepairCostData.unshift(newRepairCost);
-            localStorage.setItem('Repair-Cost', JSON.stringify(state.RepairCostData));
+            LocalStorageManager.saveData(STORAGE_KEYS.REPAIR_COST, [...state.RepairCostData]);
           }
         }
       })
@@ -327,7 +327,7 @@ setEditRepairCost: (state, action) => {
     }
   }
 
-  localStorage.setItem("repair-cost", JSON.stringify(state.RepairCostData));
+  LocalStorageManager.saveData(STORAGE_KEYS.REPAIR_COST, [...state.RepairCostData]);
 
   // Reset Edit state after successful update
   state.Edit = {

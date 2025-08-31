@@ -1,8 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { deleteRequestMethodWithParam, getRequestMethod, postRequestMethod, putRequestMethodWithBodyAndParam } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
+import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
-const storedData = localStorage.getItem("categories");
+const storeData = LocalStorageManager.getData(STORAGE_KEYS.CATEGORY);
 
 interface User {
     id: string;
@@ -23,7 +24,7 @@ const initialState: AddCategory = {
     isSuccess: false,
     isError: false,
     message: "",
-    data: storedData ? JSON.parse(storedData) : [],
+    data: storeData,
     Edit: { category: { name: "" }, isEdit: false }, 
 }
 
@@ -32,9 +33,11 @@ const AddCategorySlice = createSlice({
     initialState,
     reducers: {
         Remove: (state, action) => {
+            const updatedCategoryData = state.data.filter(item => item.id !== action.payload)
+            LocalStorageManager.saveData(STORAGE_KEYS.CATEGORY, updatedCategoryData)
             return {
                 ...state,
-                data: state.data.filter(item => item.id !== action.payload)
+                data: updatedCategoryData
             }
         },
         // Added Update reducer for edit mode
@@ -68,6 +71,7 @@ const AddCategorySlice = createSlice({
                 state.isSuccess = true;
                 state.isError = false;
                 state.data = action.payload
+                LocalStorageManager.saveData(STORAGE_KEYS.CATEGORY, action.payload);
             })
             .addCase(GetAllCategory.rejected, (state, action) => {
                 state.isLoading = false;
@@ -86,6 +90,7 @@ const AddCategorySlice = createSlice({
                 state.isSuccess = true;
                 state.isError = false;
                 state.data = [...state.data, action.payload]
+                LocalStorageManager.saveData(STORAGE_KEYS.CATEGORY, [...state.data]);
             })
             .addCase(CreateCategory.rejected, (state, action) => {
                 state.isLoading = false
@@ -134,6 +139,7 @@ const AddCategorySlice = createSlice({
                 state.data = state.data.map(category =>
                     category.id === action.payload?.id ? action.payload : category
                 );
+                LocalStorageManager.saveData(STORAGE_KEYS.CATEGORY, [...state.data]);
                 state.Edit = { isEdit: false, category: { name: "" } }; 
             })
             .addCase(UpdateCategory.rejected, (state, action) => {

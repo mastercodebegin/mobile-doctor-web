@@ -106,7 +106,7 @@ const AddBrand = () => {
 
   useEffect(() => {
     setIsLoaded(true);
-    localStorage.setItem('brand', JSON.stringify(BrandData))
+    // localStorage.setItem('brand', JSON.stringify(BrandData))
     dispatch(GetAllBrand())
   }, [])
 

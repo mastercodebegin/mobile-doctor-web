@@ -1,8 +1,10 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getRequestMethod, getRequestMethodWithParam, postRequestMethod, putRequestMethodWithBodyAndParam } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
+import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
 const storedData = localStorage.getItem("Modal-Numbers")
+const storeData = LocalStorageManager.getData(STORAGE_KEYS.MODAL_NUMBER);
 
 // ✅ Product Specification (as per given API response)
 interface ProductSpecification {
@@ -106,7 +108,7 @@ const initialState: MobileNumber = {
   viewVariant: {
 isLoading: false,
 isSuccess: false,
-data: [],
+data: storeData,
   },
   Edit: {
     modalNumber: {
@@ -143,9 +145,9 @@ data: [],
     },
     isEdit: false
   },
-  AllModalNumberData: storedData ? JSON.parse(storedData) : [],
-  BrandModalNumberData: storedData ? JSON.parse(storedData) : [],
-  MobileNumberData: storedData ? JSON.parse(storedData) : [],
+  AllModalNumberData: storeData,
+  BrandModalNumberData: storeData,
+  MobileNumberData: storeData,
 };
 
 const MobileNumberSlice = createSlice({
@@ -153,9 +155,11 @@ const MobileNumberSlice = createSlice({
   initialState,
   reducers: {
     Remove: (state, action) => {
+      const updatedModalNumberData = state.AllModalNumberData.filter(item => item.id !== action.payload);
+      LocalStorageManager.saveData(STORAGE_KEYS.MODAL_NUMBER, updatedModalNumberData);
       return {
         ...state,
-        AllModalNumberData: state.AllModalNumberData.filter(item => item.id !== action.payload)
+        AllModalNumberData: updatedModalNumberData
       }
     },
     // ✅ FIXED: Consistent restore function
@@ -255,6 +259,7 @@ const MobileNumberSlice = createSlice({
         state.isLoading = false
         state.isSuccess = true
         state.AllModalNumberData = action.payload
+        LocalStorageManager.saveData(STORAGE_KEYS.MODAL_NUMBER, action.payload);
       })
       .addCase(FetchAllModalNumber.rejected, (state, action) => {
         state.isLoading = false
@@ -271,7 +276,7 @@ const MobileNumberSlice = createSlice({
         state.isLoading = false
         state.isSuccess = true
         state.AllModalNumberData = [...state.AllModalNumberData, action.payload]
-        console.log("Created Modal Number Data :--------", action.payload)
+        LocalStorageManager.saveData(STORAGE_KEYS.MODAL_NUMBER, [...state.AllModalNumberData]);
       })
       .addCase(CreateModalNumber.rejected, (state, action) => {
         state.isLoading = false
@@ -288,6 +293,7 @@ const MobileNumberSlice = createSlice({
         state.isLoading = false
         state.isSuccess = true
         state.BrandModalNumberData = action.payload
+        LocalStorageManager.saveData(STORAGE_KEYS.MODAL_NUMBER, action.payload);
       })
       .addCase(FetchBrandIdModalNumber.rejected, (state, action) => {
         state.isLoading = false
@@ -316,6 +322,7 @@ const MobileNumberSlice = createSlice({
           isEdit: false
         };
         console.log("Updated Modal Number Data:", action.payload)
+            LocalStorageManager.saveData(STORAGE_KEYS.MODAL_NUMBER, [...state.AllModalNumberData]);
       })
       .addCase(UpdateModalNumber.rejected, (state, action) => {
         state.isLoading = false
@@ -333,6 +340,7 @@ const MobileNumberSlice = createSlice({
         state.isLoading = false
         state.isSuccess = true
         state.MobileNumberData = action.payload
+        LocalStorageManager.saveData(STORAGE_KEYS.MODAL_NUMBER, action.payload);
       })
       .addCase(FetchModalBySubCategory.rejected, (state, action) =>{
         state.isLoading = false
@@ -350,6 +358,7 @@ const MobileNumberSlice = createSlice({
         state.viewVariant.isLoading = false
         state.viewVariant.isSuccess = true
         state.viewVariant.data = action.payload
+        LocalStorageManager.saveData(STORAGE_KEYS.MODAL_NUMBER, action.payload);
       })
       .addCase(ViewVariantData.rejected, (state, action) =>{
         state.viewVariant.isLoading = false

@@ -1,8 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getRequestMethod, postRequestMethod, putRequestMethodWithBodyAndParam } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
+import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
-const storedData = localStorage.getItem("subcategories")
+const storeData = LocalStorageManager.getData(STORAGE_KEYS.SUB_CATEGORY);
 
 interface User {
   id: string | number;
@@ -35,7 +36,7 @@ interface SubCategory {
 const initialState: SubCategory = {
   isLoading: false,
   isSuccess: false,
-  SubCategoriesData: storedData ? JSON.parse(storedData) : [],
+  SubCategoriesData: storeData,
   Edit: {
     subCategory: {
       id: "",
@@ -57,9 +58,11 @@ const SubCategorySlice = createSlice({
   initialState,
   reducers: {
     Remove: (state, action) => {
+      const updatedSubCategoryData = state.SubCategoriesData.filter(item => item.id !== action.payload);
+      LocalStorageManager.saveData(STORAGE_KEYS.SUB_CATEGORY, updatedSubCategoryData)
       return {
         ...state,
-        SubCategoriesData: state.SubCategoriesData.filter(item => item.id !== action.payload)
+        SubCategoriesData: updatedSubCategoryData
       }
     },
     restore: (state) => {
@@ -99,6 +102,7 @@ const SubCategorySlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.SubCategoriesData = action.payload
+        LocalStorageManager.saveData(STORAGE_KEYS.SUB_CATEGORY, action.payload);
       })
       .addCase(GetAllSubCategory.rejected, (state, action) => {
         state.isLoading = false;
@@ -115,6 +119,7 @@ const SubCategorySlice = createSlice({
         state.isLoading = false
         state.isSuccess = true
         state.SubCategoriesData = [...state.SubCategoriesData, action.payload]
+        LocalStorageManager.saveData(STORAGE_KEYS.SUB_CATEGORY, [...state.SubCategoriesData]);
       })
       .addCase(CreateSubCategory.rejected, (state, action) => {
         state.isLoading = false
@@ -147,6 +152,7 @@ const SubCategorySlice = createSlice({
             } : sub
           );
         }
+        LocalStorageManager.saveData(STORAGE_KEYS.SUB_CATEGORY, [...state.SubCategoriesData]);
 
         // Clear edit state
         state.Edit = {

@@ -710,7 +710,7 @@ const MobileNumberPage = () => {
 
   useEffect(() => {
     setIsLoaded(true);
-    localStorage.setItem("Modal-Numbers", JSON.stringify(AllModalNumberData));
+    // localStorage.setItem("Modal-Numbers", JSON.stringify(AllModalNumberData));
     dispatch(GetAllSubCategory());
     dispatch(GetAllBrand());
     dispatch(GetAllCategory());

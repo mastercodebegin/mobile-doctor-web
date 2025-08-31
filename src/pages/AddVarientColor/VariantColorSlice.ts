@@ -1,8 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { postRequestMethodForAddVariant } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
+import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
-const storedData = localStorage.getItem("VariantColor");
+const storeData = LocalStorageManager.getData(STORAGE_KEYS.VARIANT_COLOR);
 
 interface ModalImages {
   id: number | string;
@@ -40,7 +41,7 @@ const initialState: VariantColor = {
   isLoading: false,
   isSuccess: false,
   error: null,
-  AllVariantColorData: storedData ? JSON.parse(storedData) : []
+  AllVariantColorData: storeData,
 };
 
 const VariantColorSlice = createSlice({
@@ -67,7 +68,7 @@ const VariantColorSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.AllVariantColorData = [...state.AllVariantColorData, action.payload]
-                console.log("Created Variant Color Data :-------", action.payload)
+        LocalStorageManager.saveData(STORAGE_KEYS.VARIANT_COLOR, [...state.AllVariantColorData]);
       })
       .addCase(CreateVariantColor.rejected, (state, action) => {
         state.isLoading = false;

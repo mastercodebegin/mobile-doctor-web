@@ -1,8 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { deleteRequestMethodWithParam, getRequestMethod, postRequestMethodForAddVariant, putRequestMethod } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
+import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
-const storedData = localStorage.getItem("Variant")
+const storeData = LocalStorageManager.getData(STORAGE_KEYS.VARIANT);
 
 interface ModalImages {
   id: number | string;
@@ -79,7 +80,7 @@ const initialState: Variant = {
     }, 
     isEdit: false
   },
-  AllVariantData: storedData ? JSON.parse(storedData) : [],
+  AllVariantData: storeData,
 }
 
 const variantSlice = createSlice({
@@ -133,11 +134,12 @@ const variantSlice = createSlice({
 
 
     Remove: (state, action) => {
+      const updatedVariantData = state.AllVariantData.filter(item => 
+          item.id !== action.payload);
+          LocalStorageManager.saveData(STORAGE_KEYS.VARIANT, updatedVariantData)
       return {
         ...state,
-        AllVariantData: state.AllVariantData.filter(item => 
-          item.id !== action.payload
-        )
+        AllVariantData: updatedVariantData
       }
     }
   },
@@ -151,6 +153,7 @@ const variantSlice = createSlice({
         state.isLoading = false
         state.isSuccess = true
         state.AllVariantData = action.payload
+        LocalStorageManager.saveData(STORAGE_KEYS.VARIANT, action.payload);
       })
       .addCase(FetchVariantByModalId.rejected, (state, action) => {
         state.isLoading = false
@@ -167,7 +170,7 @@ const variantSlice = createSlice({
         state.isLoading = false
         state.isSuccess = true
         state.AllVariantData = [...state.AllVariantData, action.payload]
-        console.log("Created Variant Data :-------", action.payload)
+LocalStorageManager.saveData(STORAGE_KEYS.VARIANT, [...state.AllVariantData]);
       })
       .addCase(CreateVariant.rejected, (state, action) => {
         state.isLoading = false
@@ -212,6 +215,7 @@ const variantSlice = createSlice({
       console.log("ROM field preserved:", state.AllVariantData[updateIndex].variantStringData.rom);
     }
   }
+  LocalStorageManager.saveData(STORAGE_KEYS.VARIANT, [...state.AllVariantData]);
 
   // Reset edit state
   state.Edit = {

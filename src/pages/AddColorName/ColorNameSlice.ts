@@ -1,8 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getRequestMethod, postRequestMethod, postRequestMethodWithBodyAndParam} from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
+import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
-const storedData = localStorage.getItem("color-name");
+const storeData = LocalStorageManager.getData(STORAGE_KEYS.COLOR_NAME);
 
 interface User {
     id : string;
@@ -20,7 +21,7 @@ interface AddColor {
 const initialState : AddColor = {
 isLoading : false,
 isSuccess : false,
-colorData : [],
+colorData : storeData,
 Edit : {Color : { id : "", color : "", colorCode : ""}, isEdit : false},
 }
 
@@ -46,9 +47,11 @@ const ColorNameSlice = createSlice({
             }
         },
         Remove: (state , action) =>{
+            const updatedColorNameData = state.colorData.filter(item => item.id !== action.payload);
+            LocalStorageManager.saveData(STORAGE_KEYS.BRANCH, updatedColorNameData);
             return{
                 ...state,
-                colorData : state.colorData.filter(item => item.id !== action.payload)
+                colorData : updatedColorNameData
             }
         }
     },
@@ -62,6 +65,7 @@ const ColorNameSlice = createSlice({
             state.isLoading = false;
                 state.isSuccess = true;
                 state.colorData = action.payload
+                LocalStorageManager.saveData(STORAGE_KEYS.COLOR_NAME, action.payload);
         })
         .addCase(GetAllColors.rejected , (state , action) =>{
             state.isLoading = false;
@@ -78,7 +82,7 @@ const ColorNameSlice = createSlice({
             state.isLoading = false
             state.isSuccess = true
             state.colorData = [...state.colorData, action.payload]
-             localStorage.setItem("color-name", JSON.stringify(state.colorData));
+             LocalStorageManager.saveData(STORAGE_KEYS.COLOR_NAME, [...state.colorData]);
         })
         .addCase(CreateColor.rejected, (state , action) =>{
             state.isLoading = false
@@ -97,7 +101,7 @@ const ColorNameSlice = createSlice({
             state.colorData = state.colorData.map((color) => color.id === action.payload?.id ? action.payload : color)
             state.Edit = {isEdit : false, Color : {id : "", color : "", colorCode : ""}}
 
-            console.log("Update Color Name Data :--", action.payload)
+            LocalStorageManager.saveData(STORAGE_KEYS.COLOR_NAME, [...state.colorData]);
         })
         .addCase(UpdateColorName.rejected, (state , action) =>{
             state.isLoading = false

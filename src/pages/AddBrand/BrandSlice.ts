@@ -1,8 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getRequestMethod, postRequestMethod, putRequestMethodWithBodyAndParam } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
+import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
-const storeData = localStorage.getItem("brand")
+const storeData = LocalStorageManager.getData(STORAGE_KEYS.BRAND);
 
 interface User {
     id : string;
@@ -23,7 +24,7 @@ const initialState : Brand = {
     isSuccess : false,
     isError : false,
     message : "",
-    BrandData : storeData ? JSON.parse(storeData) : [],
+    BrandData : storeData,
     Edit : {brand : {name : ""}, isEdit : false}
 }
 
@@ -32,9 +33,11 @@ const BrandSlice = createSlice({
     initialState,
     reducers : {
         Remove : (state , action) =>{
+            const updatedBrandData = state.BrandData.filter(item => item.id !== action.payload);
+            LocalStorageManager.saveData(STORAGE_KEYS.BRAND, updatedBrandData);
             return{
                 ...state,
-                BrandData : state.BrandData.filter(item => item.id !== action.payload)
+                BrandData : updatedBrandData
             }
         },
         Update : (state , action) =>{
@@ -64,6 +67,7 @@ const BrandSlice = createSlice({
                     state.isLoading = false;
                     state.isSuccess = true;
                     state.BrandData = action.payload
+                    LocalStorageManager.saveData(STORAGE_KEYS.BRAND, action.payload);
                 })
                 .addCase(GetAllBrand.rejected , (state , action) =>{
                     state.isLoading = false;
@@ -79,6 +83,7 @@ const BrandSlice = createSlice({
                             state.isLoading = false;
                             state.isSuccess = true;
                             state.BrandData = [...state.BrandData , action.payload]
+                            LocalStorageManager.saveData(STORAGE_KEYS.BRAND, [...state.BrandData]);
                         })
                         .addCase(CreateBrand.rejected , (state , action) =>{
                             state.isLoading = false
@@ -98,6 +103,7 @@ const BrandSlice = createSlice({
                             state.message = "Brand Updated Successfully!!"
                             state.BrandData = state.BrandData.map((brand) => brand.id === action.payload?.id ? action.payload : brand)
                             state.Edit = {isEdit : false, brand : {name : ""}}
+                            LocalStorageManager.saveData(STORAGE_KEYS.BRAND, [...state.BrandData]);
                         })
                         .addCase(UpdateBrand.rejected , (state , action) =>{
                              state.isLoading = false
