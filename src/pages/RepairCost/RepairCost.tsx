@@ -11,6 +11,7 @@ import { GetAllRepairCost, GetRepairCostByModalId, CreateRepairCost, setEditRepa
 import { GetAllSubCategory, GetAllSubCategoryById } from "../AddSubCategory/SubCategorySlice";
 import { GetAllCategory } from "../AddCategory/AddCategorySlice";
 import { toast } from "react-toastify";
+import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
 const RepairCost = () => {
 
@@ -25,7 +26,7 @@ const RepairCost = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [selectedProductPart, setSelectedProductPart] = useState("");
-  const [selectedModalNumber, setSelectedModalNumber] = useState("");
+  const [selectedModalNumber, setSelectedModalNumber] = useState(0);
   const [isFiltered, setIsFiltered] = useState(false);
 
   // Initial selection states
@@ -151,11 +152,11 @@ const RepairCost = () => {
   };
 }
 
-  const handleModalNumberSelect = (modalNumberId: number) => {
-  setSelectedModalNumber(modalNumberId);
+  const handleModalNumberSelect = (modelNumberId: number) => {
+  setSelectedModalNumber(modelNumberId);
 
-  if (modalNumberId) {
-    dispatch(GetRepairCostByModalId(modalNumberId)); // yahan object nahi, number pass karo
+  if (modelNumberId) {
+    dispatch(GetRepairCostByModalId(modelNumberId)); 
     setIsFiltered(true);
     setCurrentPage(1);
   }
@@ -447,11 +448,13 @@ const handleEditUser = async (user: any) => {
   // Initialize data on component mount
   useEffect(() => {
     setIsLoaded(true);
+         if (!LocalStorageManager.hasData(STORAGE_KEYS.REPAIR_COST)) {
+                                dispatch(GetAllRepairCost());
+                            }
     dispatch(FetchAllModalNumber());
     dispatch(GetAllModalIssues());
     dispatch(GetAllCategory());
     dispatch(GetAllSubCategory());
-    dispatch(GetAllRepairCost());
   }, [dispatch]);
 
   if (isLoading) {
