@@ -367,9 +367,9 @@ export const GetAllRepairCost = createAsyncThunk(
 // Get By Modal-Id Thunk
 export const GetRepairCostByModalId = createAsyncThunk(
   "FETCH/REPAIR-COST/BY/ID",
-  async (modalNumberId: number, thunkAPI) => {
+  async (modelNumberId: number, thunkAPI) => {
     try {
-      const params = { modalNumberId }; 
+      const params = { modelNumberId }; 
       const response = await getRequestMethodWithParam(params, UrlConstants.GET_REPAIR_COST_BY_ID);
       return response;
     } catch (error: any) {
