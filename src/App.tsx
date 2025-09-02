@@ -32,6 +32,7 @@ import State from "./pages/State/State";
 import City from "./pages/City/City";
 import Branch from "./pages/Branch/Branch";
 import Coupon from "./pages/Coupons/Coupon";
+import Settings from "./pages/Settings/Settings";
 
 function App() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
@@ -144,6 +145,7 @@ function App() {
               <Route path="/city" element={<City />} />
               <Route path="/branch" element={<Branch />} />
               <Route path="/coupon" element={<Coupon />} />
+              <Route path="/settings" element={<Settings />} />
             </Route>
           </Routes>
         </div>

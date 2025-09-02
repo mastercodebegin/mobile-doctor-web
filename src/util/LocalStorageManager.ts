@@ -43,7 +43,8 @@ export const LocalStorageManager = {
     
     // Check if data exists
     hasData: (key: string) => {
-        return localStorage.getItem(key) !== null;
+       const data = localStorage.getItem(key);
+        return data !== null && JSON.parse(data).length > 0;
     }
 };
 

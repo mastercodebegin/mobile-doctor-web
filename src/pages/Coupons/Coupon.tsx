@@ -24,7 +24,8 @@ const [expiredOn, setExpiredOn] = useState("");
       const {couponData, isLoading, Edit} = useSelector((state: RootState) => state.CouponSlice)
       
       const usersPerPage = 5;
-  const paginatedUsers = couponData.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
+      const couponArray = Array.isArray(couponData) ? couponData : couponData ? [couponData] : [];
+  const paginatedUsers = couponArray?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 
   const handleSaveClick = () =>{
     if(!couponCode || !discountInPercent || !expiredOn) {

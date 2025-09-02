@@ -21,6 +21,7 @@ import {
   LocateFixed,
   Split,
   TicketPercent,
+  Settings,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { SidebarColors } from "../../helper/ApplicationConstants";
@@ -97,6 +98,7 @@ const menuItems = [
   { type: "link", to: "/role", label: "User Role", icon: Users, ...SidebarColors.role },
   { type: "dropdown", label: "Location", icon: LocateFixed, color: SidebarColors.dropdown.location.color, children: LocationLinks },
   { type: "link", to: "/coupon", label: "Coupon", icon: TicketPercent, ...SidebarColors.coupon },
+  { type: "link", to: "/settings", label: "Settings", icon: Settings, ...SidebarColors.settings },
 ];
 
 interface SidebarProps {

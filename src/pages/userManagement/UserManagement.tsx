@@ -3,12 +3,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import Loading from '../../components/Loading';
 import { AppDispatch, RootState } from '../../redux/store';
 import { CreateVendor, GetAllVendors, GetVendorByEmail, GetVendorByRoleId } from './VendorSlice';
-import { DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, ShowModalMainClass, ShowVarientButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from '../../helper/ApplicationConstants';
+import { DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, RoleIds, ShowModalMainClass, ShowVarientButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from '../../helper/ApplicationConstants';
 import Pagination from '../../helper/Pagination';
 import { toast } from 'react-toastify';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { GetAllRoles } from '../Roles/RoleSlice';
 import { GetCitiesByStateId } from '../City/CitySlice';
+import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
 
 const UserManagement = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -84,19 +85,102 @@ const UserManagement = () => {
     setSearchByEmail(true);
   };
 
-  const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-      city: '', // Reset city when state changes
-    }));
+  // // handle state change
+  // const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  //   const stateId = Number(e.target.value);
 
-    // Fetch cities for the selected state
-    if (value) {
-      dispatch(GetCitiesByStateId(value));
-    }
-  };
+  //   // poora object nikaalo
+  //   const selectedState = stateData.find((item) => item.id === stateId);
+
+  //   // formData me poora state save karo
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     state: selectedState || null,   // poora object store hoga
+  //   }));
+
+  //   // dispatch ke liye sirf id bhejna
+  //   if (selectedState) {
+  //     dispatch(GetCitiesByStateId(selectedState.id));
+  //   }
+  // };
+
+  // 3. Update handleStateChange - Add onBlur validation
+const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const stateId = Number(e.target.value);
+
+  // poora object nikaalo
+  const selectedState = stateData.find((item) => item.id === stateId);
+
+  // formData me poora state save karo
+  setFormData((prev) => ({
+    ...prev,
+    state: selectedState || null,   // poora object store hoga
+  }));
+
+  // Clear error if state is selected
+  if (selectedState && errors.state) {
+    setErrors((prev) => ({
+      ...prev,
+      state: '',
+    }));
+  }
+
+  // dispatch ke liye sirf id bhejna
+  if (selectedState) {
+    dispatch(GetCitiesByStateId(selectedState.id));
+  }
+};
+
+// 4. Add separate onBlur handler for state
+const handleStateBlur = (e: React.FocusEvent<HTMLSelectElement>) => {
+  const { value } = e.target;
+  
+  setTouched((prev) => ({
+    ...prev,
+    state: true,
+  }));
+
+  const error = validateField('state', value);
+  setErrors((prev) => ({
+    ...prev,
+    state: error,
+  }));
+};
+
+// 5. Update city change handler with onBlur validation
+const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const cityId = Number(e.target.value);
+  const selectedCity = cityData.find((item) => item.id === cityId);
+
+  setFormData((prev) => ({
+    ...prev,
+    city: selectedCity || null,
+  }));
+
+  // Clear error if city is selected
+  if (selectedCity && errors.city) {
+    setErrors((prev) => ({
+      ...prev,
+      city: '',
+    }));
+  }
+};
+
+// 6. Add separate onBlur handler for city
+const handleCityBlur = (e: React.FocusEvent<HTMLSelectElement>) => {
+  const { value } = e.target;
+  
+  setTouched((prev) => ({
+    ...prev,
+    city: true,
+  }));
+
+  const error = validateField('city', value);
+  setErrors((prev) => ({
+    ...prev,
+    city: error,
+  }));
+};
 
 
   const documentTypes = [
@@ -109,7 +193,7 @@ const UserManagement = () => {
     { value: 'PASSPORT', label: 'Passport' },
   ];
 
-  // 2. Add validation functions (add these new functions)
+
   const validateField = (name: string, value: string) => {
     const selectedRole = roleData?.find((role: any) => role.id == formData.role);
     const isManagerRole = selectedRole?.name?.toLowerCase() === 'manager';
@@ -171,6 +255,7 @@ const UserManagement = () => {
         break;
 
       case 'gstNumber':
+        // GST is optional but if provided, should be valid
         if (value && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(value.toUpperCase())) {
           return 'Please enter a valid GST number';
         }
@@ -210,63 +295,103 @@ const UserManagement = () => {
       }
     });
 
-    // Document validation
-    if (!selectedDocType && !searchByEmail) {
-      newErrors.selectedDocType = 'Please select a document type';
-    }
+    // Document validation - only for non-search mode
+    if (!searchByEmail) {
+      if (!selectedDocType) {
+        newErrors.selectedDocType = 'Please select a document type';
+      }
 
-    if (selectedDocType && !frontDoc && !searchByEmail) {
-      newErrors.frontDoc = 'Front side document is required';
-    }
+      if (selectedDocType && !frontDoc) {
+        newErrors.frontDoc = 'Front side document is required';
+      }
 
-    if (selectedDocType && !backDoc && !searchByEmail) {
-      newErrors.backDoc = 'Back side document is required';
+      if (selectedDocType && !backDoc) {
+        newErrors.backDoc = 'Back side document is required';
+      }
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // 3. Update handleInputChange to include validation (replace existing function)
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  // // 3. Update handleInputChange to include validation (replace existing function)
+  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  //   const { name, value } = e.target;
 
-    setTouched((prev) => ({
-      ...prev,
-      [name]: true,
-    }));
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     [name]: value,
+  //   }));
 
-    // Validate field on change
-    const error = validateField(name, value);
+  //   setTouched((prev) => ({
+  //     ...prev,
+  //     [name]: true,
+  //   }));
+
+  //   // Validate field on change
+  //   const error = validateField(name, value);
+  //   setErrors((prev) => ({
+  //     ...prev,
+  //     [name]: error,
+  //   }));
+  // };
+
+  // // Add onBlur validation handler (add this new function)
+  // const handleFieldBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+  //   const { name, value } = e.target;
+
+  //   // Only validate if field has value
+  //   if (value && value.trim()) {
+  //     setTouched((prev) => ({
+  //       ...prev,
+  //       [name]: true,
+  //     }));
+
+  //     const error = validateField(name, value);
+  //     setErrors((prev) => ({
+  //       ...prev,
+  //       [name]: error,
+  //     }));
+  //   }
+  // };
+
+
+  // 1. Update handleInputChange - Remove validation on change, only update form data
+const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const { name, value } = e.target;
+
+  setFormData((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+
+  // Remove validation from here - only clear error if field has value
+  if (value.trim() && errors[name]) {
     setErrors((prev) => ({
       ...prev,
-      [name]: error,
+      [name]: '',
     }));
-  };
+  }
+};
 
-  // Add onBlur validation handler (add this new function)
-  const handleFieldBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+// 2. Update handleFieldBlur - Run validation only when user leaves the field
+const handleFieldBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const { name, value } = e.target;
 
-    // Only validate if field has value
-    if (value && value.trim()) {
-      setTouched((prev) => ({
-        ...prev,
-        [name]: true,
-      }));
+  // Mark field as touched
+  setTouched((prev) => ({
+    ...prev,
+    [name]: true,
+  }));
 
-      const error = validateField(name, value);
-      setErrors((prev) => ({
-        ...prev,
-        [name]: error,
-      }));
-    }
-  };
+  // Validate field only if it has been touched and user has left the field
+  const error = validateField(name, value);
+  setErrors((prev) => ({
+    ...prev,
+    [name]: error,
+  }));
+};
 
   // Add file validation handler (add this new function)
   const handleFileValidation = (file: File | null, fieldName: string) => {
@@ -357,27 +482,6 @@ const UserManagement = () => {
     return null;
   };
 
-  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-  //   const { name, value } = e.target;
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     [name]: value,
-  //   }));
-  // };
-
-  // const handleSaveClick = () => {
-  //   if (searchByEmail) {
-  //     // =================  SEARCH  =================
-  //     if (!filterEmail.trim()) return;
-  //     console.log(filterEmail)
-  //     dispatch(GetVendorByEmail(filterEmail.trim()));
-  //     handleCloseModal();
-  //     return;
-  //   }
-  //   setShowConfirmModal(true);
-  // };
-
-  // Updated handleConfirmSave function
   const handleConfirmSave = async () => {
     try {
       console.log("🚀 Starting Vendor form submission...");
@@ -396,7 +500,10 @@ const UserManagement = () => {
         newFormData.append('files', file);
       });
 
-      // ✅ vendorString
+      // Fixed vendorString - ensure all fields are included for manager role
+      const selectedRole = roleData?.find((role: any) => role.id == formData.role);
+      const isManagerRole = selectedRole?.id === RoleIds.manager;
+
       const vendorString = {
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -405,36 +512,33 @@ const UserManagement = () => {
         panCard: formData.panCard,
         aadharNumber: formData.aadharNumber,
         homeAddress: formData.homeAddress,
-        businessName: formData.businessName,
-        businessAddress: formData.businessAddress,
         pinCode: formData.pinCode,
-        gstNumber: formData.gstNumber,
-        state: {
-          id: parseInt(formData.state) || 0,
-          name: stateData?.find(s => s.id === parseInt(formData.state))?.name || "",
-        },
-        city: {
-          id: parseInt(formData.city) || 0,
-          name: cityData?.find(c => c.id === parseInt(formData.city))?.name || "",
-        },
-        password: formData.password || "HX36?@tz",
+        state: formData.state.name,
+        city: formData.city.name,
         createdOn: new Date().toISOString(),
         role: {
           id: parseInt(formData.role) || 0,
-          name: roleData?.find(r => r.id === parseInt(formData.role))?.name || "",
-
+          name: selectedRole?.name || "",
         },
+        // Add manager-specific fields only if manager role
+        ...(isManagerRole && {
+          businessName: formData.businessName,
+          businessAddress: formData.businessAddress,
+          gstNumber: formData.gstNumber || '', 
+        })
       };
-      console.log(vendorString)
+
+      console.log("Vendor String:", vendorString);
       newFormData.append("vendorString", JSON.stringify(vendorString));
 
+      // Fixed userDocumentString - correct frontSide values
       const userDocumentString = [];
 
       if (frontDoc) {
         userDocumentString.push({
           imageName: frontDoc.name,
           idtype: selectedDocType || "AADHAR_CARD",
-          frontSide: true,
+          frontSide: true, 
         });
       }
 
@@ -442,7 +546,7 @@ const UserManagement = () => {
         userDocumentString.push({
           imageName: backDoc.name,
           idtype: selectedDocType || "AADHAR_CARD",
-          frontSide: true,
+          frontSide: false, 
         });
       }
 
@@ -462,6 +566,7 @@ const UserManagement = () => {
         });
       }
 
+      console.log("User Document String:", userDocumentString);
       newFormData.append("userDocumentString", JSON.stringify(userDocumentString));
 
       // Debug
@@ -469,41 +574,37 @@ const UserManagement = () => {
       for (let [key, value] of newFormData.entries()) {
         console.log(key, ':', value);
         if (value instanceof File) {
-          console.log(`  File name: ${value.name}`);
+          console.log(`  File name: ${value.name}, size: ${value.size}`);
         }
       }
 
       // Dispatch
       dispatch(CreateVendor(newFormData)).unwrap()
         .then((res: any) => {
-          toast.success("User-Management Created Successfull!!");
-          console.log(res)
+          toast.success("User-Management Created Successfully!!");
+          console.log("Create Response:", res);
           handleCloseModal();
           setCurrentPage(1);
-          dispatch(GetAllVendors())
+          dispatch(GetAllVendors());
           setOpenSpecRow(null);
           setOpenSpecImgRow(null);
+          setFormData({});
+          setFrontDoc(null);
+          setBackDoc(null);
+          setGstDoc(null);
+          setGumastaDoc(null);
+          setSelectedDocType('');
         })
-
+        .catch((error) => {
+          console.error("Create Vendor Error:", error);
+          toast.error(error?.message || "Failed to create vendor");
+        });
 
     } catch (error: any) {
       console.error("❌ Error submitting vendor form:", error);
       toast.error(error?.message || "Failed to create vendor");
     }
   };
-
-  // const handleCloseModal = () => {
-  //   setShowModal(false);
-  //   setShowConfirmModal(false);
-  //   setIsEditMode(false);
-  //   setSearchByEmail(false);
-  //   setSelectedDocType('');
-  //   setFrontDoc(null);
-  //   setBackDoc(null);
-  //   setGstDoc(null);
-  //   setGumastaDoc(null);
-  //   setFormData({})
-  // };
 
   const handleEditUser = (user: any) => {
     console.log(user)
@@ -611,7 +712,7 @@ const UserManagement = () => {
                       Status
                     </th>
                     <th scope="col" className={TableHadeClass}>
-                      <button>View</button>
+                      <button>Details</button>
                     </th>
                   </tr>
                 </thead>
@@ -673,8 +774,8 @@ const UserManagement = () => {
                               </div>
                             </td>
                             <td className={TableDataClass}>
-                              <button onClick={() => toggleSpecRow(openSpecRow === vendor?.id ? null : vendor?.id)} className={ShowVarientButtonClass}>
-                                {openSpecRow === vendor?.id ? 'Hide' : 'Show'} Details
+                              <button onClick={() => toggleSpecRow(openSpecRow === vendor?.id ? null : vendor?.id)} className={EditClass}>
+                                {openSpecRow === vendor?.id ? <ArrowUpIcon size={28} /> : <ArrowDownIcon size={28} />}
                               </button>
                             </td>
                           </tr>
@@ -687,7 +788,7 @@ const UserManagement = () => {
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                       {(() => {
                                         const user = vendor.vendor;
-                                        const roleName = user?.role?.name?.toLowerCase();
+                                        const roleId = user?.role?.id;
 
                                         // All possible fields
                                         const allFields = [
@@ -710,10 +811,10 @@ const UserManagement = () => {
 
                                         let variantFields = [];
 
-                                        if (roleName === 'vendor') {
-                                          // Vendor: Show ALL fields
+                                        if (roleId === RoleIds.manager) {
+                                          // Manager: Show ALL fields
                                           variantFields = allFields;
-                                        } else if (roleName === 'customer') {
+                                        } else if (roleId === RoleIds.customer) {
                                           // Customer: Hide BusinessName, BusinessAddress, GstNumber, Aadhar, PanCard
                                           variantFields = allFields.filter(field =>
                                             !['Business Name', 'Business Address', 'GST Number', 'Aadhar Number', 'PAN Card'].includes(field.label)
@@ -743,14 +844,6 @@ const UserManagement = () => {
                                           </>
                                         );
                                       })()}
-
-
-
-
-
-
-
-
                                     </div>
                                   </div>
                                 </td>
@@ -779,7 +872,6 @@ const UserManagement = () => {
                             </React.Fragment>
                           )}
 
-                          {/* Add this Image Modal at the end of your component (before closing div/fragment) */}
                           {selectedImage && (
                             <div
                               className={ShowModalMainClass}
@@ -835,7 +927,7 @@ const UserManagement = () => {
                 &times;
               </button>
 
-              {searchByEmail && (
+              {searchByEmail ? (
                 <div className="mb-6">
                   <label className="block text-lg font-medium mb-2">Enter Email</label>
                   <input
@@ -851,439 +943,475 @@ const UserManagement = () => {
                     </div>
                   )}
                 </div>
-              )}
-
-
-
-              <>
-                {/* Title */}
-                <h2 className="text-3xl font-semibold text-center mb-6">
-                  {isEditMode ? "Update User" : "Create User"}
-                </h2>
-
-                <div className="mb-4">
-                  <select
-                    name="role"
-                    value={formData.role || ''}
-                    onChange={handleInputChange}
-                    onBlur={handleFieldBlur}
-                    className={`input ${errors.role && touched.role ? 'border-red-500' : ''}`}
-                  >
-                    <option value="">Select Role</option>
-                    {roleData?.map((role: any) => (
-                      <option key={role.id} value={role.id}>
-                        {role.name}
-                      </option>
-                    ))}
-                  </select>
-                  {renderFieldError('role')}
-                </div>
-
-                {/* // Basic Info inputs (replace existing grid): */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <input
-                      name="firstName"
-                      value={formData.firstName || ''}
-                      onChange={handleInputChange}
-                      onBlur={handleFieldBlur}
-                      placeholder="First name"
-                      className={`input ${errors.firstName && touched.firstName ? 'border-red-500' : ''}`}
-                    />
-                    {renderFieldError('firstName')}
-                  </div>
-
-                  <div>
-                    <input
-                      name="lastName"
-                      value={formData.lastName || ''}
-                      onChange={handleInputChange}
-                      onBlur={handleFieldBlur}
-                      placeholder="Last name"
-                      className={`input ${errors.lastName && touched.lastName ? 'border-red-500' : ''}`}
-                    />
-                    {renderFieldError('lastName')}
-                  </div>
-
-                  <div>
-                    <input
-                      name="mobile"
-                      value={formData.mobile || ''}
-                      onChange={handleInputChange}
-                      onBlur={handleFieldBlur}
-                      placeholder="Mobile"
-                      className={`input ${errors.mobile && touched.mobile ? 'border-red-500' : ''}`}
-                      maxLength={10}
-                    />
-                    {renderFieldError('mobile')}
-                  </div>
-
-                  <div>
-                    <input
-                      name="email"
-                      value={formData.email || ''}
-                      onChange={handleInputChange}
-                      onBlur={handleFieldBlur}
-                      placeholder="Email"
-                      type="email"
-                      className={`input ${errors.email && touched.email ? 'border-red-500' : ''}`}
-                    />
-                    {renderFieldError('email')}
-                  </div>
-
-                  <div>
-                    <input
-                      name="panCard"
-                      value={formData.panCard || ''}
-                      onChange={handleInputChange}
-                      onBlur={handleFieldBlur}
-                      placeholder="PAN Card Number (e.g., ABCDE1234F)"
-                      className={`input ${errors.panCard && touched.panCard ? 'border-red-500' : ''}`}
-                      maxLength={10}
-                      style={{ textTransform: 'uppercase' }}
-                    />
-                    {renderFieldError('panCard')}
-                  </div>
-
-                  <div>
-                    <input
-                      name="homeAddress"
-                      value={formData.homeAddress || ''}
-                      onChange={handleInputChange}
-                      onBlur={handleFieldBlur}
-                      placeholder="Home Address"
-                      className={`input ${errors.homeAddress && touched.homeAddress ? 'border-red-500' : ''}`}
-                    />
-                    {renderFieldError('homeAddress')}
-                  </div>
-
-                  <div>
-                    <input
-                      name="aadharNumber"
-                      value={formData.aadharNumber || ''}
-                      onChange={handleInputChange}
-                      onBlur={handleFieldBlur}
-                      placeholder="Aadhar Number"
-                      className={`input ${errors.aadharNumber && touched.aadharNumber ? 'border-red-500' : ''}`}
-                      maxLength={12}
-                    />
-                    {renderFieldError('aadharNumber')}
-                  </div>
-
-                  {(() => {
-                    const selectedRole = roleData?.find((role: any) => role.id == formData.role);
-                    const isManagerRole = selectedRole?.name?.toLowerCase() === 'manager';
-
-                    return isManagerRole && (
-                      <>
-                        <div>
-                          <input
-                            name="businessName"
-                            value={formData.businessName || ''}
-                            onChange={handleInputChange}
-                            onBlur={handleFieldBlur}
-                            placeholder="Business Name"
-                            className={`input ${errors.businessName && touched.businessName ? 'border-red-500' : ''}`}
-                          />
-                          {renderFieldError('businessName')}
-                        </div>
-
-                        <div>
-                          <input
-                            name="businessAddress"
-                            value={formData.businessAddress || ''}
-                            onChange={handleInputChange}
-                            onBlur={handleFieldBlur}
-                            placeholder="Business Address"
-                            className={`input ${errors.businessAddress && touched.businessAddress ? 'border-red-500' : ''}`}
-                          />
-                          {renderFieldError('businessAddress')}
-                        </div>
-                      </>
-                    );
-                  })()}
-
-                  <div>
-                    <input
-                      name="pinCode"
-                      value={formData.pinCode || ''}
-                      onChange={handleInputChange}
-                      onBlur={handleFieldBlur}
-                      placeholder="Pincode"
-                      className={`input ${errors.pinCode && touched.pinCode ? 'border-red-500' : ''}`}
-                      maxLength={6}
-                    />
-                    {renderFieldError('pinCode')}
-                  </div>
-
-                  <div>
-                    <input
-                      name="gstNumber"
-                      value={formData.gstNumber || ''}
-                      onChange={handleInputChange}
-                      onBlur={handleFieldBlur}
-                      placeholder="GST Number (Optional)"
-                      className={`input ${errors.gstNumber && touched.gstNumber ? 'border-red-500' : ''}`}
-                      maxLength={15}
-                      style={{ textTransform: 'uppercase' }}
-                    />
-                    {renderFieldError('gstNumber')}
-                  </div>
-
-                  <div>
-                    <select
-                      name="state"
-                      value={formData.state || ''}
-                      onChange={handleStateChange}
-                      onBlur={handleFieldBlur}
-                      className={`input ${errors.state && touched.state ? 'border-red-500' : ''}`}
-                    >
-                      <option value="">Select State</option>
-                      {stateData?.map((item: any) => (
-                        <option key={item.id} value={item.id}>
-                          {item.name}
-                        </option>
-                      ))}
-                    </select>
-                    {renderFieldError('state')}
-                  </div>
-
-                  <div>
-                    <select
-                      name="city"
-                      value={formData.city || ''}
-                      onChange={handleInputChange}
-                      onBlur={handleFieldBlur}
-                      className={`input ${errors.city && touched.city ? 'border-red-500' : ''}`}
-                      disabled={!formData.state}
-                    >
-                      <option value="">Select City</option>
-                      {cityData?.map((item: any) => (
-                        <option key={item.id} value={item.id}>
-                          {item.name}
-                        </option>
-                      ))}
-                    </select>
-                    {renderFieldError('city')}
-                  </div>
-                </div>
-                
+              ) : (
                 <>
-                  <hr className="my-2 border-gray-300" />
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold mb-4">Upload Documents</h3>
+                  {/* Title */}
+                  <h2 className="text-3xl font-semibold text-center mb-6">
+                    {isEditMode ? "Update User" : "Create User"}
+                  </h2>
 
-                    {/* Document Type Selection Dropdown */}
-                    <div className="mb-6">
-                      <label className="block font-medium mb-2">Select Document Type</label>
-                      <select
-                        value={selectedDocType}
-                        onChange={(e) => {
-                          setSelectedDocType(e.target.value);
-                          setTouched(prev => ({ ...prev, selectedDocType: true }));
-                          if (errors.selectedDocType) {
-                            setErrors(prev => ({ ...prev, selectedDocType: '' }));
-                          }
-                        }}
-                        className={`w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.selectedDocType && touched.selectedDocType ? 'border-red-500' : ''}`}
-                      >
-                        <option value="">Select Document Type</option>
-                        {documentTypes.map((doc) => (
-                          <option key={doc.value} value={doc.value}>
-                            {doc.label}
-                          </option>
-                        ))}
-                      </select>
-                      {renderFieldError('selectedDocType')}
+                  <div className="mb-4">
+                    <select
+                      name="role"
+                      value={formData.role || ''}
+                      onChange={handleInputChange}
+                      onBlur={handleFieldBlur}
+                      className={`input ${errors.role && touched.role ? 'border-red-500' : ''}`}
+                    >
+                      <option value="">Select Role</option>
+                      {roleData?.map((role: any) => (
+                        <option key={role.id} value={role.id}>
+                          {role.name}
+                        </option>
+                      ))}
+                    </select>
+                    {renderFieldError('role')}
+                  </div>
+
+                  {/* // Basic Info inputs (replace existing grid): */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <input
+                        name="firstName"
+                        value={formData.firstName || ''}
+                        onChange={handleInputChange}
+                        onBlur={handleFieldBlur}
+                        placeholder="First name"
+                        className={`input ${errors.firstName && touched.firstName ? 'border-red-500' : ''}`}
+                      />
+                      {renderFieldError('firstName')}
                     </div>
 
-                    {/* Document Upload Fields - Show based on selection */}
-                    {selectedDocType && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <input
+                        name="lastName"
+                        value={formData.lastName || ''}
+                        onChange={handleInputChange}
+                        onBlur={handleFieldBlur}
+                        placeholder="Last name"
+                        className={`input ${errors.lastName && touched.lastName ? 'border-red-500' : ''}`}
+                      />
+                      {renderFieldError('lastName')}
+                    </div>
 
-                        {/* // Front Document Upload: */}
-                        <div className="mb-6">
-                          <label className="block font-medium mb-2">
-                            {selectedDocType === 'AADHAR_CARD' ? 'Aadhar Front' :
-                              selectedDocType === 'VOTER_ID' ? 'Voter ID Front' :
-                                selectedDocType === 'DRIVING_LICENSE' ? 'Driving License Front' :
-                                  selectedDocType === 'GST' ? 'GST Front' :
-                                    selectedDocType === 'GUMASTA' ? 'Gumasta Front' :
-                                      selectedDocType === 'PANCARD' ? 'PanCard Front' :
-                                        selectedDocType === 'PASSPORT' ? 'Passport Front' :
-                                          `${selectedDocType} Front`}
-                          </label>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            multiple={false}
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              setFrontDoc(file || null);
-                              setTouched(prev => ({ ...prev, frontDoc: true }));
+                    <div>
+                      <input
+                        name="mobile"
+                        value={formData.mobile || ''}
+                        onChange={handleInputChange}
+                        onBlur={handleFieldBlur}
+                        placeholder="Mobile"
+                        className={`input ${errors.mobile && touched.mobile ? 'border-red-500' : ''}`}
+                        maxLength={10}
+                      />
+                      {renderFieldError('mobile')}
+                    </div>
 
-                              // Validate file immediately after selection
-                              if (file) {
-                                handleFileValidation(file, 'frontDoc');
-                              }
-                            }}
-                            className={`w-full border border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400 transition-colors ${errors.frontDoc && touched.frontDoc ? 'border-red-500' : ''}`}
-                          />
-                          {renderFieldError('frontDoc')}
-                          {frontDoc && (
-                            <div className="mt-4">
-                              <div className="relative bg-gray-100 p-2 rounded-lg">
-                                <span className="text-sm text-gray-700 truncate block">
-                                  {frontDoc.name}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setFrontDoc(null);
-                                    setErrors(prev => ({ ...prev, frontDoc: '' }));
-                                  }}
-                                  className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
-                                >
-                                  ×
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
+                    <div>
+                      <input
+                        name="email"
+                        value={formData.email || ''}
+                        onChange={handleInputChange}
+                        onBlur={handleFieldBlur}
+                        placeholder="Email"
+                        type="email"
+                        className={`input ${errors.email && touched.email ? 'border-red-500' : ''}`}
+                      />
+                      {renderFieldError('email')}
+                    </div>
 
-                        {/* // Back Document Upload: */}
-                        <div className="mb-6">
-                          <label className="block font-medium mb-2">
-                            {selectedDocType === 'AADHAR_CARD' ? 'Aadhar Back' :
-                              selectedDocType === 'VOTER_ID' ? 'Voter ID Back' :
-                                selectedDocType === 'DRIVING_LICENSE' ? 'Driving License Back' :
-                                  selectedDocType === 'GST' ? 'GST Back' :
-                                    selectedDocType === 'GUMASTA' ? 'Gumasta Back' :
-                                      selectedDocType === 'PANCARD' ? 'PanCard Back' :
-                                        selectedDocType === 'PASSPORT' ? 'Passport Back' :
-                                          `${selectedDocType} Back`}
-                          </label>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            multiple={false}
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              setBackDoc(file || null);
-                              setTouched(prev => ({ ...prev, backDoc: true }));
+                    <div>
+                      <input
+                        name="panCard"
+                        value={formData.panCard || ''}
+                        onChange={handleInputChange}
+                        onBlur={handleFieldBlur}
+                        placeholder="PAN Card Number (e.g., ABCDE1234F)"
+                        className={`input ${errors.panCard && touched.panCard ? 'border-red-500' : ''}`}
+                        maxLength={10}
+                        style={{ textTransform: 'uppercase' }}
+                      />
+                      {renderFieldError('panCard')}
+                    </div>
 
-                              // Validate file immediately after selection
-                              if (file) {
-                                handleFileValidation(file, 'backDoc');
-                              }
-                            }}
-                            className={`w-full border border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400 transition-colors ${errors.backDoc && touched.backDoc ? 'border-red-500' : ''}`}
-                          />
-                          {renderFieldError('backDoc')}
-                          {backDoc && (
-                            <div className="mt-4">
-                              <div className="relative bg-gray-100 p-2 rounded-lg">
-                                <span className="text-sm text-gray-700 truncate block">
-                                  {backDoc.name}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setBackDoc(null);
-                                    setErrors(prev => ({ ...prev, backDoc: '' }));
-                                  }}
-                                  className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
-                                >
-                                  ×
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
+                    <div>
+                      <input
+                        name="homeAddress"
+                        value={formData.homeAddress || ''}
+                        onChange={handleInputChange}
+                        onBlur={handleFieldBlur}
+                        placeholder="Home Address"
+                        className={`input ${errors.homeAddress && touched.homeAddress ? 'border-red-500' : ''}`}
+                      />
+                      {renderFieldError('homeAddress')}
+                    </div>
 
-                      </div>
-                    )}
+                    <div>
+                      <input
+                        name="aadharNumber"
+                        value={formData.aadharNumber || ''}
+                        onChange={handleInputChange}
+                        onBlur={handleFieldBlur}
+                        placeholder="Aadhar Number"
+                        className={`input ${errors.aadharNumber && touched.aadharNumber ? 'border-red-500' : ''}`}
+                        maxLength={12}
+                      />
+                      {renderFieldError('aadharNumber')}
+                    </div>
 
-                    <hr className="my-4 border-gray-300" />
-
-                    {/* GST and Gumasta Documents */}
                     {(() => {
                       const selectedRole = roleData?.find((role: any) => role.id == formData.role);
-                      const isManagerRole = selectedRole?.name?.toLowerCase() === 'manager';
+                      const isManagerRole = selectedRole?.id === RoleIds.manager;
+
                       return isManagerRole && (
                         <>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* GST Document */}
-                            <div className="mb-6">
-                              <label className="block font-medium mb-2">GST Certificate</label>
-                              <input
-                                type="file"
-                                accept="image/*"
-                                multiple={false}
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  setGstDoc(file || null);
-                                }}
-                                className="w-full border border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400 transition-colors"
-                              />
-                              {gstDoc && (
-                                <div className="mt-4">
-                                  <div className="relative bg-gray-100 p-2 rounded-lg">
-                                    <span className="text-sm text-gray-700 truncate block">
-                                      {gstDoc.name}
-                                    </span>
-                                    <button
-                                      type="button"
-                                      onClick={() => setGstDoc(null)}
-                                      className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
-                                    >
-                                      ×
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
+                          <div>
+                            <input
+                              name="businessName"
+                              value={formData.businessName || ''}
+                              onChange={handleInputChange}
+                              onBlur={handleFieldBlur}
+                              placeholder="Business Name"
+                              className={`input ${errors.businessName && touched.businessName ? 'border-red-500' : ''}`}
+                            />
+                            {renderFieldError('businessName')}
+                          </div>
 
-                            {/* Gumasta Document */}
-                            <div className="mb-6">
-                              <label className="block font-medium mb-2">Gumasta License</label>
-                              <input
-                                type="file"
-                                accept="image/*"
-                                multiple={false}
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  setGumastaDoc(file || null);
-                                }}
-                                className="w-full border border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400 transition-colors"
-                              />
-                              {gumastaDoc && (
-                                <div className="mt-4">
-                                  <div className="relative bg-gray-100 p-2 rounded-lg">
-                                    <span className="text-sm text-gray-700 truncate block">
-                                      {gumastaDoc.name}
-                                    </span>
-                                    <button
-                                      type="button"
-                                      onClick={() => setGumastaDoc(null)}
-                                      className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
-                                    >
-                                      ×
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
+                          <div>
+                            <input
+                              name="businessAddress"
+                              value={formData.businessAddress || ''}
+                              onChange={handleInputChange}
+                              onBlur={handleFieldBlur}
+                              placeholder="Business Address"
+                              className={`input ${errors.businessAddress && touched.businessAddress ? 'border-red-500' : ''}`}
+                            />
+                            {renderFieldError('businessAddress')}
                           </div>
                         </>
-                      )
+                      );
                     })()}
 
+                    <div>
+                      <input
+                        name="pinCode"
+                        value={formData.pinCode || ''}
+                        onChange={handleInputChange}
+                        onBlur={handleFieldBlur}
+                        placeholder="Pincode"
+                        className={`input ${errors.pinCode && touched.pinCode ? 'border-red-500' : ''}`}
+                        maxLength={6}
+                      />
+                      {renderFieldError('pinCode')}
+                    </div>
+
+                    <div>
+                      <input
+                        name="gstNumber"
+                        value={formData.gstNumber || ''}
+                        onChange={handleInputChange}
+                        onBlur={handleFieldBlur}
+                        placeholder="GST Number (Optional)"
+                        className={`input ${errors.gstNumber && touched.gstNumber ? 'border-red-500' : ''}`}
+                        maxLength={15}
+                        style={{ textTransform: 'uppercase' }}
+                      />
+                      {renderFieldError('gstNumber')}
+                    </div>
+
+                    <div>
+                      {/* <select
+                        className={`input ${errors.state && touched.state ? 'border-red-500' : ''}`}
+                        name="state"
+                        value={formData.state?.id || ""}
+                        onBlur={handleFieldBlur}
+                        onChange={handleStateChange}
+                      >
+                        <option value="">Select State</option>
+                        {stateData.map((item) => (
+                          <option key={item.id} value={item.id}>
+                            {item.name}
+                          </option>
+                        ))}
+                      </select> */}
+                      <select
+  className={`input ${errors.state && touched.state ? 'border-red-500' : ''}`}
+  name="state"
+  value={formData.state?.id || ""}
+  onBlur={handleStateBlur}  // Add this line
+  onChange={handleStateChange}
+>
+  <option value="">Select State</option>
+  {stateData.map((item) => (
+    <option key={item.id} value={item.id}>
+      {item.name}
+    </option>
+  ))}
+</select>
+
+                      {renderFieldError('state')}
+                    </div>
+
+                    <div>
+                      {/* <select
+                        className={`input ${errors.city && touched.city ? 'border-red-500' : ''}`}
+                        name="city"
+                        value={formData.city?.id || ""}
+                        onBlur={handleFieldBlur}
+                        disabled={!formData.state}
+                        onChange={(e) => {
+                          const cityId = Number(e.target.value);
+                          const selectedCity = cityData.find((item) => item.id === cityId);
+
+                          setFormData((prev) => ({
+                            ...prev,
+                            city: selectedCity || null,
+                          }));
+                        }}
+                      >
+                        <option value="">Select City</option>
+                        {cityData?.map((item: any) => (
+                          <option key={item.id} value={item.id}>
+                            {item.name}
+                          </option>
+                        ))}
+                      </select> */}
+
+                      <select
+  className={`input ${errors.city && touched.city ? 'border-red-500' : ''}`}
+  name="city"
+  value={formData.city?.id || ""}
+  onBlur={handleCityBlur}  // Add this line
+  disabled={!formData.state}
+  onChange={handleCityChange}  // Change from inline function to separate handler
+>
+  <option value="">Select City</option>
+  {cityData?.map((item: any) => (
+    <option key={item.id} value={item.id}>
+      {item.name}
+    </option>
+  ))}
+</select>
+
+                      {renderFieldError('city')}
+                    </div>
                   </div>
+
+                  <>
+                    <hr className="my-2 border-gray-300" />
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold mb-4">Upload Documents</h3>
+
+                      {/* Document Type Selection Dropdown */}
+                      <div className="mb-6">
+                        <label className="block font-medium mb-2">Select Document Type</label>
+                        <select
+                          value={selectedDocType}
+                          onChange={(e) => {
+                            setSelectedDocType(e.target.value);
+                            setTouched(prev => ({ ...prev, selectedDocType: true }));
+                            if (errors.selectedDocType) {
+                              setErrors(prev => ({ ...prev, selectedDocType: '' }));
+                            }
+                          }}
+                          className={`w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.selectedDocType && touched.selectedDocType ? 'border-red-500' : ''}`}
+                        >
+                          <option value="">Select Document Type</option>
+                          {documentTypes.map((doc) => (
+                            <option key={doc.value} value={doc.value}>
+                              {doc.label}
+                            </option>
+                          ))}
+                        </select>
+                        {renderFieldError('selectedDocType')}
+                      </div>
+
+                      {/* Document Upload Fields - Show based on selection */}
+                      {selectedDocType && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                          {/* // Front Document Upload: */}
+                          <div className="mb-6">
+                            <label className="block font-medium mb-2">
+                              {selectedDocType === 'AADHAR_CARD' ? 'Aadhar Front' :
+                                selectedDocType === 'VOTER_ID' ? 'Voter ID Front' :
+                                  selectedDocType === 'DRIVING_LICENSE' ? 'Driving License Front' :
+                                    selectedDocType === 'GST' ? 'GST Front' :
+                                      selectedDocType === 'GUMASTA' ? 'Gumasta Front' :
+                                        selectedDocType === 'PANCARD' ? 'PanCard Front' :
+                                          selectedDocType === 'PASSPORT' ? 'Passport Front' :
+                                            `${selectedDocType} Front`}
+                            </label>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              multiple={false}
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                setFrontDoc(file || null);
+                                setTouched(prev => ({ ...prev, frontDoc: true }));
+
+                                // Validate file immediately after selection
+                                if (file) {
+                                  handleFileValidation(file, 'frontDoc');
+                                }
+                              }}
+                              className={`w-full border border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400 transition-colors ${errors.frontDoc && touched.frontDoc ? 'border-red-500' : ''}`}
+                            />
+                            {renderFieldError('frontDoc')}
+                            {frontDoc && (
+                              <div className="mt-4">
+                                <div className="relative bg-gray-100 p-2 rounded-lg">
+                                  <span className="text-sm text-gray-700 truncate block">
+                                    {frontDoc.name}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setFrontDoc(null);
+                                      setErrors(prev => ({ ...prev, frontDoc: '' }));
+                                    }}
+                                    className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* // Back Document Upload: */}
+                          <div className="mb-6">
+                            <label className="block font-medium mb-2">
+                              {selectedDocType === 'AADHAR_CARD' ? 'Aadhar Back' :
+                                selectedDocType === 'VOTER_ID' ? 'Voter ID Back' :
+                                  selectedDocType === 'DRIVING_LICENSE' ? 'Driving License Back' :
+                                    selectedDocType === 'GST' ? 'GST Back' :
+                                      selectedDocType === 'GUMASTA' ? 'Gumasta Back' :
+                                        selectedDocType === 'PANCARD' ? 'PanCard Back' :
+                                          selectedDocType === 'PASSPORT' ? 'Passport Back' :
+                                            `${selectedDocType} Back`}
+                            </label>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              multiple={false}
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                setBackDoc(file || null);
+                                setTouched(prev => ({ ...prev, backDoc: true }));
+
+                                // Validate file immediately after selection
+                                if (file) {
+                                  handleFileValidation(file, 'backDoc');
+                                }
+                              }}
+                              className={`w-full border border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400 transition-colors ${errors.backDoc && touched.backDoc ? 'border-red-500' : ''}`}
+                            />
+                            {renderFieldError('backDoc')}
+                            {backDoc && (
+                              <div className="mt-4">
+                                <div className="relative bg-gray-100 p-2 rounded-lg">
+                                  <span className="text-sm text-gray-700 truncate block">
+                                    {backDoc.name}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setBackDoc(null);
+                                      setErrors(prev => ({ ...prev, backDoc: '' }));
+                                    }}
+                                    className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                        </div>
+                      )}
+
+                      <hr className="my-4 border-gray-300" />
+
+                      {/* GST and Gumasta Documents */}
+                      {(() => {
+                        const selectedRole = roleData?.find((role: any) => role.id == formData.role);
+                        const isManagerRole = selectedRole?.id === RoleIds.manager;
+                        return isManagerRole && (
+                          <>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              {/* GST Document */}
+                              <div className="mb-6">
+                                <label className="block font-medium mb-2">GST Certificate</label>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  multiple={false}
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    setGstDoc(file || null);
+                                  }}
+                                  className="w-full border border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400 transition-colors"
+                                />
+                                {gstDoc && (
+                                  <div className="mt-4">
+                                    <div className="relative bg-gray-100 p-2 rounded-lg">
+                                      <span className="text-sm text-gray-700 truncate block">
+                                        {gstDoc.name}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => setGstDoc(null)}
+                                        className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                                      >
+                                        ×
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Gumasta Document */}
+                              <div className="mb-6">
+                                <label className="block font-medium mb-2">Gumasta License</label>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  multiple={false}
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    setGumastaDoc(file || null);
+                                  }}
+                                  className="w-full border border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400 transition-colors"
+                                />
+                                {gumastaDoc && (
+                                  <div className="mt-4">
+                                    <div className="relative bg-gray-100 p-2 rounded-lg">
+                                      <span className="text-sm text-gray-700 truncate block">
+                                        {gumastaDoc.name}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => setGumastaDoc(null)}
+                                        className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                                      >
+                                        ×
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </>
+                        )
+                      })()}
+
+                    </div>
+                  </>
                 </>
-              </>
-
-
+              )}
 
               {/*Action  Buttons */}
               <div className="flex justify-end space-x-4 mt-4">
@@ -1310,7 +1438,7 @@ const UserManagement = () => {
           onCancel={() => setShowConfirmModal(false)}
           onConfirm={handleConfirmSave}
           title="Confirm Save"
-          message="Are you sure you want to save this variant?"
+          message="Are you sure you want to Create This User?"
         />
       )}
     </>

@@ -4,6 +4,8 @@ import { UrlConstants } from "../../util/practice/UrlConstants";
 import { pageSize } from "../../helper/ApplicationConstants";
 import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
+const storeData = LocalStorageManager.getData(STORAGE_KEYS.COUPON)
+
 interface User {
     id: number;
     couponCode: string;
@@ -31,7 +33,7 @@ Edit: {
 const initialState:Coupon = {
     isLoading: false,
     isSuccess: false,
-    couponData: [],
+    couponData: storeData,
     Edit: {
         isEdit: false,
         coupon: {

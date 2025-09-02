@@ -65,6 +65,7 @@ export const SidebarColors = {
   supportTicket: { bgColor: 'bg-blue-50', color: '#3B82F6' },
   role: { bgColor: 'bg-blue-50', color: '#3B82F6' },
   coupon: { bgColor: 'bg-blue-50', color: '#3B82F6' },
+  settings: { bgColor: 'bg-blue-50', color: '#3B82F6' },
   addProduct: {
     category: { bgColor: 'bg-blue-50', color: '#3B82F6' },
     subCategory: { bgColor: 'bg-blue-50', color: '#3B82F6' },
@@ -110,4 +111,13 @@ export const getStatusBadgeClass = (status: string) => {
     case 'COMPLETED': return 'bg-emerald-100 text-emerald-800';
     default: return 'bg-gray-100 text-gray-800';
   }
+};
+
+export const RoleIds = {
+  admin: 1,
+  customer: 2,
+  manager: 3,
+  pickupPartner: 4,
+  engineer: 5,
+  customerExecutive: 6
 };
