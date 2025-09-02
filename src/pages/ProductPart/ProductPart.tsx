@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
 import Pagination from '../../helper/Pagination';
-import { ArrowDown, ArrowUp, ClearFilter, DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, InventoryRefillUse, pageSize, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass, ThemeBackgroundColor } from '../../helper/ApplicationConstants';
+import { ClearFilter, DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, InventoryRefillUse, pageSize, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass, ThemeBackgroundColor } from '../../helper/ApplicationConstants';
 import { toast } from 'react-toastify';
 import Loading from '../../components/Loading';
 import { GetAllCategory } from '../AddCategory/AddCategorySlice';
@@ -12,7 +12,7 @@ import { CreateInventory, DeleteInventory, GetAllProductPart, GetAllProductPartB
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { FetchModalBySubCategory } from '../AddMobileNumber/MobileNumberSlice';
 import IphoneImage from "../../assets/Laptop_Image.png";
-import { ArrowDown01, ArrowDownIcon, ArrowUpIcon, Minus, MinusCircleIcon, Plus, PlusCircleIcon } from 'lucide-react';
+import { ArrowDownIcon, ArrowUpIcon, MinusCircleIcon, PlusCircleIcon } from 'lucide-react';
 
 const ProductPart = () => {
 

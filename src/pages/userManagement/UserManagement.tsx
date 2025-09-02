@@ -85,36 +85,15 @@ const UserManagement = () => {
     setSearchByEmail(true);
   };
 
-  // // handle state change
-  // const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-  //   const stateId = Number(e.target.value);
-
-  //   // poora object nikaalo
-  //   const selectedState = stateData.find((item) => item.id === stateId);
-
-  //   // formData me poora state save karo
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     state: selectedState || null,   // poora object store hoga
-  //   }));
-
-  //   // dispatch ke liye sirf id bhejna
-  //   if (selectedState) {
-  //     dispatch(GetCitiesByStateId(selectedState.id));
-  //   }
-  // };
-
   // 3. Update handleStateChange - Add onBlur validation
 const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
   const stateId = Number(e.target.value);
 
-  // poora object nikaalo
   const selectedState = stateData.find((item) => item.id === stateId);
 
-  // formData me poora state save karo
   setFormData((prev) => ({
     ...prev,
-    state: selectedState || null,   // poora object store hoga
+    state: selectedState || null,  
   }));
 
   // Clear error if state is selected
@@ -313,49 +292,6 @@ const handleCityBlur = (e: React.FocusEvent<HTMLSelectElement>) => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
-
-  // // 3. Update handleInputChange to include validation (replace existing function)
-  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-  //   const { name, value } = e.target;
-
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     [name]: value,
-  //   }));
-
-  //   setTouched((prev) => ({
-  //     ...prev,
-  //     [name]: true,
-  //   }));
-
-  //   // Validate field on change
-  //   const error = validateField(name, value);
-  //   setErrors((prev) => ({
-  //     ...prev,
-  //     [name]: error,
-  //   }));
-  // };
-
-  // // Add onBlur validation handler (add this new function)
-  // const handleFieldBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
-  //   const { name, value } = e.target;
-
-  //   // Only validate if field has value
-  //   if (value && value.trim()) {
-  //     setTouched((prev) => ({
-  //       ...prev,
-  //       [name]: true,
-  //     }));
-
-  //     const error = validateField(name, value);
-  //     setErrors((prev) => ({
-  //       ...prev,
-  //       [name]: error,
-  //     }));
-  //   }
-  // };
-
 
   // 1. Update handleInputChange - Remove validation on change, only update form data
 const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -1120,20 +1056,6 @@ const handleFieldBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElemen
                     </div>
 
                     <div>
-                      {/* <select
-                        className={`input ${errors.state && touched.state ? 'border-red-500' : ''}`}
-                        name="state"
-                        value={formData.state?.id || ""}
-                        onBlur={handleFieldBlur}
-                        onChange={handleStateChange}
-                      >
-                        <option value="">Select State</option>
-                        {stateData.map((item) => (
-                          <option key={item.id} value={item.id}>
-                            {item.name}
-                          </option>
-                        ))}
-                      </select> */}
                       <select
   className={`input ${errors.state && touched.state ? 'border-red-500' : ''}`}
   name="state"
@@ -1153,30 +1075,6 @@ const handleFieldBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElemen
                     </div>
 
                     <div>
-                      {/* <select
-                        className={`input ${errors.city && touched.city ? 'border-red-500' : ''}`}
-                        name="city"
-                        value={formData.city?.id || ""}
-                        onBlur={handleFieldBlur}
-                        disabled={!formData.state}
-                        onChange={(e) => {
-                          const cityId = Number(e.target.value);
-                          const selectedCity = cityData.find((item) => item.id === cityId);
-
-                          setFormData((prev) => ({
-                            ...prev,
-                            city: selectedCity || null,
-                          }));
-                        }}
-                      >
-                        <option value="">Select City</option>
-                        {cityData?.map((item: any) => (
-                          <option key={item.id} value={item.id}>
-                            {item.name}
-                          </option>
-                        ))}
-                      </select> */}
-
                       <select
   className={`input ${errors.city && touched.city ? 'border-red-500' : ''}`}
   name="city"

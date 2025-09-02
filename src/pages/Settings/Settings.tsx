@@ -22,7 +22,7 @@ const Settings = () => {
 
   // Profile image fallback
   const profilePic = data?.responseDetails?.picturePath;
-  const initials = `${userDetails?.firstName?.[0] || "U"}`;
+  const initials = `${userDetails?.firstName?.[0] || "AK"}`;
 
   return (
     <div className=" p-10 rounded-lg ">
