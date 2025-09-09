@@ -707,7 +707,7 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
 
             {/* Title */}
            <h2 className="text-3xl font-semibold text-center mb-6">
-  {isEditMode ? "Update Variant" : "Add Variant"}
+  {isEditMode ? "Update Variant" : "Create Variant"}
 </h2>
 
 {/* ✅ FIXED: Dropdowns - Show in both Create and Edit Mode, but pre-populate in Create Mode */}
