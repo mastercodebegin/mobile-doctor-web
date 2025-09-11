@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useRef, useState } from "react";
-import ForgetPassword from "../../components/ForgetPassword";
+import UpdatePassword from "../../components/UpdatePassword";
 
 interface NavbarProps {
   onToggleSidebar: () => void;
@@ -107,7 +107,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
           >
             {/* Top user section (Chrome-like different shade, no border) */}
             <div className="p-4 bg-white text-center rounded-md">
-              <p className="font-extrabold text-base tracking-wide">
+              <p className="font-bold text-base tracking-wide">
                 {fullNameCaps || "USER"}
               </p>
 
@@ -121,7 +121,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
 
               {/* Mobile */}
               {mobile ? (
-                <div className="mt-1 flex items-center justify-center gap-2 text-sm text-gray-300">
+                <div className="mt-1 flex items-center justify-center gap-2 text-sm text-gray-400">
                   <Phone size={16} />
                   <span className="truncate">{mobile}</span>
                 </div>
@@ -129,21 +129,21 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
             </div>
 
             {/* Divider via shade (no border) */}
-            <div className="h-[1px] bg-[#3c4043]" />
+            <div className="h-[1px] bg-gray-300" />
 
             {/* Options */}
             <div className="flex flex-col p-2">
               <button
-                className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-400 transition text-sm"
+                className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm"
                 onClick={() => setOpenP(true)}
               >
                 <KeyRound size={18} />
-                Change Password
+                Update Password
               </button>
 
               <button
                 onClick={handleClearLoginState}
-                className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-400 transition text-sm hover:text-red-600 text-red-400"
+                className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm hover:text-red-600 text-red-400"
               >
                 <LogOut size={18} />
                 Log Out
@@ -153,7 +153,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
         )}
       </div>
 
-      {openP && <ForgetPassword setOpenP={setOpenP} />}
+      {openP && <UpdatePassword setOpenP={setOpenP} />}
     </div>
   );
 };

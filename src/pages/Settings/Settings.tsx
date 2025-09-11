@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
-import { SubmitButtonClass } from '../../helper/ApplicationConstants';
+import { capitalizeEachWord, SubmitButtonClass } from '../../helper/ApplicationConstants';
 
 const Settings = () => {
   const { data } = useSelector((state: RootState) => state.UserLoginSlice);
@@ -22,7 +22,7 @@ const Settings = () => {
 
   // Profile image fallback
   const profilePic = data?.responseDetails?.picturePath;
-  const initials = `${userDetails?.firstName?.[0] || "AK"}`;
+  const initials = `${userDetails?.firstName?.[0]?.charAt(0)?.toUpperCase() || "AK"}`;
 
   return (
     <div className=" p-10 rounded-lg ">
@@ -36,12 +36,12 @@ const Settings = () => {
               className="w-20 h-20 object-cover rounded-full"
             />
           ) : (
-            <div className="w-20 h-20 rounded-full bg-gray-300 border border-blue-500 flex items-center justify-center text-blue-500 text-3xl font-bold">
+            <div className="w-20 h-20 rounded-full bg-gray-400 border flex items-center justify-center text-white text-3xl font-bold">
               {initials}
             </div>
           )}
           <div>
-            <h4 className="font-semibold text-blue-500 text-3xl">{userDetails?.firstName || "User"}</h4>
+            <h4 className="font-semibold text-black text-3xl">{capitalizeEachWord(userDetails?.firstName) || "Alfaiz"}</h4>
             <p className="text-lg text-gray-600">{userDetails?.email}</p>
           </div>
         </div>
@@ -52,7 +52,7 @@ const Settings = () => {
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
   {fields.map(([key, value], i) => (
     <div key={i} className="w-full transform transition-all duration-300 hover:shadow-md hover:scale-103 shadow ">
-      <label className="block text-sm mb-2 font-medium text-blue-500 capitalize">
+      <label className="block text-sm mb-2 font-medium text-black capitalize">
         {key.replace(/([A-Z])/g, " $1")}
       </label>
       <div className=" p-3 rounded-md border-b border-l shadow-sm">

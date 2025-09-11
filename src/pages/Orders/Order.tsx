@@ -5,14 +5,14 @@ import { GetAllSubCategory } from '../AddSubCategory/SubCategorySlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
 import { toast } from 'react-toastify';
-import { ClearFilter, EditClass, EditIcon, getStatusBadgeClass, inputClass, pageSize, SearchIcon, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from '../../helper/ApplicationConstants';
+import { capitalizeEachWord, ClearFilter, EditClass, EditIcon, getStatusBadgeClass, inputClass, pageSize, SearchIcon, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from '../../helper/ApplicationConstants';
 import Pagination from '../../helper/Pagination';
 import { GetAllRepairUnitOrderByUserId, update, UpdateOrder } from './OrderSlice';
 import DatePicker from '../../components/DatePicker';
 import { UrlConstants } from '../../util/practice/UrlConstants';
 import { getRequestMethodWithParam } from '../../util/CommonService';
 import ConfirmationModal from '../../components/ConfirmationModal';
-import { MapPin, Phone, ShieldCheck, User } from 'lucide-react';
+import { Mail, MapPin, Phone, ShieldCheck, User } from 'lucide-react';
 import OrderProgressStepper from '../../components/OrderProgressStepper';
 import DefaultImage from "../../assets/Laptop_Image.png"
 
@@ -342,17 +342,6 @@ const Order = () => {
 
 
    const firstOrder = Array.isArray(selectedOrderDetails) ? selectedOrderDetails[0] : selectedOrderDetails;
-
-  const firstName = firstOrder?.customer?.firstName
-    ? firstOrder?.customer?.firstName?.charAt(0).toUpperCase() +
-      firstOrder?.customer?.firstName?.slice(1).toLowerCase()
-    : "";
-
-  const lastName = firstOrder?.customer?.lastName
-    ? firstOrder?.customer?.lastName?.charAt(0).toUpperCase() +
-      firstOrder?.customer?.lastName?.slice(1).toLowerCase()
-    : "";
-
     const HoverEffect = "rounded-xl p-6 mb-8 rounded-l-lg shadow border-l-4 border-gray-400"
 
   return (
@@ -683,7 +672,7 @@ const Order = () => {
       </div>
      <div>
        <h3 className="text-xl font-semibold text-gray-800">
-        {`${firstName} ${lastName}`}
+        {`${capitalizeEachWord(firstOrder?.customer?.firstName)} ${capitalizeEachWord(firstOrder?.customer?.lastName)}`}
       </h3>
       <span className='text-gray-500 text-sm' >{firstOrder.customer?.role?.name || "N/A"}</span>
      </div>
@@ -692,14 +681,14 @@ const Order = () => {
     {/* Right Side: Details Card */}
     <div dir="rtl" className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 md:mt-0 md:ml-8 md:w-auto ">
       
-      <div dir="ltr" className="flex items-center space-x-2 p-2 border border-gray-300 rounded-lg bg-white">
-        <User className="w-5 h-5 text-blue-600" />
+      <div dir="ltr" className="flex items-center space-x-2 px-2 py-4 border border-gray-300 rounded-2xl bg-white">
+        <Mail className="w-5 h-5 text-black" />
         <span>{firstOrder.customer?.email || "N/A"}</span>
       </div>
       
-      <div dir="ltr" className="flex items-center space-x-2 p-2 border border-gray-300 rounded-lg bg-white">
-        <Phone className="w-5 h-5 text-green-600" />
-        <span>{firstOrder.customer?.mobile || "N/A"}</span>
+      <div dir="ltr" className="flex items-center space-x-2 p-4 border border-gray-300 rounded-2xl bg-white">
+        <Phone className="w-5 h-5 text-black" />
+        <span>+91 {firstOrder.customer?.mobile || "N/A"}</span>
       </div>
 
     </div>
@@ -707,20 +696,20 @@ const Order = () => {
 </section>
 
                 {/* Progress Stepper-1 - Show overall progress based on actual dates */}
-               <div className={`rounded-xl p-6 mb-4 rounded-l-lg shadow border-l-4 border-gray-400`}>
+               <div className={`rounded-xl p-6 mb-4 rounded-l-lg shadow border-l-4 border-cyan-500`}>
   <OrderProgressStepper selectedOrderDetails={selectedOrderDetails} />
 </div>
 
 {/* Rent Location Section */}
 <div className="flex items-center space-x-3 mb-4 p-3 rounded-lg bg-white">
   {/* Icon with light gray background */}
-  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
     <MapPin className="w-5 h-5 text-gray-600" />
   </div>
 
   {/* Text Section */}
   <div>
-    <h4 className="text-sm font-semibold">Rent location</h4>
+    <h4 className="text-sm font-semibold">Delivered Address</h4>
     <p className="text-gray-600 text-sm">
       {firstOrder?.userAddress || "No Description"}
     </p>
@@ -730,7 +719,7 @@ const Order = () => {
 {/* User Description Section */}
 <div className="flex items-center space-x-3 mb-4 p-3 rounded-lg bg-white">
   {/* Icon with light gray background */}
-  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
     <User className="w-5 h-5 text-gray-600" />
   </div>
 
@@ -746,7 +735,7 @@ const Order = () => {
 {/* Manager Description Section */}
 <div className="flex items-center space-x-3 mb-4 p-3 rounded-lg bg-white">
   {/* Icon with light gray background */}
-  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
     <ShieldCheck className="w-5 h-5 text-gray-600" />
   </div>
 
@@ -809,16 +798,19 @@ const Order = () => {
 
                 {/* Products/Orders List - Row wise display for multiple orders */}
                 <div className="mb-8 border border-gray-300 rounded-xl p-6">
-  <h3 className="text-xl font-semibold mb-6 text-gray-800">Orders ({Array.isArray(selectedOrderDetails) ? selectedOrderDetails.length : 1})</h3>
+  <h3 className="text-xl font-semibold mb-6 text-gray-800">Orders Summary</h3>
 
   <div className="overflow-x-auto border border-gray-200 rounded-xl">
     <table className="min-w-full divide-y divide-gray-200 text-sm">
       <thead className="bg-gray-50">
         <tr>
           <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-            Item Details
+            Model Number
           </th>
-          <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider border-l border-gray-300">
+            Issue Label
+          </th>
+          <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-l border-gray-300">
             Price
           </th>
         </tr>
@@ -826,7 +818,6 @@ const Order = () => {
       <tbody className="divide-y divide-gray-200 bg-white">
         {(Array.isArray(selectedOrderDetails) ? selectedOrderDetails : [selectedOrderDetails]).map((order, index) => (
           <tr key={index} className="hover:bg-gray-50">
-            {/* Item Details */}
             <td className="px-6 py-4 flex items-center space-x-4">
               <img
                 src={
@@ -847,8 +838,11 @@ const Order = () => {
               </div>
             </td>
 
-            {/* Charge */}
-            <td className="px-6 py-4 text-center">
+            <td className="px-6 py-4 text-left border-l border-gray-300">
+              {order?.unitProblemDetails?.productPart?.name || "N/A"}
+            </td>
+
+            <td className="px-6 py-4 text-center border-l border-gray-300">
               ₹{order.price || 0}
             </td>
           </tr>
@@ -857,6 +851,8 @@ const Order = () => {
     </table>
   </div>
 </div>
+
+
 
 {/* Summary Section */}
 <div className="flex justify-end mt-6">

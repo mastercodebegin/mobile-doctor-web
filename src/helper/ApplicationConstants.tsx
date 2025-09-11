@@ -121,3 +121,15 @@ export const RoleIds = {
   engineer: 5,
   customerExecutive: 6
 };
+
+export const capitalizeEachWord = (text = "") => {
+  if (!text) return "";
+
+  return text
+    .split(" ")
+    .map(
+      (word) =>
+        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    )
+    .join(" ");
+};

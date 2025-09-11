@@ -98,11 +98,11 @@ const OrderProgressStepper = ({ selectedOrderDetails }) => {
             {/* Progress Container */}
             <div className="relative">
                 {/* Background Line */}
-                <div className="absolute top-4 left-4 right-4 h-1 bg-gray-200 rounded-full"></div>
+                <div className="absolute top-4 left-4 right-4 h-1 bg-gray-100 rounded-full"></div>
 
                 {/* Animated Progress Line */}
                 <div
-                    className="absolute top-4 left-4 h-1 bg-black rounded-full transition-all duration-1000 ease-out"
+                    className="absolute top-4 left-4 h-1 bg-gray-200 rounded-full transition-all duration-1000 ease-out"
                     style={{
                         width: showSteps ? `calc(${animatedWidth}% - 16px + ${(animatedWidth / 100) * 16}px)` : '0%'
                     }}
@@ -121,7 +121,7 @@ const OrderProgressStepper = ({ selectedOrderDetails }) => {
                                 style={{ transitionDelay: `${stepDelay}ms`, minWidth: '120px' }}
                             >
                                 {/* Circle */}
-                                <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center relative z-10 ${isCompleted ? 'bg-black border-black' : 'bg-white border-gray-300'}`}>
+                                <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center relative z-10 ${isCompleted ? 'bg-gray-800 border-gray-800' : 'bg-white border-gray-300'}`}>
                                     {isCompleted && (
                                         <div className="w-2 h-2 rounded-full bg-white"></div>
                                     )}

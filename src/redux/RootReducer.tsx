@@ -20,6 +20,7 @@ import StateSlice from "../pages/State/StateSlice"
 import CitySlice from "../pages/City/CitySlice"
 import BranchSlice from "../pages/Branch/BranchSlice"
 import CouponSlice from "../pages/Coupons/CouponSlice"
+import PasswordSlice from "../pages/Password/PasswordSlice"
 
 const RootReducer = ({
     ErrorModalWindowSlice,
@@ -44,6 +45,7 @@ const RootReducer = ({
     CitySlice,
     BranchSlice,
     CouponSlice,
+    PasswordSlice,
 })
 
 

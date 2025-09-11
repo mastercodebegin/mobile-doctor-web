@@ -84,6 +84,7 @@ CREATE_USER_BY_ADMIN: 'user/createUserByAdmin',
 GET_ALL_USER: 'user/getAllUser',
 GET_USER_BY_EMAIL: 'user/getUserByEmail',
 GET_USER_BY_ROLE_ID: 'user/getUsersListByRoleId',
+UPDATE_PASSWORD: 'user/updatePassword',
 
   ADD_BRAND:'brand/addBrand',
   ADD_SUB_CATEGORY:'subCategory/addSubCategory',
