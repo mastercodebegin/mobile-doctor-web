@@ -94,13 +94,6 @@ const OrderProgressStepper = ({ selectedOrderDetails }) => {
 
     return (
         <div className="w-full">
-            {/* Progress Header */}
-            <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-800">PROGRESS</h3>
-                <div className="text-sm text-gray-500">
-                    Order ID: {firstOrder.orderId}
-                </div>
-            </div>
 
             {/* Progress Container */}
             <div className="relative">
@@ -135,7 +128,7 @@ const OrderProgressStepper = ({ selectedOrderDetails }) => {
                                 </div>
 
                                 {/* Step Info */}
-                                <div className="mt-4 text-left">
+                                <div className="mt-2 text-left">
                                     <div className="flex items-center gap-2 text-sm">
                                         <span className={`font-medium ${isCompleted ? 'text-gray-800' : 'text-gray-400'}`}>
                                             {step.label}:

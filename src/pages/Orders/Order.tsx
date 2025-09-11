@@ -12,8 +12,9 @@ import DatePicker from '../../components/DatePicker';
 import { UrlConstants } from '../../util/practice/UrlConstants';
 import { getRequestMethodWithParam } from '../../util/CommonService';
 import ConfirmationModal from '../../components/ConfirmationModal';
-import { LocateIcon, Phone, User } from 'lucide-react';
+import { MapPin, Phone, ShieldCheck, User } from 'lucide-react';
 import OrderProgressStepper from '../../components/OrderProgressStepper';
+import DefaultImage from "../../assets/Laptop_Image.png"
 
 interface FilterObject {
   modalNumberId: number;
@@ -352,7 +353,7 @@ const Order = () => {
       firstOrder?.customer?.lastName?.slice(1).toLowerCase()
     : "";
 
-    const HoverEffect = "hover:rounded-xl p-6 mb-8 rounded-l-lg shadow hover:border-l-4 border-gray-400"
+    const HoverEffect = "rounded-xl p-6 mb-8 rounded-l-lg shadow border-l-4 border-gray-400"
 
   return (
     <>
@@ -664,21 +665,21 @@ const Order = () => {
 
                 {/* Header Section with Order ID */}
                 <div className="mb-8 flex">
-                  <h1 className="text-3xl font-bold text-gray-800 mb-2">Order</h1>
-                  <span className="text-md font-semibold pe-4 pt-3 rounded-lg inline-block">
+                  <h1 className="text-3xl font-bold text-gray-800 mb-2">#</h1>
+                  <span className="text-md font-semibold pe-4 pt-2 rounded-lg inline-block">
                     {selectedOrderDetails.orderId}
                   </span>
                 </div>
 
-                <div className="mb-8 p-4 rounded-md border border-gray-400">
+                <div className="mb-8 p-4 rounded-md border border-gray-300">
 
                 {/* User Profile Section */}
 <section>
-  <div className="flex flex-col md:flex-row items-center md:items-start justify-between">
+  <div className="flex flex-col mb-4 md:flex-row items-center md:items-start justify-between">
     
     {/* Left Side: Avatar + Name */}
     <div className="flex items-center space-x-4">
-      <div className="w-16 h-16 bg-gray-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-md">
+      <div className="w-16 h-16 bg-gray-400 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-md">
         {firstOrder.customer?.firstName?.charAt(0)?.toUpperCase() || "AK"}
       </div>
      <div>
@@ -692,24 +693,14 @@ const Order = () => {
     {/* Right Side: Details Card */}
     <div dir="rtl" className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 md:mt-0 md:ml-8 md:w-auto ">
       
-      <div dir="ltr" className="flex items-center space-x-2 p-2 border rounded-lg shadow-md bg-white">
+      <div dir="ltr" className="flex items-center space-x-2 p-2 border border-gray-300 rounded-lg bg-white">
         <User className="w-5 h-5 text-blue-600" />
         <span>{firstOrder.customer?.email || "N/A"}</span>
       </div>
       
-      <div dir="ltr" className="flex items-center space-x-2 p-2 border rounded-lg shadow-md bg-white">
+      <div dir="ltr" className="flex items-center space-x-2 p-2 border border-gray-300 rounded-lg bg-white">
         <Phone className="w-5 h-5 text-green-600" />
         <span>{firstOrder.customer?.mobile || "N/A"}</span>
-      </div>
-      
-      {/* <div dir='ltr' className="flex items-center space-x-2 p-2 border rounded-lg shadow-md bg-white">
-        <User className="w-5 h-5 text-purple-600" />
-        <span>{firstOrder.customer?.role?.name || "N/A"}</span>
-      </div> */}
-      
-      <div dir="ltr" className="flex items-center space-x-2 p-2 border rounded-lg shadow-md bg-white">
-        <LocateIcon className="w-5 h-5 text-red-600" />
-        <span>{firstOrder.userAddress || "N/A"}</span>
       </div>
 
     </div>
@@ -717,22 +708,66 @@ const Order = () => {
 </section>
 
                 {/* Progress Stepper-1 - Show overall progress based on actual dates */}
-               <div className={HoverEffect}>
+               <div className={`rounded-xl p-6 mb-4 rounded-l-lg shadow border-l-4 border-gray-400`}>
   <OrderProgressStepper selectedOrderDetails={selectedOrderDetails} />
 </div>
 
+{/* Rent Location Section */}
+<div className="flex items-center space-x-3 mb-4 p-3 rounded-lg bg-white">
+  {/* Icon with light gray background */}
+  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+    <MapPin className="w-5 h-5 text-gray-600" />
+  </div>
+
+  {/* Text Section */}
+  <div>
+    <h4 className="text-sm font-semibold">Rent location</h4>
+    <p className="text-gray-600 text-sm">
+      {firstOrder?.userAddress || "No Description"}
+    </p>
+  </div>
+</div>
+
+{/* User Description Section */}
+<div className="flex items-center space-x-3 mb-4 p-3 rounded-lg bg-white">
+  {/* Icon with light gray background */}
+  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+    <User className="w-5 h-5 text-gray-600" />
+  </div>
+
+  {/* Text Section */}
+  <div>
+    <h4 className="text-sm font-semibold">User Description</h4>
+    <p className="text-gray-600 text-sm">
+      {selectedOrderDetails.userDefectDescription || "N/A"}
+    </p>
+  </div>
+</div>
+
+{/* Manager Description Section */}
+<div className="flex items-center space-x-3 mb-4 p-3 rounded-lg bg-white">
+  {/* Icon with light gray background */}
+  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+    <ShieldCheck className="w-5 h-5 text-gray-600" />
+  </div>
+
+  {/* Text Section */}
+  <div>
+    <h4 className="text-sm font-semibold">Manager Description</h4>
+    <p className="text-gray-600 text-sm">
+      {selectedOrderDetails.defectDescriptionByEngineer || "N/A"}
+    </p>
+  </div>
+</div>
+
                 {/* Global Descriptions Section - Common for all orders */}
-                <div className={`${HoverEffect} px-4 py-2`}>
-                  <h3 className="text-lg font-semibold mb-2 text-gray-800">Overall Problem Description</h3>
+                <div
+  className={`${HoverEffect} px-4 py-2 ${
+    !selectedOrderDetails?.cancelReason && !selectedOrderDetails?.delayReason ? "hidden" : ""
+  }`}
+>
+                  <h3 className={"text-lg font-semibold mb-2 text-gray-800"}>Overall Problem Description</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-white p-4 rounded-lg">
-                      <span className="font-medium text-gray-700">User Description:</span>
-                      <p className="text-gray-600 mt-1">{selectedOrderDetails.userDefectDescription || "N/A"}</p>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg">
-                      <span className="font-medium text-gray-700">Engineer Description:</span>
-                      <p className="text-gray-600 mt-1">{selectedOrderDetails.defectDescriptionByEngineer || "N/A"}</p>
-                    </div>
                     {selectedOrderDetails.cancelReason && (
                       <div className="bg-white p-4 rounded-lg">
                         <span className="font-medium text-red-600">Cancel Reason:</span>
@@ -748,27 +783,6 @@ const Order = () => {
                   </div>
                 </div>
 
-                {/* Created By Manager */}
-                {selectedOrderDetails.createdByManager && (
-                  <div className={`${HoverEffect} px-4 py-2`}>
-                    <h3 className="text-lg font-semibold mb-4 text-gray-800">Created By Manager</h3>
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold">
-                        {selectedOrderDetails.createdByManager.firstName?.charAt(0)?.toUpperCase() || 'M'}
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 flex-1">
-                        <div>
-                          <p><span className="font-medium">Name:</span> {selectedOrderDetails.createdByManager.firstName} {selectedOrderDetails.createdByManager.lastName}</p>
-                          <p><span className="font-medium">Email:</span> {selectedOrderDetails.createdByManager.email}</p>
-                        </div>
-                        <div>
-                          <p><span className="font-medium">Mobile:</span> {selectedOrderDetails.createdByManager.mobile || "N/A"}</p>
-                          <p><span className="font-medium">Role:</span> {selectedOrderDetails.createdByManager.role?.name}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
 
                 {/* Defective Part Information */}
                 {selectedOrderDetails.defectivePart && (
@@ -792,27 +806,21 @@ const Order = () => {
                  )} 
 
                 </div>
-                <div className="p-4 rounded-md border border-gray-400">
+                <div className="p-4 rounded-md border border-gray-300">
 
                 {/* Products/Orders List - Row wise display for multiple orders */}
-                <div className="mb-8 border border-gray-400 rounded-xl p-6">
-  <h3 className="text-xl font-semibold mb-6 text-gray-800">Product Rent ({Array.isArray(selectedOrderDetails) ? selectedOrderDetails.length : 1})</h3>
+                <div className="mb-8 border border-gray-300 rounded-xl p-6">
+  <h3 className="text-xl font-semibold mb-6 text-gray-800">Orders ({Array.isArray(selectedOrderDetails) ? selectedOrderDetails.length : 1})</h3>
 
   <div className="overflow-x-auto border border-gray-200 rounded-xl">
     <table className="min-w-full divide-y divide-gray-200 text-sm">
       <thead className="bg-gray-50">
         <tr>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
             Item Details
           </th>
-          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Quantity
-          </th>
-          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Charge
-          </th>
-          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Total Amount
+          <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+            Price
           </th>
         </tr>
       </thead>
@@ -824,11 +832,11 @@ const Order = () => {
               <img
                 src={
                   order.variant?.variantColors?.[0]?.modalImages?.[0]?.imageName
-                    ? `http://34.131.155.169:8080/uploads/${order.variant.variantColors[0].modalImages[0].imageName}`
-                    : "https://via.placeholder.com/60"
+                    ? `${order.variant.variantColors[0].modalImages[0].imageName}`
+                    : DefaultImage
                 }
                 alt="Product"
-                className="w-14 h-14 rounded-md object-cover border"
+                className="w-14 h-14 rounded-md object-cover bg-gray-100"
               />
               <div>
                 <p className="font-medium text-gray-800">
@@ -840,19 +848,9 @@ const Order = () => {
               </div>
             </td>
 
-            {/* Quantity */}
-            <td className="px-6 py-4 text-center">
-              <span className="font-medium">1x</span>
-            </td>
-
             {/* Charge */}
             <td className="px-6 py-4 text-center">
-              {order.rentDays || 2} day(s) • ₹{order.pricePerDay || 200}/day
-            </td>
-
-            {/* Total Amount */}
-            <td className="px-6 py-4 text-right font-bold text-gray-900">
-             ₹{order.price || 450}
+              ₹{order.price || 0}
             </td>
           </tr>
         ))}
