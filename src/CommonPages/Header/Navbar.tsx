@@ -93,7 +93,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
               className="w-full h-full object-cover"
             />
           ) : (
-            <span className="text-lg font-semibold text-white w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-purple-600">
+            <span className="text-lg font-semibold text-white w-10 h-10 flex items-center justify-center rounded-full bg-gray-400">
               {initial}
             </span>
           )}
