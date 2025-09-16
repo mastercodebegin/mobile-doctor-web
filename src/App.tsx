@@ -34,6 +34,7 @@ import Branch from "./pages/Branch/Branch";
 import Coupon from "./pages/Coupons/Coupon";
 import Settings from "./pages/Settings/Settings";
 import ForgetPassword from "./pages/Password/ForgetPassword";
+import Loading from "./components/Loading";
 
 function App() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
@@ -103,12 +104,7 @@ function App() {
     // ADD: Show loading while initializing
   if (isInitializing) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
+      <Loading />
     );
   }
 
@@ -158,7 +154,7 @@ function App() {
               <Route path="/repair-cost" element={<RepairCost />} />
               <Route path="/product-part" element={<ProductPart />} />
               <Route path="/products" element={<Products />} />
-              <Route path="/orders" element={<Order />} />
+              <Route path="/orders" element={<Order sidebarMobileOpen={sidebarMobileOpen} />} />
               <Route path="/support-ticket" element={<SupportTicket />} />
               <Route path="/role" element={<Role />} />
               <Route path="/country" element={<Country />} />

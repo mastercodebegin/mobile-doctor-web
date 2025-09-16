@@ -1,9 +1,10 @@
 import { enUS } from 'date-fns/locale';
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DateRangePicker } from 'react-date-range';
 
-const DatePicker = ({ value, onChange }) => {
+const DatePicker = ({ value, onChange, sidebarMobileOpen  }) => {
   const [isOpen, setIsOpen] = useState(false);
+const [screenSize, setScreenSize] = useState('large');
 
  const [selection, setSelection] = useState({
       startDate: value?.startDate || new Date(),
@@ -60,6 +61,30 @@ const DatePicker = ({ value, onChange }) => {
     setIsOpen(false)
   };
 
+  // Set Screen Size
+useEffect(() => {
+  const handleResize = () => {
+    if (window.innerWidth < 768) {
+      setScreenSize('small');
+    } else if (window.innerWidth < 1024) {
+      setScreenSize('medium');  
+    } else if (window.innerWidth < 1270) {
+      setScreenSize('large');
+    } else {
+      setScreenSize('medium-large');
+    }
+  };
+    handleResize(); // Initial check
+  window.addEventListener('resize', handleResize);
+  return () => window.removeEventListener('resize', handleResize);
+}, []);
+
+  useEffect(() => {
+    if (sidebarMobileOpen) {
+      setIsOpen(false);
+    }
+  }, [sidebarMobileOpen]);
+
   return (
     <div className="relative w-full max-w-lg">
       {/* Input Field */}
@@ -85,35 +110,53 @@ const DatePicker = ({ value, onChange }) => {
           ></div>
           
           {/* Calendar */}
-          <div className="absolute top-full left-0 mt-2 z-50 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden">
-            <DateRangePicker
-              ranges={[selection]}
-              onChange={handleSelect}
-              showSelectionPreview={true}
-              moveRangeOnFirstSelection={false}
-              months={2}
-              direction="horizontal"
-              className="border-0"
-              rangeColors={['#3b82f6']}
-              showDateDisplay={false}
-              locale={enUS}
-            />
-            
-            <div className="flex justify-between items-center px-4 py-3 border-t border-gray-200 bg-gray-50">
-              <button 
-                onClick={handleClear}
-                className="text-sm text-gray-600 hover:text-gray-800 transition-colors"
-              >
-                Clear
-              </button>
-              <button 
-                onClick={handleApply}
-                className="px-4 py-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-              >
-                Apply
-              </button>
-            </div>
-          </div>
+<div 
+    className={`absolute z-50 bg-white border border-gray-800 rounded-lg shadow-xl overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100
+    ${screenSize === 'small' 
+      ? 'fixed left-5 right-5 top-1/2 transform -translate-y-1/2 max-h-[90vh] w-[85vw]'
+      : screenSize === 'medium'
+      ? 'left-0 top-full mt-2 max-h-[90vh] w-[85vw]'
+      : screenSize === 'large'
+      ? 'top-full left-0 mt-2 max-h-[90vh] overflow-hidden overflow-x-auto w-[65vw]'
+      : 'top-full left-0 mt-2 max-h-[90vh] w-[65vw]'}
+    ${screenSize === 'medium-large' ? 'w-[900px]' : ''}
+  `}
+>
+  <div className="h-full overflow-y-auto" style={{ maxHeight: screenSize === 'small' ? '90vh' : '90vh' }}>
+    <DateRangePicker
+      ranges={[selection]}
+      onChange={handleSelect}
+      showSelectionPreview={true}
+      moveRangeOnFirstSelection={false}
+      months={
+        screenSize === 'small' ? 1 : 
+        screenSize === 'medium' || screenSize === 'large' ? 2 : 
+        2
+      }
+      direction={screenSize === 'small' ? 'vertical' : 'horizontal'}
+      className="border-0 w-full"
+      rangeColors={['#3b82f6']}
+      showDateDisplay={false}
+      locale={enUS}
+    />
+      
+    {/* Action Buttons */}
+    <div className="flex justify-between items-center px-4 py-3 border-t border-gray-200 bg-gray-50">
+      <button 
+        onClick={handleClear}
+        className="text-sm text-gray-600 hover:text-gray-800 transition-colors"
+      >
+        Clear
+      </button>
+      <button 
+        onClick={handleApply}
+        className="px-4 py-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+      >
+        Apply
+      </button>
+    </div>
+  </div>
+</div>
 
         </>
       )}

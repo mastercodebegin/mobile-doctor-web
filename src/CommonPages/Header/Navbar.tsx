@@ -32,7 +32,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
     navigate("/login");
   };
 
-  // ✅ Correctly map from your API response shape
+  //  Correctly map from your API response shape
   const apiBucket = data; // outer
   const user = apiBucket; // inner user
   const avatarUrl = apiBucket?.picturePath || null;

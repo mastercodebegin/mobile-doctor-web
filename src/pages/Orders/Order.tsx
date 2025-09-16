@@ -29,7 +29,7 @@ interface FilterObject {
 }
 
 
-const Order = () => {
+const Order = ({ sidebarMobileOpen }) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
@@ -357,6 +357,7 @@ const Order = () => {
             <DatePicker
               value={filterDate}
               onChange={handleDateChange}
+               sidebarMobileOpen={sidebarMobileOpen} 
             />
           </div>
 

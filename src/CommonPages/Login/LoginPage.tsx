@@ -7,7 +7,6 @@ import { toast } from "react-toastify";
 import { AppDispatch, RootState } from "../../redux/store";
 import { Dispatch } from "@reduxjs/toolkit";
 import { inputClass, SubmitButtonClass } from "../../helper/ApplicationConstants";
-import useAuthStatus from "../../hooks/useAuthStatus";
 import { Eye, EyeOff } from "lucide-react";
 
 interface LoginPageProps {
@@ -16,8 +15,7 @@ interface LoginPageProps {
 
 const Login: React.FC<LoginPageProps> = ({ onLogin }) => {
 
-  const { isLoading, data } = useSelector((state: RootState) => state.UserLoginSlice)
-  const { loggedIn } = useAuthStatus()
+  const { isLoading } = useSelector((state: RootState) => state.UserLoginSlice)
   const [showPass, setShowPass] = useState(false);
 
   const dispatch = useDispatch<AppDispatch>()

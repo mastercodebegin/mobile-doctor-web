@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Mail, Key, CheckCircle, ArrowLeft, EyeOff, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BackToLogin, ForgotPassInput, SubmitButtonClass } from '../../helper/ApplicationConstants';
@@ -442,67 +442,6 @@ useEffect(() => {
   //     </div>
   //   );
   // }
-
-//   // Option-2 
-// if (step === 4) {
-//   return (
-//     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center px-4 relative overflow-hidden">
-//       {/* Animated Background Elements */}
-//       <div className="absolute inset-0 overflow-hidden">
-//         <div className="absolute -top-4 -left-4 w-24 h-24 bg-green-200 rounded-full opacity-20 animate-pulse"></div>
-//         <div className="absolute top-20 right-10 w-16 h-16 bg-emerald-300 rounded-full opacity-30 animate-bounce" style={{animationDelay: '1s'}}></div>
-//         <div className="absolute bottom-20 left-10 w-20 h-20 bg-teal-200 rounded-full opacity-25 animate-pulse" style={{animationDelay: '2s'}}></div>
-//         <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-green-300 rounded-full opacity-15 animate-bounce" style={{animationDelay: '0.5s'}}></div>
-        
-//         {/* Floating particles */}
-//         <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-green-400 rounded-full opacity-40 animate-ping"></div>
-//         <div className="absolute top-3/4 right-1/4 w-3 h-3 bg-emerald-400 rounded-full opacity-30 animate-ping" style={{animationDelay: '1.5s'}}></div>
-//         <div className="absolute top-1/2 left-3/4 w-1 h-1 bg-teal-400 rounded-full opacity-50 animate-ping" style={{animationDelay: '0.8s'}}></div>
-//       </div>
-
-//       {/* Main Card with Enhanced Animation */}
-//       <div className="w-full max-w-sm bg-white p-8 rounded-3xl shadow-2xl text-center relative z-10 transform animate-bounce-in border border-green-100">
-//         {/* Success Icon with Ripple Effect */}
-//         <div className="relative mb-6">
-//           <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg transform hover:scale-110 transition-transform duration-300">
-//             <CheckCircle className="w-10 h-10 text-white animate-pulse" />
-//           </div>
-//           {/* Ripple rings */}
-//           <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-24 h-24 border-4 border-green-300 rounded-full opacity-30 animate-ping"></div>
-//           <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-28 h-28 border-2 border-green-200 rounded-full opacity-20 animate-ping" style={{animationDelay: '0.5s'}}></div>
-//         </div>
-
-//         {/* Content with Slide-in Animation */}
-//         <div className="space-y-4 animate-fade-in-up">
-//           <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-4">
-//             Password Reset
-//           </h1>
-          
-//           <div className="space-y-2 mb-8">
-//             <p className="text-gray-600 text-base font-medium">Your password has been successfully reset!</p>
-//             <p className="text-gray-500 text-sm">You can now log in with your new password</p>
-//           </div>
-
-//           {/* Enhanced Continue Button */}
-//           <Link to="/login">
-//             <button
-//               onClick={resetFlow}
-//               className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-4 px-6 rounded-2xl font-bold text-lg shadow-lg transform hover:scale-105 active:scale-95 transition-all duration-200 relative overflow-hidden group"
-//             >
-//               <span className="relative z-10">Continue to Login</span>
-//               {/* Shine effect */}
-//               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -skew-x-12 group-hover:animate-shimmer"></div>
-//             </button>
-//           </Link>
-//         </div>
-
-//         {/* Decorative elements */}
-//         <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-400 rounded-full opacity-60 animate-bounce"></div>
-//         <div className="absolute -bottom-1 -left-1 w-4 h-4 bg-emerald-400 rounded-full opacity-40 animate-pulse"></div>
-//       </div>
-//     </div>
-//   );
-// }
 
 
 // Option-3

@@ -142,13 +142,6 @@ const handleEditUser = (ticket: any) => {
     dispatch(GetAllSupportTicket())
   }, [])
 
-  // Sync data to localStorage whenever Support-Ticket changes
-  // useEffect(() => {
-  //   if (SupportTicketData.length > 0) {
-  //     localStorage.setItem('orders', JSON.stringify(SupportTicketData));
-  //   }
-  // }, [SupportTicketData])
-
   useEffect(() => {
 if(Edit?.isEdit && Edit?.supportTicket) {
   setIsEditMode(true);

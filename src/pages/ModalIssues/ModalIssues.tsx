@@ -219,8 +219,6 @@ const ModalIssues = () => {
       .then((res: any) => {
         console.log("Delete successful:", res);
         toast.success("Modal-Issue deleted successfully!");
-        // Optional: Refresh data if needed
-        // dispatch(GetAllModalIssues());
       })
       .catch((err: any) => {
         console.log("Delete Failed:", err);
@@ -236,13 +234,6 @@ const ModalIssues = () => {
     dispatch(GetAllSubCategory());
     dispatch(GetAllCategory());
   }, [])
-
-  // Sync data to localStorage whenever ModalIssuesData changes
-  // useEffect(() => {
-  //   if (ModalIssuesData.length > 0) {
-  //     localStorage.setItem('modal-issues', JSON.stringify(ModalIssuesData));
-  //   }
-  // }, [ModalIssuesData])
 
   useEffect(() => {
     if (Edit?.isEdit && Edit?.modalIssue) {

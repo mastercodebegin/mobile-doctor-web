@@ -698,13 +698,6 @@ const ProductPart = () => {
     dispatch(GetAllCategory());
   }, [])
 
-  // // Sync data to localStorage whenever InventoryData changes
-  // useEffect(() => {
-  //   if (ProductPartData.length > 0) {
-  //     localStorage.setItem('product-part', JSON.stringify(ProductPartData));
-  //   }
-  // }, [ProductPartData])
-
   useEffect(() => {
     if (Edit?.isEdit && Edit?.inventory) {
       setIsEditMode(true);

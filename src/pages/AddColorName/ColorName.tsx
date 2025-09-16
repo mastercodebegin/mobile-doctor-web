@@ -117,7 +117,6 @@ const handleDeleteUser = async (id : string) =>{
  // Animation for table rows
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Save to localStorage whenever data changes
   useEffect(() => {
     setIsLoaded(true);
         dispatch(GetAllColors())
@@ -136,20 +135,8 @@ const handleDeleteUser = async (id : string) =>{
     }
   }, [Edit]);
 
-  // // Save to localStorage whenever colorData changes
-  // useEffect(() => {
-  //   if(colorData.length > 0) {
-  //       localStorage.setItem("color-name", JSON.stringify(colorData));
-  //   }
-  // }, [colorData]);
-
   useEffect(() => {
     setIsLoaded(true);
-    // const storedData = localStorage.getItem("color-name");
-    // if (storedData) {
-    //     const parsedData = JSON.parse(storedData);
-    //     dispatch(SetInitialData(parsedData));
-    // }
     dispatch(GetAllColors());
 }, [dispatch]);
 

@@ -483,7 +483,6 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
   }, [selectedModalNumber, dispatch]);
 
   useEffect(() => {
-    // localStorage.setItem("Variant", JSON.stringify(AllVariantData))
     dispatch(FetchAllModalNumber());
     dispatch(GetAllColors());
   }, [dispatch]);
@@ -708,7 +707,7 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
   {isEditMode ? "Update Variant" : "Create Variant"}
 </h2>
 
-{/* ✅ FIXED: Dropdowns - Show in both Create and Edit Mode, but pre-populate in Create Mode */}
+{/*  FIXED: Dropdowns - Show in both Create and Edit Mode, but pre-populate in Create Mode */}
             {!isEditMode && (
   <div className="mb-4 space-y-6">
     <div>

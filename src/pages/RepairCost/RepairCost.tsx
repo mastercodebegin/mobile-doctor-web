@@ -74,7 +74,7 @@ const RepairCost = () => {
     productPart: {
       id: 0,
       name: '',
-       subCategory: {
+      subCategory: {
         id: 0,
         name: '',
         category: {
@@ -144,23 +144,23 @@ const RepairCost = () => {
     setSelectedProductPart("");
     setSelectedModalNumber("");
 
-   if (subCategoryId) {
+    if (subCategoryId) {
       dispatch(GetRepairCostBySubCategoryId({ subCategoryId: Number(subCategoryId) }));
       dispatch(FetchModalBySubCategory(subCategoryId))
       setIsFiltered(true);
       setCurrentPage(1)
-  };
-}
+    };
+  }
 
   const handleModalNumberSelect = (modelNumberId: number) => {
-  setSelectedModalNumber(modelNumberId);
+    setSelectedModalNumber(modelNumberId);
 
-  if (modelNumberId) {
-    dispatch(GetRepairCostByModalId(modelNumberId)); 
-    setIsFiltered(true);
-    setCurrentPage(1);
-  }
-};
+    if (modelNumberId) {
+      dispatch(GetRepairCostByModalId(modelNumberId));
+      setIsFiltered(true);
+      setCurrentPage(1);
+    }
+  };
 
 
   // Handle clear filter
@@ -279,59 +279,59 @@ const RepairCost = () => {
   };
 
   // 5. Add this debug console.log in handleSaveClick to check if it's being called
-const handleSaveClick = async () => {
-  console.log("Save button clicked");
+  const handleSaveClick = async () => {
+    console.log("Save button clicked");
 
-  if (!formData.category || !formData.price || !formData.productModelNumber?.id) {
-    alert("Fill All Details!!");
-    return;
-  }
-
-  const isUpdating = isEditMode && Edit?.repairCost?.id;
-  console.log("✔ DEBUG ---");
-console.log("isEditMode:", isEditMode); 
-console.log("Edit.repairCost.id:", Edit.repairCost?.id); 
-console.log("Edit.isEdit:", Edit.isEdit); 
-  console.log("🔍 Is this an update?", isUpdating);
-  console.log("🔍 Edit object:", Edit);
-
-  if (isUpdating) {
-    console.log("✅ UPDATE FLOW");
-
-    try {
-      // Prepare updated object
-      const updatedRepairCost = {
-        id: Edit.repairCost?.id,
-        price: formData.price,
-        message: formData.message,
-        category: formData.category,
-        subCategory: formData.subCategory,
-        productPart: formData.productPart,
-        productModelNumber: formData.productModelNumber
-      };
-
-      // First update the redux `edit` state
-      dispatch(setEditRepairCost(updatedRepairCost));
-
-      // Now make the async update API call
-      const updateResult = await dispatch(UpdateRepairCost(updatedRepairCost.id)).unwrap();
-
-      console.log("Update successful:", updateResult);
-
-      await dispatch(GetAllRepairCost()); 
-      toast.success(updateResult.message || "Repair Cost Updated Successfully!");
-      handleCloseModal();
-
-    } catch (error: any) {
-      console.error("Edit error:", error);
-      toast.error("Repair Cost Update Failed: " + error.message || error);
+    if (!formData.category || !formData.price || !formData.productModelNumber?.id) {
+      alert("Fill All Details!!");
+      return;
     }
 
-  } else {
-    console.log("❌ CREATE FLOW");
-    setShowConfirmModal(true);
-  }
-};
+    const isUpdating = isEditMode && Edit?.repairCost?.id;
+    console.log("✔ DEBUG ---");
+    console.log("isEditMode:", isEditMode);
+    console.log("Edit.repairCost.id:", Edit.repairCost?.id);
+    console.log("Edit.isEdit:", Edit.isEdit);
+    console.log("🔍 Is this an update?", isUpdating);
+    console.log("🔍 Edit object:", Edit);
+
+    if (isUpdating) {
+      console.log("✅ UPDATE FLOW");
+
+      try {
+        // Prepare updated object
+        const updatedRepairCost = {
+          id: Edit.repairCost?.id,
+          price: formData.price,
+          message: formData.message,
+          category: formData.category,
+          subCategory: formData.subCategory,
+          productPart: formData.productPart,
+          productModelNumber: formData.productModelNumber
+        };
+
+        // First update the redux `edit` state
+        dispatch(setEditRepairCost(updatedRepairCost));
+
+        // Now make the async update API call
+        const updateResult = await dispatch(UpdateRepairCost(updatedRepairCost.id)).unwrap();
+
+        console.log("Update successful:", updateResult);
+
+        await dispatch(GetAllRepairCost());
+        toast.success(updateResult.message || "Repair Cost Updated Successfully!");
+        handleCloseModal();
+
+      } catch (error: any) {
+        console.error("Edit error:", error);
+        toast.error("Repair Cost Update Failed: " + error.message || error);
+      }
+
+    } else {
+      console.log("❌ CREATE FLOW");
+      setShowConfirmModal(true);
+    }
+  };
 
   // 6. Add this debug console.log in handleConfirmSave
   const handleConfirmSave = async () => {
@@ -373,44 +373,44 @@ console.log("Edit.isEdit:", Edit.isEdit);
     setShowModal(true);
   };
 
-const handleEditUser = async (user: any) => {
-  console.log("Edit Data", user);
+  const handleEditUser = async (user: any) => {
+    console.log("Edit Data", user);
 
-  const subCategory = user?.productPart?.subCategory || {};
-  const category = subCategory?.category || {};
+    const subCategory = user?.productPart?.subCategory || {};
+    const category = subCategory?.category || {};
 
-  // Populate dropdowns
-  if (category?.id) {
-    await dispatch(GetAllSubCategoryById(category.id));
-  }
+    // Populate dropdowns
+    if (category?.id) {
+      await dispatch(GetAllSubCategoryById(category.id));
+    }
 
-  if (subCategory?.id) {
-    await dispatch(GetAllProductPartsBySubCategory(subCategory.id));
-  }
+    if (subCategory?.id) {
+      await dispatch(GetAllProductPartsBySubCategory(subCategory.id));
+    }
 
-  // ✅ Pre-fill formData (local form state)
-  setFormData({
-    price: user?.price || "",
-    message: user?.message || "",
-    category,
-    subCategory,
-    productPart: user?.productPart || {},
-    productModelNumber: user?.productModelNumber || {}
-  });
+    // ✅ Pre-fill formData (local form state)
+    setFormData({
+      price: user?.price || "",
+      message: user?.message || "",
+      category,
+      subCategory,
+      productPart: user?.productPart || {},
+      productModelNumber: user?.productModelNumber || {}
+    });
 
-  // ✅ Set dropdown values
-  setFormCategory(category?.id?.toString() || "");
-  setFormSubCategory(subCategory?.id?.toString() || "");
-  setFormProductPart(user?.productPart?.id?.toString() || "");
-  setFormModalNumber(user?.productModelNumber?.id?.toString() || "");
+    // ✅ Set dropdown values
+    setFormCategory(category?.id?.toString() || "");
+    setFormSubCategory(subCategory?.id?.toString() || "");
+    setFormProductPart(user?.productPart?.id?.toString() || "");
+    setFormModalNumber(user?.productModelNumber?.id?.toString() || "");
 
-  // ✅ Set edit mode
-  setIsEditMode(true);
-  setShowModal(true);
+    // ✅ Set edit mode
+    setIsEditMode(true);
+    setShowModal(true);
 
-  // ✅ Store edit data in Redux
-  dispatch(setEditRepairCost(user));
-};
+    // ✅ Store edit data in Redux
+    dispatch(setEditRepairCost(user));
+  };
 
   const handleDeleteUser = (userId: number) => {
     console.log("Delete Id", userId);
@@ -448,16 +448,16 @@ const handleEditUser = async (user: any) => {
   // Initialize data on component mount
   useEffect(() => {
     setIsLoaded(true);
-         if (!LocalStorageManager.hasData(STORAGE_KEYS.REPAIR_COST)) {
-                                dispatch(GetAllRepairCost());
-                            }
+    if (!LocalStorageManager.hasData(STORAGE_KEYS.REPAIR_COST)) {
+      dispatch(GetAllRepairCost());
+    }
     dispatch(FetchAllModalNumber());
     dispatch(GetAllModalIssues());
     dispatch(GetAllCategory());
     dispatch(GetAllSubCategory());
   }, [dispatch]);
 
-    {isLoading && <Loading overlay={true} />}
+  { isLoading && <Loading overlay={true} /> }
 
   return (
     <>
@@ -465,68 +465,68 @@ const handleEditUser = async (user: any) => {
         <div className="mt-10 flex items-center justify-between">
 
           {/* Left side - Filter controls */}
-<div className="flex items-center flex-wrap gap-4">
-  {/* First Row - Category and Sub-Category */}
-  <div className="flex items-center gap-2">
-    {/* Category Dropdown */}
-    <select
-      className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-[150px]"
-      value={selectedCategory}
-      onChange={(e) => handleCategorySelect(e.target.value)}
-    >
-      <option value="">Select Category</option>
-      {data?.map((category) => (
-        <option key={category.id} value={category.id}>
-          {category.name}
-        </option>
-      ))}
-    </select>
+          <div className="flex items-center flex-wrap gap-4">
+            {/* First Row - Category and Sub-Category */}
+            <div className="flex items-center gap-2">
+              {/* Category Dropdown */}
+              <select
+                className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-[150px]"
+                value={selectedCategory}
+                onChange={(e) => handleCategorySelect(e.target.value)}
+              >
+                <option value="">Select Category</option>
+                {data?.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
 
-    {/* Sub-Category Dropdown */}
-    <select
-      className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-[150px] disabled:bg-gray-100 disabled:cursor-not-allowed"
-      value={selectedSubCategory}
-      onChange={(e) => handleSubCategorySelect(e.target.value)}
-      disabled={!selectedCategory}
-    >
-      <option value="">Select Sub-Category</option>
-      {filteredSubCategories?.map((subCategory) => (
-        <option key={subCategory.id} value={subCategory.id}>
-          {subCategory.name}
-        </option>
-      ))}
-    </select>
-  </div>
+              {/* Sub-Category Dropdown */}
+              <select
+                className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-[150px] disabled:bg-gray-100 disabled:cursor-not-allowed"
+                value={selectedSubCategory}
+                onChange={(e) => handleSubCategorySelect(e.target.value)}
+                disabled={!selectedCategory}
+              >
+                <option value="">Select Sub-Category</option>
+                {filteredSubCategories?.map((subCategory) => (
+                  <option key={subCategory.id} value={subCategory.id}>
+                    {subCategory.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-  {/* Second Row - Product Part and Modal Number */}
-  <div className="flex items-center gap-2">
+            {/* Second Row - Product Part and Modal Number */}
+            <div className="flex items-center gap-2">
 
-    {/* Modal Number Dropdown */}
-    <select
-      className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-[150px] disabled:bg-gray-100 disabled:cursor-not-allowed"
-      value={selectedModalNumber}
-      onChange={(e) => handleModalNumberSelect(e.target.value)}
-      disabled={!selectedSubCategory}
-    >
-      <option value="">Select Modal Number</option>
-      {MobileNumberData?.map((modal) => (
-        <option key={modal.id} value={modal.id}>
-          {modal.name}
-        </option>
-      ))}
-    </select>
+              {/* Modal Number Dropdown */}
+              <select
+                className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-[150px] disabled:bg-gray-100 disabled:cursor-not-allowed"
+                value={selectedModalNumber}
+                onChange={(e) => handleModalNumberSelect(e.target.value)}
+                disabled={!selectedSubCategory}
+              >
+                <option value="">Select Modal Number</option>
+                {MobileNumberData?.map((modal) => (
+                  <option key={modal.id} value={modal.id}>
+                    {modal.name}
+                  </option>
+                ))}
+              </select>
 
-    {/* Clear Filter Button */}
-    {(selectedCategory || selectedSubCategory || selectedProductPart || selectedModalNumber || isFiltered) && (
-      <button
-        onClick={handleClearFilter}
-        className={ClearFilter}
-      >
-        Clear Filter
-      </button>
-    )}
-  </div>
-</div>
+              {/* Clear Filter Button */}
+              {(selectedCategory || selectedSubCategory || selectedProductPart || selectedModalNumber || isFiltered) && (
+                <button
+                  onClick={handleClearFilter}
+                  className={ClearFilter}
+                >
+                  Clear Filter
+                </button>
+              )}
+            </div>
+          </div>
 
           {/* Right side - Action buttons */}
           <div className="flex gap-2">
@@ -614,12 +614,12 @@ const handleEditUser = async (user: any) => {
                             </td>
                             <td className={TableDataClass}>
                               <button onClick={() => handleEditUser(user)} className={EditClass}>
-                               {EditIcon}
+                                {EditIcon}
                               </button>
                             </td>
                             <td className={TableDataClass}>
                               <button onClick={() => handleDeleteUser(user?.id)} className={DeleteClass}>
-                               {DeleteIcon}
+                                {DeleteIcon}
                               </button>
                             </td>
                           </tr>
@@ -695,7 +695,7 @@ const handleEditUser = async (user: any) => {
                   </select>
                 </div>
 
-                    {/* Modal Number Selection */}
+                {/* Modal Number Selection */}
                 <div>
                   <label className="block font-medium mb-2">Select Modal Number</label>
                   <select
@@ -786,8 +786,8 @@ const handleEditUser = async (user: any) => {
         </>
       )}
 
-                {/* ADD this overlay loading at the end */}
-          {isLoading && <Loading overlay={true} />}
+      {/* ADD this overlay loading at the end */}
+      {isLoading && <Loading overlay={true} />}
     </>
   );
 };

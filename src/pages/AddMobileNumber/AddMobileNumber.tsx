@@ -710,14 +710,12 @@ const MobileNumberPage = () => {
 
   useEffect(() => {
     setIsLoaded(true);
-    // localStorage.setItem("Modal-Numbers", JSON.stringify(AllModalNumberData));
     dispatch(GetAllSubCategory());
     dispatch(GetAllBrand());
     dispatch(GetAllCategory());
     dispatch(FetchAllModalNumber());
   }, []);
 
-  // Replace your existing useEffect for brand filtering with this:
   useEffect(() => {
     if (selectedBrand && selectedBrand !== "") {
       console.log("Dispatching FetchBrandIdModalNumber with brandId:", selectedBrand);
