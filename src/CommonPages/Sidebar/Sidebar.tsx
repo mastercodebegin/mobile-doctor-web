@@ -98,7 +98,7 @@ const menuItems = [
   { type: "link", to: "/role", label: "User Role", icon: Users, ...SidebarColors.role },
   { type: "dropdown", label: "Location", icon: LocateFixed, color: SidebarColors.dropdown.location.color, children: LocationLinks },
   { type: "link", to: "/coupon", label: "Coupon", icon: TicketPercent, ...SidebarColors.coupon },
-  { type: "link", to: "/settings", label: "Settings", icon: Settings, ...SidebarColors.settings },
+  // { type: "link", to: "/settings", label: "Settings", icon: Settings, ...SidebarColors.settings },
 ];
 
 interface SidebarProps {
@@ -159,6 +159,12 @@ export default function Sidebar({ collapsed, onNavigate }: SidebarProps) {
       const defaultRoute = defaultRoutes[role] || '/orders';
       navigate(defaultRoute, { replace: true });
     }
+
+     if (["/settings", "/update-password"].includes(currentPath)) {
+    setActiveLink(null);
+  } else {
+    setActiveLink(currentPath);
+  }
   }, [location.pathname, role, navigate]);
 
   // ==========================

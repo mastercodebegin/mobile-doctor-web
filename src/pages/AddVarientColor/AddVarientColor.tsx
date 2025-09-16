@@ -440,9 +440,7 @@ const AddVarientColor = () => {
     dispatch(GetAllColors());
   }, [dispatch]);
 
-  if (isLoading) {
-    return <Loading />;
-  }
+    {isLoading && <Loading overlay={true} />}
 
   return (
     <>
@@ -754,6 +752,10 @@ const AddVarientColor = () => {
         onConfirm={handleConfirmSave}
         onCancel={() => setShowConfirmModal(false)}
       />
+
+                {/* ADD this overlay loading at the end */}
+    {isLoading && <Loading overlay={true} />}
+    
     </>
   );
 };

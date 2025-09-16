@@ -7,7 +7,6 @@ const UrlConstants = {
   LOGIN: 'user/login',
   TEST_API:'user/testapi',
   GET_MY_PROFILE:'user/getMyProfile',
-  FORGOT_PASSWORD:'',
   ADD_CATEGORY:'category/addCategory',
   GET_ALL_CATEGORY:'category/getAllCategory',
   GET_ALL_BRAND:'brand/getAllBrand',
@@ -70,6 +69,7 @@ GET_BRANCH_BY_ID: 'centre/findById',
 ADD_BRANCH: 'centre/create',
 GET_ALL_COUPONS: 'coupon/getAllCoupons',
 ADD_COUPON: 'coupon/create',
+GENERATE_OTP: 'otpverification/sendOtpToEmailForForgotPassword',
 
 
 
@@ -85,6 +85,7 @@ GET_ALL_USER: 'user/getAllUser',
 GET_USER_BY_EMAIL: 'user/getUserByEmail',
 GET_USER_BY_ROLE_ID: 'user/getUsersListByRoleId',
 UPDATE_PASSWORD: 'user/updatePassword',
+FORGOT_PASSWORD: 'user/updatePasswordByForgotPassword',
 
   ADD_BRAND:'brand/addBrand',
   ADD_SUB_CATEGORY:'subCategory/addSubCategory',

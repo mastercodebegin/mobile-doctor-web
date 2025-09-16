@@ -1,7 +1,7 @@
 import { SetStateAction, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../../features/auth/UserLoginSlice";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Loading from "../../components/Loading";
 import { toast } from "react-toastify";
 import { AppDispatch, RootState } from "../../redux/store";
@@ -65,30 +65,7 @@ const Login: React.FC<LoginPageProps> = ({ onLogin }) => {
     }
   };
 
-  // useEffect(() => {
-  //   if (!loggedIn) {
-  //     navigate("/login", { replace: true });
-  //   } else if (data?.role?.name === "customer") {
-  //     navigate("/orders", { replace: true });
-  //   } else if (data?.role?.name === "admin") {
-  //     navigate("/", { replace: true });
-  //   } else if (data?.role?.name === "manager") {
-  //     navigate("/", { replace: true });
-  //   }else if (data?.role?.name === "pickupPartner") {
-  //     navigate("/orders", { replace: true });
-  //   } else if (data?.role?.name === "engineer") {
-  //     navigate("/orders", { replace: true });
-  //   }  else if (data?.role?.name === "customerExecutive") {
-  //     navigate("/orders", { replace: true });
-  //   } else if (data?.role?.name === "vendor") {
-  //     navigate("/product-part", {replace: true})
-  //   }
-  // }, [loggedIn, data, navigate]);
-
-
-  if (isLoading) {
-    return <Loading />
-  }
+{isLoading && <Loading overlay={true} />}
 
   return (
     <>
@@ -135,7 +112,7 @@ const Login: React.FC<LoginPageProps> = ({ onLogin }) => {
                 required
                 className={`mt-1 ${inputClass}`}
               />
-               <span
+              <span
                 className="absolute right-3 top-[58%] -translate-y-0/2 cursor-pointer text-gray-500 hover:text-gray-700 transition"
                 onClick={() => setShowPass(!showPass)}
               >
@@ -153,12 +130,14 @@ const Login: React.FC<LoginPageProps> = ({ onLogin }) => {
 
           <p className="text-center text-sm text-gray-600 mt-4">
             Don't have an account?
-            <a href="/signup" className="text-blue-500 hover:underline ml-1">
-              forget Password
-            </a>
+            <Link to="/forgot-password" className="text-blue-500 hover:underline ml-1">
+              Forgot Password
+            </Link>
           </p>
         </div>
       </div>
+
+      {isLoading && <Loading overlay={true} />}
     </>
 
   )

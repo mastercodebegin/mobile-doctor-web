@@ -555,10 +555,7 @@ const handleFieldBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElemen
     dispatch(GetAllRoles());
   }, []);
 
-  if (isLoading) {
-    return <Loading />;
-  }
-
+    {isLoading && <Loading overlay={true} />}
   return (
     <>
       <div className=" md:overflow-y-hidden overflow-x-hidden">
@@ -1339,6 +1336,9 @@ const handleFieldBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElemen
           message="Are you sure you want to Create This User?"
         />
       )}
+
+                {/* ADD this overlay loading at the end */}
+          {isLoading && <Loading overlay={true} />}
     </>
   );
 };

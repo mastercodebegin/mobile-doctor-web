@@ -123,9 +123,7 @@ if(Edit?.isEdit && Edit?.coupon) {
 }
   },[Edit])
 
-    if (isLoading) {
-      return <Loading />
-    }
+    {isLoading && <Loading overlay={true} />}
 
   return (
     <>
@@ -322,6 +320,8 @@ if(Edit?.isEdit && Edit?.coupon) {
             onConfirm={handleConfirmSave}
             onCancel={() => setShowConfirmModal(false)}
           />
+
+              {isLoading && <Loading overlay={true} />}
 
     </>
   )

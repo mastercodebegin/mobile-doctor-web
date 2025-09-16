@@ -36,14 +36,20 @@ const useAuthStatus = () => {
     const userRole = data?.role;
     const role = typeof userRole === 'object' && userRole?.name ? userRole.name : (typeof userRole === 'string' ? userRole : 'admin');
 
-    // console.log("useAuthStatus - Raw role:", userRole);
-    // console.log("useAuthStatus - Processed role:", role);
 
     useEffect(() => {
-        const isLoggedIn = data && data.jwtToken || localStorage.getItem("token");
-        setLoggedIn(!!isLoggedIn);
-        setCheckStatus(false);
-    }, [data]);
+    // IMPROVED: Better token checking logic
+    const token = localStorage.getItem("token");
+    const isLoggedIn = (data && data.jwtToken) || token;
+    
+    setLoggedIn(!!isLoggedIn);
+    setCheckStatus(false);
+    
+    // If no token found, clear any stale data
+    if (!token && !data?.jwtToken) {
+        localStorage.removeItem("user");
+    }
+}, [data]);
 
     // Route protection effect
     useEffect(() => {

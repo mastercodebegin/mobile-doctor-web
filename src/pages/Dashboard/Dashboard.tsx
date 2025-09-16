@@ -3,19 +3,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import { LineChart, Line, ResponsiveContainer, XAxis, Tooltip, CartesianGrid, YAxis } from 'recharts';
 import { AppDispatch, RootState } from '../../redux/store';
 import Loading from '../../components/Loading';
-import { useNavigate } from 'react-router-dom';
-import useAuthStatus from '../../hooks/useAuthStatus';
 import { GetAllOrderCount, GetAllOrdersInGraph } from './DashboardSlice';
 import moment from 'moment';
-import { Users, Package, Clock, ClipboardCheck, XCircle, CheckCircle2, Truck, UserCheck, Settings, Send, PackageCheck, Check } from "lucide-react";
+import { Users, Package, Clock, ClipboardCheck, XCircle, CheckCircle2, Truck, UserCheck, Settings, Send, PackageCheck, Check, ArrowUp, ArrowDown } from "lucide-react";
+import { EditClass, SubmitButtonClass } from '../../helper/ApplicationConstants';
 
 const Dashboard = () => { 
 
-  const {data} = useSelector((state:RootState) => state.UserLoginSlice)
-  const {loggedIn} = useAuthStatus()
   const {dashboardData, isLoading, productVisitData} = useSelector((state: RootState) => state.DashbaordSlice)
-  const navigate = useNavigate()
   const dispatch = useDispatch<AppDispatch>()
+  const [showAllCards, setShowAllCards] = useState(false)
+
+  console.log(dashboardData, productVisitData)
 
   // State for ResponseDetails
 const [total, setTotal] = useState<number>(0);
@@ -70,20 +69,21 @@ useEffect(() => {
   const frameDuration = 16;
   const frames = animationDuration / frameDuration;
 
+  // Safe destructuring with default values
+  const ordersCounts = dashboardData?.responseDetails?.ordersCounts || {};
   const {
-    total,
-    READY_TO_PICK,
-    PENDING,
-    CANCELLED,
-    COMPLETED,
-    PICKED_UP_BY_PARTNER,
-    PICKED_UP_BY_USER,
-    IN_SERVICE,
-    READY_TO_DISPATCH,
-    DISPATCHED,
-    DELIVERED,
-  } = dashboardData.responseDetails.ordersCounts;
-
+    total = 0,
+    CANCELLED = 0,
+    COMPLETED = 0,
+    PENDING = 0,
+    READY_TO_PICK = 0,
+    PICKED_UP_BY_PARTNER = 0,
+    PICKED_UP_BY_USER = 0,
+    IN_SERVICE = 0,
+    READY_TO_DISPATCH = 0,
+    DISPATCHED = 0,
+    DELIVERED = 0,
+  } = ordersCounts;
 
   // Increments per frame
   const totalInc = Math.ceil(total / frames) || 0;
@@ -98,13 +98,12 @@ useEffect(() => {
   const dispatchedInc = Math.ceil(DISPATCHED / frames) || 0;
   const deliveredInc = Math.ceil(DELIVERED / frames) || 0;
 
-
   let currentFrame = 0;
 
   const timer = setInterval(() => {
     currentFrame++;
 
-    // new states
+    // Update states
     setTotal(prev => (prev + totalInc > total ? total : prev + totalInc));
     setReadyToPick(prev => (prev + readyToPickInc > READY_TO_PICK ? READY_TO_PICK : prev + readyToPickInc));
     setPending(prev => (prev + pendingInc > PENDING ? PENDING : prev + pendingInc));
@@ -133,47 +132,33 @@ useEffect(() => {
 dispatch(GetAllOrderCount())
   },[dispatch])
 
-// useEffect(() => {
-//   if (!loggedIn) {
-//     navigate("/login", { replace: true });
-//   } else if (data?.role?.name === "customer") {
-//     navigate("/orders", { replace: true });
-//   } else if (data?.role?.name === "admin") {
-//     navigate("/", { replace: true });
-//   } else if (data?.role?.name === "manager") {
-//     navigate("/", { replace: true });
-//   }else if (data?.role?.name === "pickupPartner") {
-//     navigate("/orders", { replace: true });
-//   } else if (data?.role?.name === "engineer") {
-//     navigate("/orders", { replace: true });
-//   }  else if (data?.role?.name === "customerExecutive") {
-//     navigate("/orders", { replace: true });
-//   } else if (data?.role?.name === "vendor") {
-//     navigate("/product-part", {replace: true})
-//   }
-// }, [loggedIn, data, navigate]);
-
-
-if(isLoading){
- return <Loading />
-}
+    {isLoading && <Loading overlay={true} />}
 
   return (
     <>
     
-  <div className=" md:overflow-y-auto overflow-x-hidden">
-       
-
+  <div className=" md:overflow-y-auto overflow-x-hidden">      
     <div className="bg-gray-100 p-6 h-auto md:min-h-[83vh] overflow-scroll overflow-x-hidden overflow-y-hidden">
 
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      
-      {/* Users Card */}
+    {/* <div className="p-6 w-full flex flex-wrap gap-4"> */}
+      <div className="p-6 w-full grid gap-4 grid-cols-[repeat(auto-fit,minmax(230px,0.25fr))] relative">
+
+             {/* Show More/Show Less Button */}
+<div className="flex justify-end mb-4 absolute top-15 right-0 ">
+  <button
+    onClick={() => setShowAllCards(!showAllCards)}
+    className={`${EditClass}`}
+  >
+    { showAllCards ? <ArrowUp size={28} /> : <ArrowDown size={28} />}
+  </button>
+</div>
+
+               {/* Users Card */}
       {/* Dynamic User Roles Cards */}
-{Object.entries(userCountsByRole).map(([role, count]) => (
+{Object?.entries(userCountsByRole).map(([role, count]) => (
   <div
     key={role}
-    className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103"
+    className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103 w-full max-w-[15rem]"
   >
     <div className="flex items-center mb-2">
       <Users size={20} className="text-green-500 mr-2" />
@@ -181,121 +166,114 @@ if(isLoading){
         {role}
       </span>
     </div>
-    <h2 className="text-3xl font-bold text-gray-800">{count.toLocaleString()}</h2>
-    <p className="text-gray-400 text-sm mt-1">Users with {role} role</p>
+    <h2 className="text-3xl font-bold text-gray-800">{count?.toLocaleString()}</h2>
   </div>
 ))}
 
-
       {/* Total Orders */}
-      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103 w-full max-w-[15rem]">
         <div className="flex items-center mb-2">
           <Package size={20} className="text-blue-600 mr-2" />
           <span className="text-blue-600 font-medium">Total Orders</span>
         </div>
-        <h2 className="text-3xl font-bold text-gray-800">{total.toLocaleString()}</h2>
-        <p className="text-gray-400 text-sm mt-1">All time orders</p>
+        <h2 className="text-3xl font-bold text-gray-800">{total?.toLocaleString()}</h2>
       </div>
 
       {/* Pending Orders */}
-      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103 w-full max-w-[15rem]">
         <div className="flex items-center mb-2">
           <Clock size={20} className="text-orange-500 mr-2" />
           <span className="text-orange-500 font-medium">Pending</span>
         </div>
-        <h2 className="text-3xl font-bold text-gray-800">{pending.toLocaleString()}</h2>
-        <p className="text-gray-400 text-sm mt-1">Awaiting action</p>
+        <h2 className="text-3xl font-bold text-gray-800">{pending?.toLocaleString()}</h2>
       </div>
 
       {/* Ready To Pick */}
-      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103 w-full max-w-[15rem]">
         <div className="flex items-center mb-2">
           <ClipboardCheck size={20} className="text-purple-600 mr-2" />
           <span className="text-purple-600 font-medium">Ready To Pick</span>
         </div>
-        <h2 className="text-3xl font-bold text-gray-800">{readyToPick.toLocaleString()}</h2>
-        <p className="text-gray-400 text-sm mt-1">Prepared for pickup</p>
+        <h2 className="text-3xl font-bold text-gray-800">{readyToPick?.toLocaleString()}</h2>
       </div>
 
       {/* Cancelled */}
-      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103 w-full max-w-[15rem]">
         <div className="flex items-center mb-2">
           <XCircle size={20} className="text-red-500 mr-2" />
           <span className="text-red-500 font-medium">Cancelled</span>
         </div>
-        <h2 className="text-3xl font-bold text-gray-800">{cancelled.toLocaleString()}</h2>
-        <p className="text-gray-400 text-sm mt-1">Customer cancellations</p>
+        <h2 className="text-3xl font-bold text-gray-800">{cancelled?.toLocaleString()}</h2>
       </div>
 
       {/* Completed */}
-      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103 w-full max-w-[15rem]">
         <div className="flex items-center mb-2">
           <CheckCircle2 size={20} className="text-green-600 mr-2" />
           <span className="text-green-600 font-medium">Completed</span>
         </div>
-        <h2 className="text-3xl font-bold text-gray-800">{completed.toLocaleString()}</h2>
-        <p className="text-gray-400 text-sm mt-1">Successfully finished</p>
+        <h2 className="text-3xl font-bold text-gray-800">{completed?.toLocaleString()}</h2>
       </div>
 
-      {/* Picked Up By Partner */}
-      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+
+     {showAllCards && (
+      <>
+       {/* Picked Up By Partner */}
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103 w-full max-w-[15rem]">
         <div className="flex items-center mb-2">
           <Truck size={20} className="text-indigo-500 mr-2" />
           <span className="text-indigo-500 font-medium">Picked By Partner</span>
         </div>
-        <h2 className="text-3xl font-bold text-gray-800">{pickedUpByPartner.toLocaleString()}</h2>
-        <p className="text-gray-400 text-sm mt-1">Out for service</p>
+        <h2 className="text-3xl font-bold text-gray-800">{pickedUpByPartner?.toLocaleString()}</h2>
       </div>
 
       {/* Picked Up By User */}
-      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103 w-full max-w-[15rem]">
         <div className="flex items-center mb-2">
           <UserCheck size={20} className="text-teal-500 mr-2" />
           <span className="text-teal-500 font-medium">Picked By User</span>
         </div>
-        <h2 className="text-3xl font-bold text-gray-800">{pickedUpByUser.toLocaleString()}</h2>
-        <p className="text-gray-400 text-sm mt-1">User pickup</p>
+        <h2 className="text-3xl font-bold text-gray-800">{pickedUpByUser?.toLocaleString()}</h2>
       </div>
 
       {/* In Service */}
-      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103 w-full max-w-[15rem]">
         <div className="flex items-center mb-2">
           <Settings size={20} className="text-purple-700 mr-2" />
           <span className="text-purple-700 font-medium">In Service</span>
         </div>
-        <h2 className="text-3xl font-bold text-gray-800">{inService.toLocaleString()}</h2>
-        <p className="text-gray-400 text-sm mt-1">Currently processing</p>
+        <h2 className="text-3xl font-bold text-gray-800">{inService?.toLocaleString()}</h2>
       </div>
 
       {/* Ready To Dispatch */}
-      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103 w-full max-w-[15rem]">
         <div className="flex items-center mb-2">
           <Send size={20} className="text-yellow-600 mr-2" />
           <span className="text-yellow-600 font-medium">Ready To Dispatch</span>
         </div>
-        <h2 className="text-3xl font-bold text-gray-800">{readyToDispatch.toLocaleString()}</h2>
-        <p className="text-gray-400 text-sm mt-1">Waiting for dispatch</p>
+        <h2 className="text-3xl font-bold text-gray-800">{readyToDispatch?.toLocaleString()}</h2>
       </div>
 
       {/* Dispatched */}
-      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103 w-full max-w-[15rem]">
         <div className="flex items-center mb-2">
           <PackageCheck size={20} className="text-blue-500 mr-2" />
           <span className="text-blue-500 font-medium">Dispatched</span>
         </div>
-        <h2 className="text-3xl font-bold text-gray-800">{dispatched.toLocaleString()}</h2>
-        <p className="text-gray-400 text-sm mt-1">On the way</p>
+        <h2 className="text-3xl font-bold text-gray-800">{dispatched?.toLocaleString()}</h2>
       </div>
 
       {/* Delivered */}
-      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103">
+      <div className="bg-white p-6 rounded-md shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-103 w-full max-w-[15rem]">
         <div className="flex items-center mb-2">
           <Check size={20} className="text-green-700 mr-2" />
           <span className="text-green-700 font-medium">Delivered</span>
         </div>
-        <h2 className="text-3xl font-bold text-gray-800">{delivered.toLocaleString()}</h2>
-        <p className="text-gray-400 text-sm mt-1">Successfully delivered</p>
+        <h2 className="text-3xl font-bold text-gray-800">{delivered?.toLocaleString()}</h2>
       </div>
+      </>
+     )}
+
     </div>
 
 
@@ -377,6 +355,9 @@ if(isLoading){
 
     </div>
   </div>
+
+            {/* ADD this overlay loading at the end */}
+      {isLoading && <Loading overlay={true} />}
     </>
   );
 };

@@ -457,9 +457,7 @@ const handleEditUser = async (user: any) => {
     dispatch(GetAllSubCategory());
   }, [dispatch]);
 
-  if (isLoading) {
-    return <Loading />;
-  }
+    {isLoading && <Loading overlay={true} />}
 
   return (
     <>
@@ -787,6 +785,9 @@ const handleEditUser = async (user: any) => {
           />
         </>
       )}
+
+                {/* ADD this overlay loading at the end */}
+          {isLoading && <Loading overlay={true} />}
     </>
   );
 };

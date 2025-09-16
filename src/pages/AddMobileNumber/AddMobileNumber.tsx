@@ -757,9 +757,7 @@ const MobileNumberPage = () => {
     setCurrentPage(1);
   }, [selectedBrand, filterCategory, filterSubCategory]);
 
-  if (isLoading) {
-    return <Loading />;
-  }
+    {isLoading && <Loading overlay={true} />}
 
   return (
     <>
@@ -1149,6 +1147,9 @@ const MobileNumberPage = () => {
           />
         </>
       )}
+
+                {/* ADD this overlay loading at the end */}
+    {isLoading && <Loading overlay={true} />}
     </>
   );
 };

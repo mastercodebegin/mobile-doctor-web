@@ -16,6 +16,10 @@ export const ShowModelCloseButtonClass = "px-6 py-3 bg-gray-300 text-white round
 
 export const inputClass = "w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800";
 
+export const ForgotPassInput = "w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none"
+
+export const BackToLogin = "text-gray-600 hover:text-gray-800 flex items-center justify-center gap-2 mx-auto text-sm"
+
 export const EditClass = " text-cyan-500 hover:text-cyan-700 transition-colors duration-200"
 
 export const DeleteClass = " text-red-400 hover:text-red-600 transition-colors duration-200"
@@ -97,19 +101,19 @@ export const SidebarColors = {
 
 export const pageSize = 10;
 
-export const getStatusBadgeClass = (status: string) => {
+export const getStatusBadgeClass = (status: string, isBackgroundColor: boolean) => {
   switch (status) {
-    case 'PENDING': return 'bg-cyan-100 text-cyan-800';
-    case 'CANCELLED': return 'bg-red-100 text-red-800';
-    case 'READY_TO_PICK': return 'bg-purple-100 text-purple-800';
-    case 'PICKED_UP_BY_PARTNER': return 'bg-blue-100 text-blue-800';
-    case 'PICKED_UP_BY_USER': return 'bg-indigo-100 text-indigo-800';
-    case 'IN_SERVICE': return 'bg-orange-100 text-orange-800';
-    case 'READY_TO_DISPATCH': return 'bg-teal-100 text-teal-800';
-    case 'DISPATCHED': return 'bg-sky-100 text-sky-800';
-    case 'DELIVERED': return 'bg-green-100 text-green-800';
-    case 'COMPLETED': return 'bg-emerald-100 text-emerald-800';
-    default: return 'bg-gray-100 text-gray-800';
+    case 'PENDING': return `${isBackgroundColor ? "bg-cyan-100 text-cyan-800" : "bg-white text-blue-800"} `;
+    case 'CANCELLED': return `${isBackgroundColor ? 'bg-red-100 text-red-800' : "bg-white text-red-800"}`;
+    case 'COMPLETED': return `${isBackgroundColor ? "'bg-emerald-100 text-emerald-800'" : "bg-white text-green-800"}`;
+    case 'READY_TO_PICK': return isBackgroundColor ? "bg-purple-100 text-purple-800" : "bg-white text-purple-800";
+    case 'PICKED_UP_BY_PARTNER': return isBackgroundColor ? "bg-blue-100 text-blue-800" : "bg-white text-blue-800";
+    case 'PICKED_UP_BY_USER': return isBackgroundColor ? "bg-indigo-100 text-indigo-800" : "bg-white text-indigo-800";
+    case 'IN_SERVICE': return isBackgroundColor ? "bg-orange-100 text-orange-800" : "bg-white text-orange-800";
+    case 'READY_TO_DISPATCH': return isBackgroundColor ? "bg-teal-100 text-teal-800" : "bg-white text-teal-800";
+    case 'DISPATCHED': return isBackgroundColor ? "bg-sky-100 text-sky-800" : "bg-white text-sky-800";
+    case 'DELIVERED': return isBackgroundColor ? "bg-green-100 text-green-800" : "bg-white text-green-800";
+    default: return 'bg-white text-blue-500';
   }
 };
 

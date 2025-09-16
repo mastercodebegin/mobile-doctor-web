@@ -12,7 +12,7 @@ import DatePicker from '../../components/DatePicker';
 import { UrlConstants } from '../../util/practice/UrlConstants';
 import { getRequestMethodWithParam } from '../../util/CommonService';
 import ConfirmationModal from '../../components/ConfirmationModal';
-import { Mail, MapPin, Phone, ShieldCheck, User } from 'lucide-react';
+import { Mail, Phone, ShieldCheck, User } from 'lucide-react';
 import OrderProgressStepper from '../../components/OrderProgressStepper';
 import DefaultImage from "../../assets/Laptop_Image.png"
 
@@ -76,7 +76,7 @@ const Order = () => {
     'COMPLETED',
   ];
 
-  // Date change handler - यह function DatePicker से call होगा
+  // Date change handler - This function is Call By DatePicker
   const handleDateChange = (newValue) => {
     console.log("Date changed:", newValue);
     setFilterDate(newValue);
@@ -112,10 +112,12 @@ const Order = () => {
 
     // Add date filter if selected
     if (filterDate?.startDate && filterDate?.endDate) {
-      // Format dates to YYYY-MM-DD format for API
       const formatDateForAPI = (date) => {
-        return date.toISOString().split('T')[0];
-      };
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
       filterObj.fromDate = formatDateForAPI(filterDate.startDate);
       filterObj.toDate = formatDateForAPI(filterDate.endDate);
@@ -328,17 +330,7 @@ const Order = () => {
     }
   }, [unitRepairStatus, filterDate]);
 
-  // Sync data to localStorage whenever Orders changes
-  // useEffect(() => {
-  //   if (Orders.length > 0) {
-  //     localStorage.setItem('orders', JSON.stringify(Orders));
-  //   }
-  // }, [Orders])
-
-  if (isLoading) {
-    return <Loading />
-  }
-
+  {isLoading && <Loading overlay={true} />}
 
 
    const firstOrder = Array.isArray(selectedOrderDetails) ? selectedOrderDetails[0] : selectedOrderDetails;
@@ -371,7 +363,7 @@ const Order = () => {
           {/* Right Section */}
           <div className="flex items-center gap-2">
 
-            {/* Status Filter - Only show when subcategory is selected */}
+            {/* Status Filter */}
             <select
               value={unitRepairStatus}
               onChange={(e) => setUnitRepairStatus(e.target.value)}
@@ -432,7 +424,7 @@ const Order = () => {
                         <td className={TableDataClass}>
                           <div className="flex items-center space-x-2">
                             <img
-                              src={`http://34.131.155.169:8080/uploads/${user.repairUnitImages?.[0]?.imageName}`}
+                              src={`${user.repairUnitImages?.[0]?.imageName}`}
                               className="w-14 h-14 object-contain border border-gray-300 rounded-md"
                               alt="Product"
                             />
@@ -448,22 +440,22 @@ const Order = () => {
 
                         {/* Status */}
                         <td className={TableDataClass}>
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusBadgeClass(user.unitRepairStatus)}`}>
-                            {user.unitRepairStatus?.replace(/_/g, ' ')}
+                          <span className={`px-2 py-1 rounded text-xs font-medium tracking-widest ${getStatusBadgeClass(user.unitRepairStatus, false)}`}>
+                            {capitalizeEachWord(user.unitRepairStatus?.replace(/_/g, ' '))}
                           </span>
                         </td>
 
                         {/* Price */}
-                        <td className={TableDataClass}>{user.price ? `₹${user.price}` : "N/A"}</td>
+                        <td className={TableDataClass}>{user?.finalPrice ? `₹${user?.finalPrice}` : ""}</td>
 
                         {/* Created */}
-                        <td className={TableDataClass}>{user?.orderOn ? new Date(user?.orderOn).toLocaleDateString() : "N/A"}</td>
+                        <td className={TableDataClass}>{user?.orderOn ? new Date(user?.orderOn)?.toLocaleDateString()?.replace(/\//g, "-") : ""}</td>
 
                         {/* Expected Delivery */}
-                        <td className={TableDataClass}>{user?.deliveredOn ? new Date(user?.deliveredOn).toLocaleDateString() : "N/A"}</td>
+                        <td className={TableDataClass}>{user?.expectedCompletedOn ? new Date(user?.expectedCompletedOn)?.toLocaleString()?.replace(/\//g, "-") : ""}</td>
 
                         {/* Description */}
-                        <td className={TableDataClass}>{user?.defectDescriptionByEngineer || "N/A"}</td>
+                        <td className={TableDataClass}>{user?.defectDescriptionByEngineer || ""}</td>
 
                         {/* Edit */}
                         <td className={TableDataClass}>
@@ -674,7 +666,7 @@ const Order = () => {
        <h3 className="text-xl font-semibold text-gray-800">
         {`${capitalizeEachWord(firstOrder?.customer?.firstName)} ${capitalizeEachWord(firstOrder?.customer?.lastName)}`}
       </h3>
-      <span className='text-gray-500 text-sm' >{firstOrder.customer?.role?.name || "N/A"}</span>
+      <span className='text-gray-500 text-sm' >{firstOrder.customer?.role?.name || ""}</span>
      </div>
     </div>
 
@@ -683,12 +675,12 @@ const Order = () => {
       
       <div dir="ltr" className="flex items-center space-x-2 px-2 py-4 border border-gray-300 rounded-2xl bg-white">
         <Mail className="w-5 h-5 text-black" />
-        <span>{firstOrder.customer?.email || "N/A"}</span>
+        <span>{firstOrder.customer?.email || ""}</span>
       </div>
       
       <div dir="ltr" className="flex items-center space-x-2 p-4 border border-gray-300 rounded-2xl bg-white">
         <Phone className="w-5 h-5 text-black" />
-        <span>+91 {firstOrder.customer?.mobile || "N/A"}</span>
+        <span>+91 {firstOrder.customer?.mobile || ""}</span>
       </div>
 
     </div>
@@ -700,21 +692,70 @@ const Order = () => {
   <OrderProgressStepper selectedOrderDetails={selectedOrderDetails} />
 </div>
 
-{/* Rent Location Section */}
-<div className="flex items-center space-x-3 mb-4 p-3 rounded-lg bg-white">
-  {/* Icon with light gray background */}
-  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-    <MapPin className="w-5 h-5 text-gray-600" />
-  </div>
-
-  {/* Text Section */}
-  <div>
-    <h4 className="text-sm font-semibold">Delivered Address</h4>
-    <p className="text-gray-600 text-sm">
-      {firstOrder?.userAddress || "No Description"}
-    </p>
-  </div>
-</div>
+{/* Address Information Card Section */}
+{(() => {
+  try {
+    const addressData = typeof firstOrder?.userAddress === 'string' 
+      ? JSON.parse(firstOrder.userAddress) 
+      : firstOrder?.userAddress;
+    
+    if (addressData) {
+      return (
+        <div className="mb-8 border border-gray-300 rounded-xl p-6">
+          <h3 className="text-xl font-semibold mb-6 text-gray-800">Delivery Address</h3>
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <span className="text-sm font-medium text-gray-600">Name:</span>
+                <p className="text-gray-800">{`${addressData?.firstName || ''} ${addressData?.lastName || ''}`.trim() || ''}</p>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-600">Mobile:</span>
+                <p className="text-gray-800">{addressData?.mobileNumber || ''}</p>
+              </div>
+              <div className="md:col-span-2">
+                <span className="text-sm font-medium text-gray-600">Address:</span>
+                <p className="text-gray-800">{addressData?.address || ''}</p>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-600">City:</span>
+                <p className="text-gray-800">{addressData?.city || ''}</p>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-600">State:</span>
+                <p className="text-gray-800">{addressData?.state || ''}</p>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-600">Zip Code:</span>
+                <p className="text-gray-800">{addressData?.zipCode || ''}</p>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-600">Address Type:</span>
+                <p className="text-gray-800 capitalize">{addressData?.addressType || ''}</p>
+              </div>
+              {addressData?.landMark && (
+                <div>
+                  <span className="text-sm font-medium text-gray-600">Landmark:</span>
+                  <p className="text-gray-800">{addressData.landMark}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+  } catch (error) {
+    console.error('Error parsing address:', error);
+    return (
+      <div className="mb-8 border border-gray-300 rounded-xl p-6">
+        <h3 className="text-xl font-semibold mb-6 text-gray-800">Delivery Address</h3>
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <p className="text-gray-600">Address information not available</p>
+        </div>
+      </div>
+    );
+  }
+})()}
 
 {/* User Description Section */}
 <div className="flex items-center space-x-3 mb-4 p-3 rounded-lg bg-white">
@@ -727,7 +768,7 @@ const Order = () => {
   <div>
     <h4 className="text-sm font-semibold">User Description</h4>
     <p className="text-gray-600 text-sm">
-      {selectedOrderDetails.userDefectDescription || "N/A"}
+      {selectedOrderDetails.userDefectDescription || ""}
     </p>
   </div>
 </div>
@@ -743,7 +784,7 @@ const Order = () => {
   <div>
     <h4 className="text-sm font-semibold">Manager Description</h4>
     <p className="text-gray-600 text-sm">
-      {selectedOrderDetails.defectDescriptionByEngineer || "N/A"}
+      {selectedOrderDetails.defectDescriptionByEngineer || ""}
     </p>
   </div>
 </div>
@@ -796,8 +837,8 @@ const Order = () => {
                 </div>
                 <div className="p-4 rounded-md border border-gray-300">
 
-                {/* Products/Orders List - Row wise display for multiple orders */}
-                <div className="mb-8 border border-gray-300 rounded-xl p-6">
+{/* Products/Orders List - Row wise display for multiple orders */}
+<div className="mb-8 border border-gray-300 rounded-xl p-6">
   <h3 className="text-xl font-semibold mb-6 text-gray-800">Orders Summary</h3>
 
   <div className="overflow-x-auto border border-gray-200 rounded-xl">
@@ -808,7 +849,7 @@ const Order = () => {
             Model Number
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider border-l border-gray-300">
-            Issue Label
+            Unit Issue
           </th>
           <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-l border-gray-300">
             Price
@@ -817,73 +858,138 @@ const Order = () => {
       </thead>
       <tbody className="divide-y divide-gray-200 bg-white">
         {(Array.isArray(selectedOrderDetails) ? selectedOrderDetails : [selectedOrderDetails]).map((order, index) => (
-          <tr key={index} className="hover:bg-gray-50">
-            <td className="px-6 py-4 flex items-center space-x-4">
-              <img
-                src={
-                  order.variant?.variantColors?.[0]?.modalImages?.[0]?.imageName
-                    ? `${order.variant.variantColors[0].modalImages[0].imageName}`
-                    : DefaultImage
-                }
-                alt="Product"
-                className="w-14 h-14 rounded-md object-cover bg-gray-100"
-              />
-              <div>
-                <p className="font-medium text-gray-800">
-                  {order.productModelNumber?.name || "Product Name"}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {`${order?.productModelNumber?.productSpecification?.ram}GB` || "N/A"} / {`${order?.productModelNumber?.productSpecification?.rom}GB` || "N/A"}
-                </p>
-              </div>
-            </td>
+         order?.unitProblemDetails?.map((detail, detailIndex) => (
+            <tr
+              key={`${index}-${detailIndex}`}
+              className="hover:bg-gray-50"
+            >
+              {/* Model Number + Specs */}
+              <td className="px-6 py-4 flex items-center space-x-4">
+                <img
+                  src={
+                    order.variant?.variantColors?.[0]?.modalImages?.[0]
+                      ?.imageName || DefaultImage
+                  }
+                  alt="Product"
+                  className="w-14 h-14 rounded-md object-cover bg-gray-100"
+                />
+                <div>
+                  <p className="font-medium text-gray-800">
+                    {detail?.repairCost?.productModelNumber?.name ||
+                      order?.productModelNumber?.name ||
+                      "Product Name"}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {detail?.repairCost?.productModelNumber
+                      ?.productSpecification?.ram
+                      ? `${detail.repairCost.productModelNumber.productSpecification.ram}GB`
+                      : ""}{" "}
+                    /{" "}
+                    {detail?.repairCost?.productModelNumber
+                      ?.productSpecification?.rom
+                      ? `${detail.repairCost.productModelNumber.productSpecification.rom}GB`
+                      : ""}
+                  </p>
+                </div>
+              </td>
 
-            <td className="px-6 py-4 text-left border-l border-gray-300">
-              {order?.unitProblemDetails?.productPart?.name || "N/A"}
-            </td>
+              {/* Unit Issue */}
+              <td className="px-6 py-4 text-left border-l border-gray-300">
+                {detail?.productPart?.name || ""}
+              </td>
 
-            <td className="px-6 py-4 text-center border-l border-gray-300">
-              ₹{order.price || 0}
-            </td>
-          </tr>
+              {/* Price (Prefer repairCost.price if available) */}
+              <td className="px-6 py-4 text-center border-l border-gray-300">
+                ₹
+                {detail?.repairCost?.price ||
+                  detail?.price ||
+                  order?.price ||
+                  0}
+              </td>
+            </tr>
+          ))
         ))}
       </tbody>
     </table>
   </div>
 </div>
 
-
-
 {/* Summary Section */}
 <div className="flex justify-end mt-6">
-  <div className="w-full md:w-1/3 border-t border-gray-200 pt-4 space-y-3">
+  <div className="w-full md:w-1/3 border shadow border-gray-200 p-6 rounded-xl space-y-3">
     <div className="flex justify-between text-sm">
-      <span className="text-gray-600">Subtotal</span>
-      <span className="text-gray-900">₹{selectedOrderDetails?.subtotal || 750}</span>
-    </div>
+  <span className="text-gray-600">Subtotal</span>
+  <span className="text-gray-900">
+    ₹{(() => {
+      const orders = Array.isArray(selectedOrderDetails)
+        ? selectedOrderDetails
+        : [selectedOrderDetails];
+
+      const subtotal = orders.reduce((total, order) => {
+        const unitTotal = (order?.unitProblemDetails || []).reduce(
+          (unitSum, detail) => {
+            const repairCostPrice =
+              parseFloat(detail?.repairCost?.price) || 0;
+            return unitSum + repairCostPrice;
+          },
+          0
+        );
+
+        return total + unitTotal;
+      }, 0);
+
+      return subtotal;
+    })()}
+  </span>
+</div>
     <div className="flex justify-between text-sm">
       <span className="text-gray-600">
-        Delivery <span className="text-gray-400 cursor-help">ⓘ</span>
+        Advanced <span className="text-gray-400 cursor-help">({selectedOrderDetails?.advance || 0}%)</span>
       </span>
-      <span className="text-gray-900">₹{selectedOrderDetails?.delivery || 0}</span>
+      <span className="text-gray-900">₹{selectedOrderDetails?.advance || 0}</span>
     </div>
     <div className="flex justify-between text-sm">
       <span className="text-gray-600">Discount</span>
-      <span className="text-green-600">({selectedOrderDetails?.discountPercent || 20}%) - ₹{selectedOrderDetails?.discountValue || 150}</span>
+      <span className="text-green-600">({selectedOrderDetails?.discount || 0.0}%) - ₹{selectedOrderDetails?.discount || 0.0}</span>
     </div>
     <div className="flex justify-between text-sm">
       <span className="text-gray-600">Coupons</span>
-      <span className="text-gray-900">—</span>
+      <span className="text-gray-900">{selectedOrderDetails?.coupon || ""}</span>
     </div>
     <div className="flex justify-between border-t pt-3 text-base font-bold">
-      <span className="text-gray-800">Total</span>
-      <span className="text-gray-900">₹{selectedOrderDetails?.total || 600}</span>
-    </div>
+  <span className="text-gray-800">Total</span>
+  <span className="text-gray-900">
+    ₹{(() => {
+      const orders = Array.isArray(selectedOrderDetails)
+        ? selectedOrderDetails
+        : [selectedOrderDetails];
+
+      //  Subtotal calculation
+      const subtotal = orders.reduce((total, order) => {
+        const unitTotal = (order?.unitProblemDetails || []).reduce(
+          (unitSum, detail) => unitSum + (parseFloat(detail?.repairCost?.price) || 0),
+          0
+        );
+        return total + unitTotal;
+      }, 0);
+
+      //  Advanced (percentage of subtotal)
+      const advancePercent = parseFloat(selectedOrderDetails?.advance) || 0;
+
+      //  Discount (percentage of subtotal)
+      const discountPercent = parseFloat(selectedOrderDetails?.discount) || 0;
+      const discountAmount = (subtotal * discountPercent) / 100;
+
+      //  Coupon (fixed amount)
+      const couponAmount = parseFloat(selectedOrderDetails?.coupon) || 0;
+
+      //  Final total
+      return subtotal + advancePercent - discountAmount - couponAmount;
+    })()}
+  </span>
+</div>
   </div>
 </div>
-
-
-
               </div>
 
               </div>
@@ -926,6 +1032,9 @@ const Order = () => {
           message={`Are you sure you want to send this ${filterEmail} `}
         />
       )}
+
+          {/* ADD this overlay loading at the end */}
+    {isLoading && <Loading overlay={true} />}
 
     </>
   )

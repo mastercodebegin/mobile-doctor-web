@@ -5,8 +5,9 @@ import { inputClass, ShowModalMainClass, SubmitButtonClass } from "../helper/App
 import { UpdatePasswordThunk } from "../pages/Password/PasswordSlice";
 import { AppDispatch, RootState } from "../redux/store";
 import { toast } from "react-toastify";
+import Loading from "./Loading";
 
-const UpdatePassword = ({ setOpenP }) => {
+const UpdatePassword = ({ setOpenP, setActiveItem }) => {
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -24,6 +25,7 @@ const UpdatePassword = ({ setOpenP }) => {
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
+    setActiveItem(null)
   };
 
 const handleSubmit = async (e) => {
@@ -59,8 +61,11 @@ const handleSubmit = async (e) => {
   }
 };
 
+{isLoading && <Loading overlay={true} />}
+
 
   return (
+<>
     <div className={ShowModalMainClass}>
       <div className="bg-white rounded-2xl shadow-xl p-8 w-[90%] max-w-xl relative">
         <h2 className="text-3xl font-semibold text-center mb-6 text-gray-800">
@@ -163,6 +168,9 @@ const handleSubmit = async (e) => {
         </form>
       </div>
     </div>
+
+    {isLoading && <Loading overlay={true} />}
+</>
   );
 };
 

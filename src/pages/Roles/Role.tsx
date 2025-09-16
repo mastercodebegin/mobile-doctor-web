@@ -136,9 +136,7 @@ const Role = () => {
         }
     }, [Edit]);
 
-    if (isLoading) {
-        return <Loading />
-    }
+    {isLoading && <Loading overlay={true} />}
 
 
     return (
@@ -305,6 +303,8 @@ const Role = () => {
 
             )}
 
+    {isLoading && <Loading overlay={true} />}
+    
         </>
     )
 }

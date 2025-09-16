@@ -153,9 +153,7 @@ const Country = () => {
     dispatch(GetAllCountries())    
   }, []);
 
-  if (isLoading) {
-    return <Loading />
-  }
+    {isLoading && <Loading overlay={true} />}
 
   return (
     <>
@@ -334,6 +332,8 @@ const Country = () => {
       />
   </>
       )}
+
+          {isLoading && <Loading overlay={true} />}
 
     </>
   )

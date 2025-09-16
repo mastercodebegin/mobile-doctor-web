@@ -33,12 +33,16 @@ import City from "./pages/City/City";
 import Branch from "./pages/Branch/Branch";
 import Coupon from "./pages/Coupons/Coupon";
 import Settings from "./pages/Settings/Settings";
+import ForgetPassword from "./pages/Password/ForgetPassword";
 
 function App() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(!isDesktop);
   const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
   const dispatch = useDispatch()
+
+   // ADD: Initial loading state
+  const [isInitializing, setIsInitializing] = useState(true);
   
   // State for token management
   const [token, setToken] = useState(localStorage.getItem("token"));
@@ -59,19 +63,24 @@ function App() {
   useEffect(() => {
     const checkToken = () => {
       const currentToken = localStorage.getItem("token");
-      if (currentToken !== token) {
-        setToken(currentToken);
-      }
+      setToken(currentToken);
+      setIsInitializing(false); 
     };
 
     // Check immediately
     checkToken();
 
     // Set up periodic check (optional - in case of programmatic logout)
-    const interval = setInterval(checkToken, 1000);
+    const interval = setInterval(() => {
+      const currentToken = localStorage.getItem("token");
+      if (currentToken !== token) {
+        setToken(currentToken);
+      }
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [token]);
+
 
   // Adjust sidebar state based on screen size
   useEffect(() => {
@@ -90,6 +99,18 @@ function App() {
         dispatch(ShowErrorModal(message));
     });
   }, [dispatch]);
+
+    // ADD: Show loading while initializing
+  if (isInitializing) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Router>
@@ -147,6 +168,7 @@ function App() {
               <Route path="/coupon" element={<Coupon />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
+              <Route path="/forgot-password" element={<ForgetPassword />} />
           </Routes>
         </div>
         <ErrorModalWindow />

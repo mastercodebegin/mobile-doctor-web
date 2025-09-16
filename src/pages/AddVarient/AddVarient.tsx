@@ -488,9 +488,7 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
     dispatch(GetAllColors());
   }, [dispatch]);
 
-  if (isLoading) {
-    return <Loading />;
-  }
+    {isLoading && <Loading overlay={true} />}
 
   // If no modal number is selected, show the selection screen
   if (!isModalNumberSelected) {
@@ -888,6 +886,9 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
           message="Are you sure you want to save this variant?"
         />
       )}
+
+                {/* ADD this overlay loading at the end */}
+    {isLoading && <Loading overlay={true} />}
     </>
   );
 };

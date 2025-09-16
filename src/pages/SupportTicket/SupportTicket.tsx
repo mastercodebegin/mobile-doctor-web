@@ -168,9 +168,7 @@ if(Edit?.isEdit && Edit?.supportTicket) {
 }
   },[Edit])
 
-  if (isLoading) {
-    return <Loading />
-  }
+    {isLoading && <Loading overlay={true} />}
 
 
   return (
@@ -419,6 +417,8 @@ if(Edit?.isEdit && Edit?.supportTicket) {
         />
       )}
 
+    {isLoading && <Loading overlay={true} />}
+    
     </>
   )
 }

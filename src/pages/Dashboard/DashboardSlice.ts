@@ -81,7 +81,7 @@ const DashboardSlice = createSlice({
         .addCase(GetAllOrderCount.fulfilled, (state, action) =>{
             state.isLoading = false
             state.isSuccess = true
-            state.dashboardData = action.payload
+            state.dashboardData = action?.payload
             LocalStorageManager.saveData(STORAGE_KEYS.DASHBAORD, action.payload);
         })
         .addCase(GetAllOrderCount.rejected, (state, action) =>{

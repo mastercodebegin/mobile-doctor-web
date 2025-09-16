@@ -1,10 +1,10 @@
 import Logo from "../../assets/Logo.png";
 import SLogo from "../../assets/s-logo.png";
-import { LogOut, KeyRound, Mail, Phone } from "lucide-react";
+import { LogOut, KeyRound, Mail, User } from "lucide-react";
 import { clearLoginState } from "../../features/auth/UserLoginSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import React, { useEffect, useRef, useState } from "react";
 import UpdatePassword from "../../components/UpdatePassword";
 
@@ -17,9 +17,12 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
   const { data } = useSelector((state: RootState) => state.UserLoginSlice);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [openP, setOpenP] = useState(false)
+  const [activeItem, setActiveItem] = useState<string | null>(null);
+
 
   const handleClearLoginState = () => {
     localStorage.removeItem("authToken");
@@ -37,7 +40,6 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
   const firstName = user?.firstName ?? "";
   const lastName = user?.lastName ?? "";
   const email = user?.email ?? "";
-  const mobile = user?.mobile ?? "";
 
   const fullNameCaps = `${firstName} ${lastName}`.trim().toUpperCase();
   const initial =
@@ -45,7 +47,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
       email?.trim()?.[0] ??
       "U").toUpperCase();
 
-        // Close dropdown on outside click
+  // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -58,6 +60,10 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    setActiveItem(null);
+  }, [location.pathname]);
 
   return (
     <div className="w-full sticky top-0 z-50 bg-white shadow-lg px-10 py-5 flex items-center justify-between">
@@ -103,7 +109,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
         {open && (
           <div
             role="menu"
-            className="absolute right-0 mt-3 w-80 border border-gray-300 rounded-xl bg-white shadow-2xl p-3 z-50 overflow-hidden"
+            className="absolute right-0 mt-3 w-60 border border-gray-300 rounded-xl bg-white shadow-2xl z-50 overflow-hidden"
           >
             {/* Top user section (Chrome-like different shade, no border) */}
             <div className="p-4 bg-white text-center rounded-md">
@@ -118,14 +124,6 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
                   <span className="truncate">{email}</span>
                 </div>
               ) : null}
-
-              {/* Mobile */}
-              {mobile ? (
-                <div className="mt-1 flex items-center justify-center gap-2 text-sm text-gray-400">
-                  <Phone size={16} />
-                  <span className="truncate">{mobile}</span>
-                </div>
-              ) : null}
             </div>
 
             {/* Divider via shade (no border) */}
@@ -134,12 +132,25 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
             {/* Options */}
             <div className="flex flex-col p-2">
               <button
-                className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm"
-                onClick={() => setOpenP(true)}
+                className={`flex items-center gap-3 px-4 py-2 rounded-lg transition text-sm 
+    ${activeItem === "profile" ? "bg-gray-500 text-white" : "hover:bg-gray-300"}`}
+                onClick={() => { navigate("/settings"), setOpen(false), setActiveItem("profile"); }}
+              >
+                <User size={18} />
+                Profile
+              </button>
+
+              <button
+                className={`flex items-center gap-3 px-4 py-2 rounded-lg transition text-sm 
+    ${activeItem === "updatePassword" ? "bg-gray-500 text-white" : "hover:bg-gray-300"}`}
+                onClick={() => { setOpenP(true), setActiveItem("updatePassword"); }}
               >
                 <KeyRound size={18} />
                 Update Password
               </button>
+
+              {/* Divider via shade (no border) */}
+              <div className="h-[1px] bg-gray-300 my-2 p-0" />
 
               <button
                 onClick={handleClearLoginState}
@@ -153,7 +164,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
         )}
       </div>
 
-      {openP && <UpdatePassword setOpenP={setOpenP} />}
+      {openP && <UpdatePassword setOpenP={setOpenP} setActiveItem={setActiveItem} />}
     </div>
   );
 };

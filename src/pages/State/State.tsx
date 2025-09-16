@@ -170,9 +170,7 @@ const handleClearFilter = () =>{
           }
         }, [Edit]);
 
-  if (isLoading) {
-    return <Loading />
-  }
+    {isLoading && <Loading overlay={true} />}
 
   return (
     <>
@@ -406,6 +404,9 @@ const handleClearFilter = () =>{
           />
         </>
       )}
+
+          {isLoading && <Loading overlay={true} />}
+          
     </>
   )
 }

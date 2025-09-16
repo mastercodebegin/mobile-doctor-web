@@ -1,26 +1,19 @@
 import { enUS } from 'date-fns/locale';
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { DateRangePicker } from 'react-date-range';
 
 const DatePicker = ({ value, onChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
  const [selection, setSelection] = useState({
       startDate: value?.startDate || new Date(),
     endDate: value?.endDate || new Date(),
     key: 'selection'
   });
 
-  const [isOpen, setIsOpen] = useState(false);
-
   const handleSelect = (ranges) => {
     const newSelection = ranges.selection;
     setSelection(newSelection);
-    
-    if (onChange) {
-      onChange({
-        startDate: newSelection.startDate,
-        endDate: newSelection.endDate
-      });
-    }
   };
 
   const formatDate = (date) => {
@@ -32,13 +25,23 @@ const DatePicker = ({ value, onChange }) => {
   };
 
   const getDisplayText = () => {
-    if (selection.startDate && selection.endDate && 
-        selection.startDate.getTime() !== selection.endDate.getTime()) {
-      return `${formatDate(selection.startDate)} - ${formatDate(selection.endDate)}`;
-    } else if (selection.startDate) {
-      return formatDate(selection.startDate);
+  if (value?.startDate && value?.endDate && 
+      value.startDate.getTime() !== value.endDate.getTime()) {
+    return `${formatDate(value.startDate)} - ${formatDate(value.endDate)}`;
+  } else if (value?.startDate) {
+    return formatDate(value.startDate);
+  }
+  return 'Select date range';
+};
+
+    const handleApply = () => {
+    if (onChange) {
+      onChange({
+        startDate: selection.startDate,
+        endDate: selection.endDate
+      });
     }
-    return 'Select date range';
+    setIsOpen(false);
   };
 
    const handleClear = () => {
@@ -54,6 +57,7 @@ const DatePicker = ({ value, onChange }) => {
         endDate: null
       });
     }
+    setIsOpen(false)
   };
 
   return (
@@ -63,9 +67,9 @@ const DatePicker = ({ value, onChange }) => {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center justify-between w-full px-4 py-3 text-sm rounded-lg bg-transparent cursor-pointer hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
       >
-        <span className={selection.startDate ? 'text-gray-900' : 'text-gray-500'}>
-          {!selection.startDate && !selection.endDate ? getDisplayText() : ""}
-        </span>
+        <span className={value.startDate && value.endDate ? 'text-gray-900' : 'text-gray-500'}>
+  {value.startDate && value.endDate ? getDisplayText() : ""}
+</span>
         <svg className="w-5 h-5 text-gray-400 hover:text-blue-300 duration:300 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
@@ -95,7 +99,6 @@ const DatePicker = ({ value, onChange }) => {
               locale={enUS}
             />
             
-            {/* Action Buttons */}
             <div className="flex justify-between items-center px-4 py-3 border-t border-gray-200 bg-gray-50">
               <button 
                 onClick={handleClear}
@@ -104,13 +107,14 @@ const DatePicker = ({ value, onChange }) => {
                 Clear
               </button>
               <button 
-                onClick={() => setIsOpen(false)}
+                onClick={handleApply}
                 className="px-4 py-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
               >
                 Apply
               </button>
             </div>
           </div>
+
         </>
       )}
     </div>

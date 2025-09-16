@@ -257,9 +257,7 @@ const Branch = () => {
 
 
 
-  if (isLoading) {
-    return <Loading />
-  }
+    {isLoading && <Loading overlay={true} />}
 
   return (
     <>
@@ -547,6 +545,9 @@ const Branch = () => {
           />
         </>
       )}
+
+          {isLoading && <Loading overlay={true} />}
+          
     </>
   )
 }

@@ -153,9 +153,7 @@ const handleDeleteUser = async (id : string) =>{
     dispatch(GetAllColors());
 }, [dispatch]);
 
-  if (isLoading) {
-    return <Loading />
-  }
+    {isLoading && <Loading overlay={true} />}
 
   return (
     <>
@@ -328,6 +326,9 @@ const handleDeleteUser = async (id : string) =>{
         onCancel={() => setShowConfirmModal(false)}
       />
 
+          {/* ADD this overlay loading at the end */}
+    {isLoading && <Loading overlay={true} />}
+    
     </>
   )
 }

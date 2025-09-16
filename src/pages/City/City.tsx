@@ -201,12 +201,7 @@ const City = () => {
   }, [Edit]);
 
 
-
-
-
-  if (isLoading) {
-    return <Loading />
-  }
+     {isLoading && <Loading overlay={true} />}
 
   return (
     <>
@@ -498,6 +493,9 @@ const City = () => {
           />
         </>
       )}
+
+          {isLoading && <Loading overlay={true} />}
+          
     </>
   )
 }
