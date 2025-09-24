@@ -66,7 +66,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
   }, [location.pathname]);
 
   return (
-    <div className="w-full sticky top-0 z-50 bg-white shadow-lg px-10 py-5 flex items-center justify-between">
+    <div className="w-full sticky top-0 z-40 bg-white shadow-lg px-10 py-5 flex items-center justify-between">
       {/* Sidebar Toggle + Logo */}
       <div className="cursor-pointer" onClick={onToggleSidebar}>
         <img

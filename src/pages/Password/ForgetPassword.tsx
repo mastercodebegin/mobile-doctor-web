@@ -369,7 +369,7 @@ useEffect(() => {
                               className="absolute right-3 top-[58%] -translate-y-0/2 cursor-pointer text-gray-500 hover:text-gray-700 transition"
                               onClick={() => setShowPass(!showPass)}
                             >
-                              {showPass ? <EyeOff size={20} /> : <Eye size={20} />}
+                              {showPass ? <Eye size={20} /> : <EyeOff size={20} />}
                             </span>
             </div>
               <p className="text-xs text-gray-500 mt-1">Must be at least 8 characters.</p>
@@ -387,7 +387,7 @@ useEffect(() => {
                               className="absolute right-3 top-[58%] -translate-y-0/2 cursor-pointer text-gray-500 hover:text-gray-700 transition"
                               onClick={() => setShowConPass(!showConPass)}
                             >
-                              {showConPass ? <EyeOff size={20} /> : <Eye size={20} />}
+                              {showConPass ? <Eye size={20} /> : <EyeOff size={20} />}
                             </span>
             </div>
 <button

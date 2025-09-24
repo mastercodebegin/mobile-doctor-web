@@ -1,7 +1,8 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { postRequestMethod, putRequestMethod } from "../../util/CommonService";
+import { postRequestMethod, putRequestMethod, putRequestMethodWithParam } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
 import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
+import { Satellite } from "lucide-react";
 
 const storeData = LocalStorageManager.getData(STORAGE_KEYS.ORDERS);
 
@@ -22,6 +23,7 @@ export interface OrdersState {
   isLoading: boolean;
   isSuccess: boolean;
   Orders: any[]; 
+  FindUsers: any[];
   Edit:EditOrder
 }
 
@@ -29,6 +31,7 @@ const initialState = {
     isLoading: false,
     isSuccess: false,
     Orders: storeData,
+    FindUsers: storeData,
      Edit: {
     isEdit: false,
     order: {
@@ -113,6 +116,40 @@ const OrderSlice = createSlice({
                         state.isSuccess = false
                         console.log("Order Data Updted Failed :--", action.payload)
                       })
+
+                      // Find User
+                      .addCase(FindUserByEmail.pending, (state, action) =>{
+                        state.isLoading = false
+                        state.isSuccess = false
+                        console.log("Data Fetching is Pending :----", action.payload);
+                      })
+                      .addCase(FindUserByEmail.fulfilled, (state, action) =>{
+                        state.isLoading = false
+                        state.isSuccess = true
+                        state.FindUsers = action.payload
+                      })
+                      .addCase(FindUserByEmail.rejected, (state, action) =>{
+                        state.isLoading = false
+                        state.isSuccess = false
+                        console.log("Find User By Email Data Fetching Failed :---", action.payload)
+                      })
+
+                      // Assign Engineer 
+                      .addCase(AssignToEngineer.pending, (state, action) =>{
+                        state.isLoading = true
+                        state.isSuccess = false
+                        console.log("Data Fetching is Pending :-----", action.payload)
+                      })
+                      .addCase(AssignToEngineer.fulfilled, (state ,action) =>{
+                        state.isLoading = false
+                        state.isSuccess = true
+                        state.FindUsers = action.payload
+                      })
+                      .addCase(AssignToEngineer.rejected, (state, action) =>{
+                        state.isLoading = false
+                        state.isSuccess = false
+                        console.log("Assign To Engineer is Rejected With :---", action.payload)
+                      })
     }
 })
 
@@ -132,7 +169,7 @@ export const GetAllRepairUnitOrderByUserId = createAsyncThunk("FETCH/ALL/REPAIR/
     }
 })
 
-// // Update Order Thunk
+// Update Order Thunk
 export const UpdateOrder = createAsyncThunk("UPDATE/ORDER", async (actionData, thunkAPI) => {
   try {
     const state = thunkAPI.getState() as any;
@@ -167,3 +204,28 @@ export const UpdateOrder = createAsyncThunk("UPDATE/ORDER", async (actionData, t
     return thunkAPI.rejectWithValue(message);
   }
 });
+
+
+// Filter User By Email Thunk
+export const FindUserByEmail = createAsyncThunk("FIND/BY/EMAIL", async (requestData, thunkAPI) =>{
+  try {
+    const response = await postRequestMethod(requestData, UrlConstants.GET_ALL_USER);
+     console.log("Response Data :---", response);
+        return response;
+  } catch (error: any) {
+    const message = error?.response?.data?.message || error.message
+    return thunkAPI.rejectWithValue(message)
+  }
+})
+
+// Assign Engineer Thunk
+export const AssignToEngineer = createAsyncThunk("ASSIGN/TO/ENGINEER", async (requestData, thunkAPI) =>{
+  try {
+    const response = await putRequestMethodWithParam(requestData, UrlConstants.ASSIGN_TO_ENGINEER);
+     console.log("Response Data :---", response);
+        return response;
+  } catch (error: any) {
+            const message = error?.response?.data?.message || error.message
+    return thunkAPI.rejectWithValue(message)
+  }
+})

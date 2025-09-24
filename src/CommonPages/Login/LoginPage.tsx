@@ -114,7 +114,7 @@ const Login: React.FC<LoginPageProps> = ({ onLogin }) => {
                 className="absolute right-3 top-[58%] -translate-y-0/2 cursor-pointer text-gray-500 hover:text-gray-700 transition"
                 onClick={() => setShowPass(!showPass)}
               >
-                {showPass ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showPass ? <Eye size={20} /> : <EyeOff size={20} />}
               </span>
             </div>
 

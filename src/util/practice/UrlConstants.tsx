@@ -70,6 +70,7 @@ ADD_BRANCH: 'centre/create',
 GET_ALL_COUPONS: 'coupon/getAllCoupons',
 ADD_COUPON: 'coupon/create',
 GENERATE_OTP: 'otpverification/sendOtpToEmailForForgotPassword',
+ASSIGN_TO_ENGINEER: 'unitRepair/recieveDeviceFromPartnerAndAssignToEngineer',
 
 
 

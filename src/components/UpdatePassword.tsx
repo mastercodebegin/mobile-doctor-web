@@ -99,7 +99,7 @@ const handleSubmit = async (e) => {
               className="absolute right-3 top-[58%] -translate-y-0/2 cursor-pointer text-gray-500 hover:text-gray-700 transition"
               onClick={() => setShowCurrent(!showCurrent)}
             >
-              {showCurrent ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showCurrent ? <Eye size={20} /> : <EyeOff size={20} />}
             </span>
           </div>
 
@@ -121,7 +121,7 @@ const handleSubmit = async (e) => {
               className="absolute right-3 top-[58%] -translate-y-0/2 cursor-pointer text-gray-500 hover:text-gray-700 transition"
               onClick={() => setShowNew(!showNew)}
             >
-              {showNew ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showNew ? <Eye size={20} /> : <EyeOff size={20} />}
             </span>
           </div>
 
@@ -143,7 +143,7 @@ const handleSubmit = async (e) => {
               className="absolute right-3 top-[58%] -translate-y-0/2 cursor-pointer text-gray-500 hover:text-gray-700 transition"
               onClick={() => setShowConfirm(!showConfirm)}
             >
-              {showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showConfirm ? <Eye size={20} /> : <EyeOff size={20} />}
             </span>
           </div>
 

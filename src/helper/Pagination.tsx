@@ -43,10 +43,10 @@ totalCount,
           <button
             key={page}
             onClick={() => onPageChange(page)}
-            className={`w-8 h-8 flex items-center justify-center rounded transition-colors duration-200 
+            className={`w-8 h-8 text-white flex items-center justify-center rounded transition-colors duration-200 
               ${currentPage === page 
-                ? `${ThemeBackgroundColor} text-white` 
-                : 'text-gray-600 hover:bg-gray-200'}`}
+                ? `${ThemeBackgroundColor}` 
+                : 'bg-gray-200 text-gray-600 hover:bg-gray-100'}`}
           >
             {page}
           </button>
