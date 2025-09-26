@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { AppDispatch, RootState } from "../../redux/store";
 import { useDispatch, useSelector } from "react-redux";
 import Loading from "../../components/Loading";
-import { ClearFilter, DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
+import { capitalizeEachWord, ClearFilter, DeleteClass, DeleteIcon, DropDownClass, EditClass, EditIcon, getStatusBadgeClass, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, statusOptions, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
 import Pagination from "../../helper/Pagination";
 import { AddsupportTicket, GetAllSupportTicket, GetAllSupportTicketByTicketNumber, Update, UpdateSupportTicket } from "./SupportTicketSlice";
 import ConfirmationModal from "../../components/ConfirmationModal";
@@ -241,7 +241,7 @@ if(Edit?.isEdit && Edit?.supportTicket) {
                         <td className={TableDataClass}>{ticket.ticketNumber}</td>
                         <td className={TableDataClass}>{ticket.userIssue}</td>
                         <td className={TableDataClass}>
-                          <span
+                          {/* <span
                             className={`px-2 py-1 text-xs font-semibold rounded-full
                       ${ticket.supportTicketStatus === 'PENDING' ? 'bg-blue-100 text-blue-800'
                                 : ticket.supportTicketStatus === 'INREVIEW' ? 'bg-yellow-100 text-yellow-800'
@@ -250,7 +250,10 @@ if(Edit?.isEdit && Edit?.supportTicket) {
                     `}
                           >
                             {ticket.supportTicketStatus}
-                          </span>
+                          </span> */}
+                            <span className={`px-3 py-2 rounded-xl text-xs font-medium tracking-widest ${getStatusBadgeClass(ticket.supportTicketStatus, true)}`}>
+                                                      {capitalizeEachWord(ticket.supportTicketStatus?.replace(/_/g, ' '))}
+                                                    </span>
                         </td>
                         <td className={TableDataClass}>
                           {ticket.createdBy
@@ -348,12 +351,18 @@ if(Edit?.isEdit && Edit?.supportTicket) {
                     required
                       value={supportTicketStatus}
                       onChange={(e) => setSupportTicketStatus(e.target.value)}
-                      className={inputClass}
+                      className={DropDownClass}
                     >
-                      <option value="PENDING">PENDING</option>
+                      {/* <option value="PENDING">PENDING</option>
                       <option value="REOPEN">REOPEN</option>
                       <option value="RESOLVED">INREVIEW</option>
-                      <option value="CLOSED">CLOSED</option>
+                      <option value="CLOSED">CLOSED</option> */}
+                        <option value="">Select Status</option>
+                                            {statusOptions.map((status) => (
+                                              <option key={status} value={status}>
+                                                {capitalizeEachWord(status.replace(/_/g, ' '))}
+                                              </option>
+                                            ))}
                     </select>
                   </div>
                   <div>

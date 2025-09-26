@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants"
+import { ClearFilter, DeleteClass, DeleteIcon, DropDownClass, EditClass, EditIcon, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants"
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import Loading from "../../components/Loading";
@@ -260,7 +260,7 @@ const ModalIssues = () => {
             <select
               value={filterCategory ? JSON.stringify(filterCategory) : ""}
               onChange={handleFilterCategoryChange}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={DropDownClass}
             >
               <option value="" disabled>Filter by Category</option>
               {data?.map((category) => (
@@ -275,7 +275,7 @@ const ModalIssues = () => {
               <select
                 value={filterSubCategory ? JSON.stringify(filterSubCategory) : ""}
                 onChange={handleFilterSubCategoryChange}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={DropDownClass}
               >
                 <option value="" disabled>Filter by SubCategory</option>
                 {SubCategoriesData?.filter(subCat => subCat.category?.id === filterCategory?.id)?.map((subCat) => (
@@ -289,9 +289,9 @@ const ModalIssues = () => {
             {(filterCategory || filterSubCategory) && (
               <button
                 onClick={handleClearFilter}
-                className="text-red-400 hover:text-red-600 text-sm bg-red-50 px-2 py-1 rounded"
+                className={ClearFilter}
               >
-                Clear Filter
+                Clear_Filter
               </button>
             )}
           </div>
@@ -407,7 +407,7 @@ const ModalIssues = () => {
                 <select
                   value={selectedCategory ? JSON.stringify(selectedCategory) : ""}
                   onChange={handleModalCategoryChange}
-                  className={inputClass}
+                  className={DropDownClass}
                 >
                   <option value="" disabled>Select Category</option>
                   {data?.map((category) => (
@@ -428,7 +428,7 @@ const ModalIssues = () => {
                       const selectedObject = JSON.parse(e.target.value);
                       setSelectedSubCategory(selectedObject);
                     }}
-                    className={inputClass}
+                    className={DropDownClass}
                   >
                     <option value="" disabled>Select SubCategory</option>
                     {SubCategoriesData?.filter(subCat => subCat.category?.id === selectedCategory?.id)?.map((subCat) => (

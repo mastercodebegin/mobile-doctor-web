@@ -6,7 +6,7 @@ import { CreateModalNumber, FetchAllModalNumber, FetchBrandIdModalNumber, FetchM
 import ConfirmationModal from "../../components/ConfirmationModal";
 import { GetAllSubCategory, GetAllSubCategoryById } from "../AddSubCategory/SubCategorySlice";
 import { GetAllBrand } from "../AddBrand/BrandSlice";
-import { ClearFilter, DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, SelectClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass, ThemeTextColor } from "../../helper/ApplicationConstants";
+import { ClearFilter, DeleteClass, DeleteIcon, DropDownClass, EditClass, EditIcon, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass, ThemeTextColor } from "../../helper/ApplicationConstants";
 import Pagination from "../../helper/Pagination";
 import { toast } from "react-toastify";
 import { GetAllCategory } from "../AddCategory/AddCategorySlice";
@@ -771,7 +771,7 @@ const MobileNumberPage = () => {
                 value={selectedBrand}
                 onChange={handleBrandChange}
                 disabled={filterCategory || filterSubCategory} // Disable when category/subcategory filter is active
-                className={`border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-[200px] ${(filterCategory || filterSubCategory) ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                className={`${DropDownClass} ${(filterCategory || filterSubCategory) ? 'bg-gray-100 cursor-not-allowed' : ''}`}
               >
                 <option value="">All Brands</option>
                 {BrandData?.map((item) => (
@@ -786,7 +786,7 @@ const MobileNumberPage = () => {
                 value={filterCategory ? JSON.stringify(filterCategory) : ""}
                 onChange={(e) => handleFilterCategoryChange(e, 'filter')}
                 disabled={selectedBrand && selectedBrand !== ""} // Disable when brand filter is active
-                className={`px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${(selectedBrand && selectedBrand !== "") ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                className={`${DropDownClass} ${(selectedBrand && selectedBrand !== "") ? 'bg-gray-100 cursor-not-allowed' : ''}`}
               >
                 <option value="" disabled>Filter by Category</option>
                 {data?.map((category) => (
@@ -802,7 +802,7 @@ const MobileNumberPage = () => {
                   value={filterSubCategory ? JSON.stringify(filterSubCategory) : ""}
                   onChange={(e) => handleFilterSubCategoryChange(e)}
                   disabled={selectedBrand && selectedBrand !== ""} // Disable when brand filter is active
-                  className={`px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${(selectedBrand && selectedBrand !== "") ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                  className={`${DropDownClass} ${(selectedBrand && selectedBrand !== "") ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                 >
                   <option value="" disabled>Filter by SubCategory</option>
                   {SubCategoriesData?.filter(subCat => subCat.category?.id === filterCategory?.id)?.map((subCat) => (
@@ -819,7 +819,7 @@ const MobileNumberPage = () => {
                   onClick={handleClear}
                   className={ClearFilter}
                 >
-                  Clear Filter
+                  Clear_Filter
                 </button>
               )}
             </div>
@@ -992,7 +992,7 @@ const MobileNumberPage = () => {
                       )}
                     </label>
                     <select
-                      className={SelectClass}
+                      className={DropDownClass}
                       name="category"
                       onChange={handleChage}
                       value={category.id}
@@ -1022,7 +1022,7 @@ const MobileNumberPage = () => {
                       )}
                     </label>
                     <select
-                      className={SelectClass}
+                      className={DropDownClass}
                       onChange={handleChage}
                       name="subCategory"
                       value={subCategory.id}
@@ -1058,7 +1058,7 @@ const MobileNumberPage = () => {
                       )}
                     </label>
                     <select
-                      className={SelectClass}
+                      className={DropDownClass}
                       onChange={handleChage}
                       name="brand"
                       value={brand.id}

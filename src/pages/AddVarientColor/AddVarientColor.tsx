@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { DeleteClass, DeleteIcon, EditClass, EditIcon, SelectClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
+import { DeleteClass, DeleteIcon, EditClass, EditIcon, DropDownClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
 import Pagination from "../../helper/Pagination";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
@@ -580,7 +580,7 @@ const AddVarientColor = () => {
               <div>
                 <label className="block font-medium mb-2">Select Category</label>
                 <select
-                  className={SelectClass}
+                  className={DropDownClass}
                   name="category"
                   value={formData.category}
                   onChange={handleInputChange}
@@ -597,7 +597,7 @@ const AddVarientColor = () => {
               <div>
                 <label className="block font-medium mb-2">Select Sub Category</label>
                 <select
-                  className={SelectClass}
+                  className={DropDownClass}
                   name="subCategory"
                   value={formData.subCategory}
                   onChange={handleInputChange}
@@ -615,7 +615,7 @@ const AddVarientColor = () => {
               <div>
                 <label className="block font-medium mb-2">Select Brand</label>
                 <select
-                  className={SelectClass}
+                  className={DropDownClass}
                   name="brand"
                   value={formData.brand}
                   onChange={handleInputChange}
@@ -633,7 +633,7 @@ const AddVarientColor = () => {
               <div>
                 <label className="block font-medium mb-2">Select Modal Number</label>
                 <select
-                  className={SelectClass}
+                  className={DropDownClass}
                   name="modalNumber"
                   value={formData.modalNumber}
                   onChange={handleInputChange}
@@ -651,7 +651,7 @@ const AddVarientColor = () => {
               <div>
                 <label className="block font-medium mb-2">Select Variant</label>
                 <select
-                  className={SelectClass}
+                  className={DropDownClass}
                   name="variantId"
                   value={variantId}
                   onChange={handleInputChange}
@@ -669,7 +669,7 @@ const AddVarientColor = () => {
               <div>
                 <label className="block font-medium mb-2">Select Variant Color</label>
                 <select
-                  className={SelectClass}
+                  className={DropDownClass}
                   name="colorId"
                   value={variantColorData.colorName.id}
                   onChange={handleInputChange}

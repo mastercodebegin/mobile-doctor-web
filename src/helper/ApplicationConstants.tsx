@@ -1,8 +1,16 @@
+export const ThemeTextMainColor = 'text-cyan-500'
+
+export const ThemeTextMainHoverColor = 'hover:text-cyan-700'
+
 export const ThemeBackgroundColor = 'bg-cyan-500'
 
 export const ThemeBackgroundHoverColor = 'hover:bg-cyan-700'
 
 export const ThemeTextColor = 'text-gray-800 hover:text-gray-700'
+
+export const ThemeTextHoverColor = 'hover:text-gray-700'
+
+export const DropDownClass = 'w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
 
 export const ShowVarientButtonClass = ` ${ThemeBackgroundColor} ${ThemeBackgroundHoverColor} duration-200 px-6 py-2 shadow rounded-xl transition text-white`
 
@@ -10,7 +18,7 @@ export const SubmitButtonClass = `${ThemeBackgroundColor} ${ThemeBackgroundHover
 
 export const InventoryView = `${ThemeBackgroundColor} ${ThemeBackgroundHoverColor} px-5 py-2 rounded-md  text-white transition`
 
-export const InventoryRefillUse = `px-5 py-2 text-cyan-500 hover:text-cyan-700 transition`
+export const InventoryRefillUse = `px-5 py-2 ${ThemeTextMainColor} ${ThemeTextMainHoverColor} transition`
 
 export const ShowModelCloseButtonClass = "px-6 py-3 bg-gray-300 text-white rounded-full hover:bg-gray-400 transition"
 
@@ -20,7 +28,7 @@ export const ForgotPassInput = "w-full px-3 py-2.5 border border-gray-300 rounde
 
 export const BackToLogin = "text-gray-600 hover:text-gray-800 flex items-center justify-center gap-2 mx-auto text-sm"
 
-export const EditClass = " text-cyan-500 hover:text-cyan-700 transition-colors duration-200"
+export const EditClass = `${ThemeTextMainColor} ${ThemeTextMainHoverColor} transition-colors duration-200`
 
 export const DeleteClass = " text-red-400 hover:text-red-600 transition-colors duration-200"
 
@@ -29,8 +37,6 @@ export const TableDataClass = "py-4 px-6 whitespace-nowrap text-sm text-gray-700
 export const TableHadeClass = `py-4 px-6 text-left text-sm font-medium ${ThemeTextColor} `
 
 export const ShowModalMainClass = "fixed inset-0 z-50 flex items-center justify-center bg-transparent/30 backdrop-blur-sm"
-
-export const SelectClass = "w-full border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
 
 export const ClearFilter = "px-3 py-1.5 text-sm font-medium border rounded-md transition-all text-red-500 border-red-500 hover:bg-red-600 hover:text-white cursor-pointer"
 
@@ -100,6 +106,19 @@ export const SidebarColors = {
 
 
 export const pageSize = 10;
+
+export const statusOptions = [
+    'PENDING',
+    'CANCELLED',
+    'READY_TO_PICK',
+    'PICKED_UP_BY_PARTNER',
+    'PICKED_UP_BY_USER',
+    'IN_SERVICE',
+    'READY_TO_DISPATCH',
+    'DISPATCHED',
+    'DELIVERED',
+    'COMPLETED',
+  ];
 
 export const getStatusBadgeClass = (status: string, isBackgroundColor: boolean) => {
   switch (status) {

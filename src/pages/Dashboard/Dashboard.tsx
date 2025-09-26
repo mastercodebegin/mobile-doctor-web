@@ -6,7 +6,7 @@ import Loading from '../../components/Loading';
 import { GetAllOrderCount, GetAllOrdersInGraph } from './DashboardSlice';
 import moment from 'moment';
 import { Users, Package, Clock, ClipboardCheck, XCircle, CheckCircle2, Truck, UserCheck, Settings, Send, PackageCheck, Check, ArrowUp, ArrowDown } from "lucide-react";
-import { EditClass } from '../../helper/ApplicationConstants';
+import { DropDownClass, EditClass } from '../../helper/ApplicationConstants';
 
 const Dashboard = () => { 
 
@@ -319,7 +319,7 @@ dispatch(GetAllOrderCount())
                <select
           value={selectedPeriod}
           onChange={(e) => handlePeriodChange(e.target.value)}
-          className="border px-3 py-1 rounded-lg"
+          className={DropDownClass}
         >
           <option value="daily">Daily</option>
           <option value="weekly">Weekly</option>

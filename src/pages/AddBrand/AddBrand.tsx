@@ -28,7 +28,7 @@ const AddBrand = () => {
 
   const handleSaveClick = () => {
     if (!category.trim()) {
-      alert("Please enter a category name.");
+      alert("Please enter a Brand name.");
       return;
     }
 
@@ -43,15 +43,15 @@ const AddBrand = () => {
             console.log("Update response:", res);
             dispatch(GetAllBrand());
 
-            toast.success(res.message || "Category updated successfully!");
+            toast.success(res.message || "Brand updated successfully!");
             handleCloseModal()
           })
           .catch((err: any) => {
             console.error("Update failed:", err);
-            toast.error("Category update failed: " + err);
+            toast.error("Brand update failed: " + err);
           })
       } catch (error) {
-        toast.error("Failed to update category");
+        toast.error("Failed to update Brand");
         console.error("Update error:", error);
       };
 
@@ -228,7 +228,7 @@ const AddBrand = () => {
                   type="text"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  placeholder="Add Category"
+                  placeholder="Add Brand"
                   className={inputClass}
                 />
               </div>

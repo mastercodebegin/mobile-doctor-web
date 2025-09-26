@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import Loading from "../../components/Loading";
-import { DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
+import { DeleteClass, DeleteIcon, DropDownClass, EditClass, EditIcon, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
 import Pagination from "../../helper/Pagination";
 import { useEffect, useState } from "react";
 import { AppDispatch, RootState } from "../../redux/store";
@@ -432,7 +432,7 @@ const Branch = () => {
                     const selected = data.find(cat => cat.id.toString() === categoryId);
                     setSelectedUser(selected || null);
                   }}
-                  className={inputClass}
+                  className={DropDownClass}
                 >
                   <option value="">Select...</option>
                   {data.map((item) => (
@@ -451,7 +451,7 @@ const Branch = () => {
                   <select
                     value={selectedCountry?.id || ""}
                     onChange={handleCountryChange}
-                    className={inputClass}
+                    className={DropDownClass}
                   >
                     <option value="">Select...</option>
                     {countryData.map((item) => (
@@ -470,7 +470,7 @@ const Branch = () => {
                   <select
                     value={selectedState?.id || ""}
                     onChange={handleStateChange}
-                    className={inputClass}
+                    className={DropDownClass}
                   >
                     <option value="">Select...</option>
                     {stateData.map((item) => (
@@ -492,7 +492,7 @@ const Branch = () => {
                       const selected = cityData.find(cat => cat.id.toString() === categoryId);
                       setSelectedCity(selected || null);
                     }}
-                    className={inputClass}
+                    className={DropDownClass}
                   >
                     <option value="">Select...</option>
                     {cityData.map((item) => (

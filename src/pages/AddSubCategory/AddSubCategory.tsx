@@ -4,7 +4,7 @@ import { AppDispatch, RootState } from "../../redux/store";
 import Loading from "../../components/Loading";
 import { CreateSubCategory, GetAllSubCategory, Remove, restore, Update, UpdateSubCategory, } from "./SubCategorySlice";
 import ConfirmationModal from "../../components/ConfirmationModal";
-import { DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
+import { DeleteClass, DeleteIcon, DropDownClass, EditClass, EditIcon, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
 import Pagination from "../../helper/Pagination";
 import { toast } from "react-toastify";
 import { GetAllCategory } from "../AddCategory/AddCategorySlice";
@@ -318,7 +318,7 @@ const AddSubCategory = () => {
                     const selected = data.find(cat => cat.id.toString() === categoryId);
                     setSelectedCategory(selected || null);
                   }}
-                  className="border w-full p-3"
+                  className={DropDownClass}
                 >
                   <option value="">Select...</option>
                   {data.map((item) => (

@@ -20,6 +20,7 @@ interface EditOrder {
 }
 
 export interface OrdersState {
+  isEmailLoading: boolean;
   isLoading: boolean;
   isSuccess: boolean;
   Orders: any[]; 
@@ -28,6 +29,7 @@ export interface OrdersState {
 }
 
 const initialState = {
+  isEmailLoading: false,
     isLoading: false,
     isSuccess: false,
     Orders: storeData,
@@ -120,16 +122,19 @@ const OrderSlice = createSlice({
                       // Find User
                       .addCase(FindUserByEmail.pending, (state, action) =>{
                         state.isLoading = false
+                        state.isEmailLoading = true
                         state.isSuccess = false
                         console.log("Data Fetching is Pending :----", action.payload);
                       })
                       .addCase(FindUserByEmail.fulfilled, (state, action) =>{
                         state.isLoading = false
+                        state.isEmailLoading = false
                         state.isSuccess = true
                         state.FindUsers = action.payload
                       })
                       .addCase(FindUserByEmail.rejected, (state, action) =>{
                         state.isLoading = false
+                        state.isEmailLoading = false
                         state.isSuccess = false
                         console.log("Find User By Email Data Fetching Failed :---", action.payload)
                       })

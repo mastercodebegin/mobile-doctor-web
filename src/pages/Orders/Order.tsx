@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Loading from '../../components/Loading'
 import { GetAllCategory } from '../AddCategory/AddCategorySlice';
 import { GetAllSubCategory } from '../AddSubCategory/SubCategorySlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
 import { toast } from 'react-toastify';
-import { capitalizeEachWord, EditClass, EditIcon, getStatusBadgeClass, inputClass, pageSize, RoleIds, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from '../../helper/ApplicationConstants';
+import { capitalizeEachWord, DropDownClass, EditClass, EditIcon, getStatusBadgeClass, inputClass, pageSize, RoleIds, ShowModalMainClass, ShowModelCloseButtonClass, statusOptions, SubmitButtonClass, TableDataClass, TableHadeClass } from '../../helper/ApplicationConstants';
 import Pagination from '../../helper/Pagination';
 import { AssignToEngineer, FindUserByEmail, GetAllRepairUnitOrderByUserId, update, UpdateOrder } from './OrderSlice';
 import DatePicker from '../../components/DatePicker';
@@ -44,7 +44,7 @@ const Order = ({ sidebarMobileOpen }) => {
   const [searchModel, setSearchModel] = useState(false);
   const [showDetailsModel, setShowDetailsModel] = useState(false);
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
-  const { Orders, isLoading, Edit } = useSelector((state: RootState) => state.OrderSlice);
+  const { Orders, isLoading, Edit, isEmailLoading } = useSelector((state: RootState) => state.OrderSlice);
   const [filterEmail, setFilterEmail] = useState<any>('')
   const [filterOrderId, setFilterOrderId] = useState('')
   const [managerId, setManagerId] = useState<number | null>(null);
@@ -65,6 +65,7 @@ const Order = ({ sidebarMobileOpen }) => {
   const [orderCompletedOn, setOrderCompletedOn] = useState("");
 
   const dispatch = useDispatch<AppDispatch>();
+  const pickerRef = useRef<HTMLDivElement>(null);
   const [unitRepairStatus, setUnitRepairStatus] = useState<string>('');
   const [filterDate, setFilterDate] = useState({
     startDate: null,
@@ -75,20 +76,6 @@ const Order = ({ sidebarMobileOpen }) => {
   const usersPerPage = 5;
   const OrderArray = Array.isArray(Orders) ? Orders : Orders ? [Orders] : [];
   const paginatedUsers = OrderArray?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage)
-
-  // Status options - Add more as needed
-  const statusOptions = [
-    'PENDING',
-    'CANCELLED',
-    'READY_TO_PICK',
-    'PICKED_UP_BY_PARTNER',
-    'PICKED_UP_BY_USER',
-    'IN_SERVICE',
-    'READY_TO_DISPATCH',
-    'DISPATCHED',
-    'DELIVERED',
-    'COMPLETED',
-  ];
 
   // // Date change handler - This function is Call By DatePicker
   const handleDateChange = (newValue, type = 'creation') => {
@@ -177,6 +164,7 @@ const Order = ({ sidebarMobileOpen }) => {
     console.log('Final API call with filters:', finalFilterObj);
     dispatch(GetAllRepairUnitOrderByUserId(finalFilterObj)).then(() => {
       setShowConfirmModal(false)
+      handleCloseModal()
     })
   };
 
@@ -271,7 +259,7 @@ const Order = ({ sidebarMobileOpen }) => {
           const updateResult = await dispatch(UpdateOrder(updateOrder?.orderId)).unwrap();
           console.log("Update successful:", updateResult);
           await getAllUnitOrderCommonFunction();
-          toast.success(updateResult.message || "Repair Cost Updated Successfully!");
+          toast.success(updateResult.message || "Order Updated Successfully!");
           handleCloseModal();
         } catch (error: any) {
           console.error("Edit error:", error);
@@ -389,7 +377,7 @@ const Order = ({ sidebarMobileOpen }) => {
       startDate: null,
       endDate: null
     });
-  setExpectedDeliveryDate([null, null]);  
+    setExpectedDeliveryDate([null, null]);
     setSearchResults([]);
     setShowSearchResults(false);
     setSelectedUser(null);
@@ -397,12 +385,9 @@ const Order = ({ sidebarMobileOpen }) => {
   }
 
   const handleClearFilter = () => {
+    setFilterDate({ startDate: null, endDate: null });
+    setExpectedDeliveryDate([null, null]);
     setUnitRepairStatus('');
-    setFilterDate({
-      startDate: null,
-      endDate: null
-    });
-setExpectedDeliveryDate([null, null]);
     setManagerId(null);
     setEngineerId(null);
     setPickupPartnerId(null);
@@ -411,6 +396,7 @@ setExpectedDeliveryDate([null, null]);
     setFilterOrderId("");
     setCurrentPage(1);
     setIsFilterApplied(false);
+    setShowFilter(false);
     getAllUnitOrderCommonFunction();
   };
 
@@ -459,6 +445,16 @@ setExpectedDeliveryDate([null, null]);
 
   { isLoading && <Loading overlay={true} /> }
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const day = date.toLocaleDateString('en-US', { weekday: 'short' });
+    const dateNum = date.getDate();
+    const month = date.toLocaleDateString('en-US', { month: 'short' });
+    const year = date.getFullYear();
+    return `${day} ${dateNum} ${month} ${year}`;
+  };
+
 
   const firstOrder = Array.isArray(selectedOrderDetails) ? selectedOrderDetails[0] : selectedOrderDetails;
   const HoverEffect = "rounded-xl p-6 mb-8 rounded-l-lg shadow border-l-4 border-gray-400"
@@ -486,22 +482,13 @@ setExpectedDeliveryDate([null, null]);
           {showFilter && (
             <>
               {/* <div className="w-[450px] fixed left-85 bottom-0 z-40 bg-white border border-gray-300 rounded-xl shadow-lg flex flex-col max-h-[90vh]"> */}
-                  <div className={`w-[450px] fixed bottom-0 z-40 bg-white border border-gray-300 rounded-xl shadow-lg flex flex-col max-h-[90vh] transition-all duration-300 ${
-      sidebarMobileOpen ? 'left-85' : 'left-20'
-    }`}>
+              <div className={`w-[450px] fixed bottom-0 z-40 bg-white border border-gray-300 rounded-xl shadow-lg flex flex-col max-h-[90vh] transition-all duration-300 ${sidebarMobileOpen ? 'left-85' : 'left-20'
+                }`}>
 
                 {/* Header - Fixed at top */}
                 <div className="flex items-center justify-between mb-4 p-4 pb-0 flex-shrink-0">
                   <div className="flex items-center gap-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 text-cyan-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2l-6 6v5l-4 2v-7L3 6V4z" />
-                    </svg>
+                    <Filter className="w-5 h-5 text-cyan-500" />
                     <h3 className="text-lg font-semibold text-gray-800">Filter</h3>
                   </div>
                   <X onClick={() => setShowFilter(false)} className="w-5 h-5 text-gray-500 cursor-pointer" />
@@ -549,25 +536,38 @@ setExpectedDeliveryDate([null, null]);
                     </div>
 
                     <DateRangePicker
-                      format="dd MMM yyyy hh:mm:ss aa"
+                      format="dd MMM yyyy hh:mm aa"
                       showMeridian
-                      rangeColors={['#06b6d4']}
+                      rangeColors={["#06b6d4"]}
                       showSeconds
                       ranges={[]}
                       value={expectedDeliveryDate}
                       onChange={(newValue) => setExpectedDeliveryDate(newValue)}
-                      style={{ border: "none"}}
+                      style={{
+                       border: `3px solid  #06b6d4`,
+                        borderRadius: "9px",
+                      }}
                       container={() => document.body}
-                      menuStyle={{ zIndex: 9999 }} 
-                      placement="topStart"
+                      menuStyle={{ zIndex: 9999 }}
+                      cleanable={false}
+                      placement="bottomStart"
+                      appearance="subtle"
+                      // onOpen={() => {
+                      //   if (pickerRef.current) {
+                      //     pickerRef.current.style.border = "2px solid #06b6d4"; 
+                      //   }
+                      // }}
+                      // onOk={() => {
+                      //   if (pickerRef.current) {
+                      //     pickerRef.current.style.border = "2px solid #06b6d4"; 
+                      //   }
+                      // }}
+                      // onClose={() => {
+                      //   if (pickerRef.current) {
+                      //     pickerRef.current.style.border = "2px solid #06b6d4"; 
+                      //   }
+                      // }}
                     />
-
-                   {expectedDeliveryDate && expectedDeliveryDate[0] && expectedDeliveryDate[1] && (
-            <div style={{ marginTop: 15 }}>
-              <strong>From:</strong> {expectedDeliveryDate[0]?.toLocaleString()} <br />
-              <strong>To:</strong> {expectedDeliveryDate[1]?.toLocaleString()}
-            </div>
-          )}
 
                   </div>
 
@@ -582,7 +582,7 @@ setExpectedDeliveryDate([null, null]);
                     <select
                       value={unitRepairStatus}
                       onChange={(e) => setUnitRepairStatus(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={DropDownClass}
                     >
                       <option value="">Select Status</option>
                       {statusOptions.map((status) => (
@@ -711,7 +711,7 @@ setExpectedDeliveryDate([null, null]);
 
                         {/* Status */}
                         <td className={TableDataClass}>
-                          <span className={`px-2 py-1 rounded text-xs font-medium tracking-widest ${getStatusBadgeClass(user.unitRepairStatus, false)}`}>
+                          <span className={`px-3 py-2 rounded-xl text-xs font-medium tracking-widest ${getStatusBadgeClass(user.unitRepairStatus, true)}`}>
                             {capitalizeEachWord(user.unitRepairStatus?.replace(/_/g, ' '))}
                           </span>
                         </td>
@@ -720,23 +720,13 @@ setExpectedDeliveryDate([null, null]);
                         <td className={TableDataClass}>{user?.finalPrice ? `₹${user?.finalPrice}` : ""}</td>
 
                         {/* Created */}
-                        <td className={TableDataClass}>{user?.orderOn ? new Date(user?.orderOn)?.toLocaleDateString()?.replace(/\//g, "-") : ""}</td>
+                        <td className={TableDataClass}>
+                          {formatDate(user?.orderOn)}
+                        </td>
 
                         {/* Expected Delivery */}
                         <td className={TableDataClass}>
-                          {user?.expectedCompletedOn
-                            ? new Date(user?.expectedCompletedOn)
-                              .toLocaleString("en-GB", {
-                                year: "numeric",
-                                month: "2-digit",
-                                day: "2-digit",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: true,
-                              })
-                              .replace(",", "")
-                              .toUpperCase()
-                            : ""}
+                          {formatDate(user?.expectedCompletedOn)}
                         </td>
 
 
@@ -767,7 +757,7 @@ setExpectedDeliveryDate([null, null]);
                   ) : (
                     <tr>
                       <td colSpan={9} className="py-4 mx-auto text-center text-gray-500">
-                        {unitRepairStatus ? `No orders found for status: ${unitRepairStatus.replace(/_/g, ' ')}` : 'No orders found'}
+                        {unitRepairStatus ? `No orders found for status: ${capitalizeEachWord(unitRepairStatus).replace(/_/g, ' ')}` : 'No orders found'}
                       </td>
                     </tr>
                   )}
@@ -813,7 +803,7 @@ setExpectedDeliveryDate([null, null]);
                       <option value="">Select Status</option>
                       {statusOptions.map((status) => (
                         <option key={status} value={status}>
-                          {status.replace(/_/g, ' ')}
+                          {capitalizeEachWord(status).replace(/_/g, ' ')}
                         </option>
                       ))}
                     </select>
@@ -936,7 +926,7 @@ setExpectedDeliveryDate([null, null]);
                       {/* Right Side: Details Card */}
                       <div dir="rtl" className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 md:mt-0 md:ml-8 md:w-auto ">
 
-                        {!selectedOrderDetails?.onlineOrder && (
+                        {selectedOrderDetails?.onlineOrder && (
                           <button
                             onClick={() => setShowAssign(true)}
                             type='button'
@@ -1475,7 +1465,6 @@ setExpectedDeliveryDate([null, null]);
                 }`}
             >
 
-
               {/* Close */}
               <button
                 className="absolute top-4 right-5 text-2xl font-bold text-gray-500 hover:text-black"
@@ -1498,6 +1487,24 @@ setExpectedDeliveryDate([null, null]);
                   className={`${inputClass}`}
                   placeholder="Enter Email"
                 />
+
+                {/* Loader Spinner */}
+                {isEmailLoading && (
+                  <div className="flex justify-center items-center py-8">
+                    <div className="relative">
+                      <div
+                        className="w-16 h-16 border border-white rounded-full animate-spin"
+                        style={{ animationDuration: '2s' }}
+                      >
+                        <div
+                          className="absolute inset-0 border-3 border-transparent border-y-cyan-600 border-l-cyan-600 rounded-full animate-spin"
+                          style={{ animationDuration: '2s' }}
+                        />
+                      </div>
+                      <p className="text-center text-gray-600 mt-4">Loading Email...</p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Search Results Dropdown */}
                 {showSearchResults && searchResults.length > 0 && (
@@ -1528,7 +1535,7 @@ setExpectedDeliveryDate([null, null]);
                 )}
 
                 {/* No Results Found */}
-                {showSearchResults && searchResults.length === 0 && assignEmail.length >= 2 && (
+                {!isEmailLoading && showSearchResults && searchResults.length === 0 && assignEmail.length >= 1 && (
                   <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg p-4">
                     <p className="text-gray-500 text-center">No users found</p>
                   </div>

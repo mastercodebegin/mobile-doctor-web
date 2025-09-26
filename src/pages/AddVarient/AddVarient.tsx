@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, ShowVarientButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
+import { ClearFilter, DeleteClass, DeleteIcon, DropDownClass, EditClass, EditIcon, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, ShowVarientButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
 import Pagination from "../../helper/Pagination";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
@@ -10,6 +10,7 @@ import { GetAllColors } from "../AddColorName/ColorNameSlice";
 import { toast } from "react-toastify";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import IphoneImage from "../../assets/Laptop_Image.png";
+import { ArrowDown, ArrowUp } from "lucide-react";
 
 const AddVarient = () => {
  const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -497,7 +498,7 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
           <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
             <h1 className="font-bold text-2xl text-center mb-6">Please Select Modal Number</h1>
             <select 
-              className="w-full border rounded-md px-4 py-3 text-lg"
+              className={DropDownClass}
               value={selectedModalNumber}
               onChange={(e) => handleModalNumberSelect(e.target.value)}
             >
@@ -521,7 +522,7 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <select 
-                className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-[200px]"
+                className={DropDownClass}
                 value={selectedModalNumber}
                 onChange={(e) => handleModalNumberSelect(e.target.value)}
               >
@@ -535,9 +536,9 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
               {selectedModalNumber && (
                 <button 
                   onClick={handleClear}
-                  className="text-red-400 hover:text-red-600 text-sm bg-red-50 px-2 py-1 rounded"
+                  className={ClearFilter}
                 >
-                  Clear Filter
+                  Clear_Filter
                 </button>
               )}
             </div> 
@@ -619,8 +620,8 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
                             </button>
                           </td>
                           <td className={TableDataClass}>
-                            <button onClick={() => toggleSpecRow(openSpecRow === user?.id ? null : user?.id)} className={ShowVarientButtonClass}>
-                              {openSpecRow === user?.id ? 'Hide' : 'Show'} Specification
+                            <button onClick={() => toggleSpecRow(openSpecRow === user?.id ? null : user?.id)} className={`${EditClass}`}>
+                              {openSpecRow === user?.id ? <ArrowUp /> : <ArrowDown />} 
                             </button>
                           </td>
                         </tr>
@@ -646,12 +647,12 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
                                       <>
                                         {variantFields.map((field, i) => (
                                           <div key={i} className="p-4 bg-white rounded shadow-sm border border-gray-200">
-                                            <div className="text-sm font-medium text-green-600">{field?.label}</div>
+                                            <div className="text-sm font-medium text-cyan-600">{field?.label}</div>
                                             <div className="text-sm text-gray-800 mt-1">{field?.value}</div>
                                           </div>
                                         ))}
   <div className="p-4 bg-white rounded shadow-sm border border-gray-200">
-  <div className="text-sm font-medium text-green-600 mb-1">Image</div>
+  <div className="text-sm font-medium text-cyan-600 mb-1">Image</div>
   <div className="flex items-center gap-3 flex-wrap">
     <img 
       src={IphoneImage}
@@ -713,7 +714,7 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
     <div>
       <label className="block font-medium mb-1">Modal Number</label>
       <select
-        className="w-full border rounded-md px-4 py-3"
+        className={DropDownClass}
         name="ProductModalNumberPK"
         value={ProductModalNumberPK}
         onChange={handleModalNumberChange}
@@ -728,7 +729,7 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
     <div>
       <label className="block font-medium mb-1">Color</label>
       <select 
-        className="w-full border rounded-md px-4 py-3"
+        className={DropDownClass}
         name="colorId"
         value={variantData?.variantColors[0]?.colorName?.id || ""}
         onChange={handleColorChange}

@@ -17,11 +17,6 @@ const DatePicker = ({ value, onChange, sidebarMobileOpen }) => {
     setSelection(newSelection);
   };
 
-  const getToday = () => {
-  const today = new Date();
-  return today.toISOString().split("T")[0]; // yyyy-mm-dd
-};
-
 
   const formatDateInput = (date) => {
     if (!date) return '';
@@ -129,18 +124,7 @@ const DatePicker = ({ value, onChange, sidebarMobileOpen }) => {
           ></div>
           
           {/* Calendar */}
-          <div 
-          //   className={`absolute z-50 bg-white border border-gray-300 rounded-lg shadow-xl overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100
-          //   ${screenSize === 'small' 
-          //     ? 'fixed left-5 right-5 top-1/2 transform -translate-y-1/2 max-h-[90vh] w-[85vw]'
-          //     : screenSize === 'medium'
-          //     ? 'left-0 top-full mt-2 max-h-[90vh] w-[85vw]'
-          //     : screenSize === 'large'
-          //     ? 'top-full left-0 mt-2 max-h-[90vh] overflow-hidden overflow-x-auto w-[65vw]'
-          //     : 'top-full left-0 mt-2 max-h-[90vh] w-[65vw]'}
-          //   ${screenSize === 'medium-large' ? 'w-[900px]' : ''}
-          // `}
-
+          <div     
                 className={`absolute z-50 bg-white border border-gray-300 rounded-lg shadow-xl overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100
       ${screenSize === 'small' 
         ? 'fixed left-5 right-5 top-1/2 transform -translate-y-1/2 max-h-[90vh]'
@@ -150,13 +134,6 @@ const DatePicker = ({ value, onChange, sidebarMobileOpen }) => {
         ? 'top-full left-0 mt-2 max-h-[90vh] overflow-hidden overflow-x-auto w-full'
         : 'top-full left-0 mt-2 max-h-[90vh] w-full'}
     `}
-
-//     className={`absolute z-50 bg-white border border-gray-300 rounded-lg shadow-xl overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100
-//   ${screenSize === 'small' 
-//     ? 'fixed left-0 right-0 top-0 bottom-0 m-0 w-full h-full max-h-none'
-//     : 'top-full left-0 mt-2 w-[50vw] max-h-[90vh]'}
-// `}
-
           >
             <div className="h-full overflow-y-auto" style={{ maxHeight: screenSize === 'small' ? '90vh' : '90vh' }}>
               <DateRangePicker

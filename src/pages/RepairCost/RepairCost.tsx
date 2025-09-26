@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ConfirmationModal from "../../components/ConfirmationModal";
-import { ClearFilter, DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, SelectClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
+import { ClearFilter, DeleteClass, DeleteIcon, DropDownClass, EditClass, EditIcon, inputClass, DropDownClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
 import Pagination from "../../helper/Pagination";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
@@ -470,7 +470,7 @@ const RepairCost = () => {
             <div className="flex items-center gap-2">
               {/* Category Dropdown */}
               <select
-                className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-[150px]"
+                className={DropDownClass}
                 value={selectedCategory}
                 onChange={(e) => handleCategorySelect(e.target.value)}
               >
@@ -484,7 +484,7 @@ const RepairCost = () => {
 
               {/* Sub-Category Dropdown */}
               <select
-                className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-[150px] disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className={`${DropDownClass} disabled:bg-gray-100 disabled:cursor-not-allowed`}
                 value={selectedSubCategory}
                 onChange={(e) => handleSubCategorySelect(e.target.value)}
                 disabled={!selectedCategory}
@@ -503,7 +503,7 @@ const RepairCost = () => {
 
               {/* Modal Number Dropdown */}
               <select
-                className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-[150px] disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className={`${DropDownClass} disabled:bg-gray-100 disabled:cursor-not-allowed`}
                 value={selectedModalNumber}
                 onChange={(e) => handleModalNumberSelect(e.target.value)}
                 disabled={!selectedSubCategory}
@@ -522,7 +522,7 @@ const RepairCost = () => {
                   onClick={handleClearFilter}
                   className={ClearFilter}
                 >
-                  Clear Filter
+                  Clear_Filter
                 </button>
               )}
             </div>
@@ -667,7 +667,7 @@ const RepairCost = () => {
                   <label className="block font-medium mb-2">Select Category</label>
                   <select
                     name="category"
-                    className={SelectClass}
+                    className={DropDownClass}
                     onChange={handleChange}
                     value={formCategory}
                   >
@@ -683,7 +683,7 @@ const RepairCost = () => {
                   <label className="block font-medium mb-2">Select Sub-Category</label>
                   <select
                     name="subCategory"
-                    className={SelectClass}
+                    className={DropDownClass}
                     onChange={handleChange}
                     value={formSubCategory}
                     disabled={!formCategory}
@@ -700,7 +700,7 @@ const RepairCost = () => {
                   <label className="block font-medium mb-2">Select Modal Number</label>
                   <select
                     name="modalNumber"
-                    className={SelectClass}
+                    className={DropDownClass}
                     onChange={handleChange}
                     value={formModalNumber}
                     disabled={!formSubCategory}
@@ -717,7 +717,7 @@ const RepairCost = () => {
                   <label className="block font-medium mb-2">Select Product Part</label>
                   <select
                     name="productPart"
-                    className={SelectClass}
+                    className={DropDownClass}
                     onChange={handleChange}
                     value={formProductPart}
                     disabled={!formModalNumber}

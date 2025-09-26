@@ -46,7 +46,7 @@ totalCount,
             className={`w-8 h-8 text-white flex items-center justify-center rounded transition-colors duration-200 
               ${currentPage === page 
                 ? `${ThemeBackgroundColor}` 
-                : 'bg-gray-200 text-gray-600 hover:bg-gray-100'}`}
+                : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
           >
             {page}
           </button>

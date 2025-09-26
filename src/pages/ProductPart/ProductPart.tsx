@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
 import Pagination from '../../helper/Pagination';
-import { ClearFilter, DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, InventoryRefillUse, pageSize, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass, ThemeBackgroundColor } from '../../helper/ApplicationConstants';
+import { ClearFilter, DeleteClass, DeleteIcon, DropDownClass, EditClass, EditIcon, inputClass, InventoryRefillUse, pageSize, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass, ThemeBackgroundColor } from '../../helper/ApplicationConstants';
 import { toast } from 'react-toastify';
 import Loading from '../../components/Loading';
 import { GetAllCategory } from '../AddCategory/AddCategorySlice';
@@ -729,7 +729,7 @@ const ProductPart = () => {
             <select
               value={filterCategory ? JSON.stringify(filterCategory) : ""}
               onChange={(e) => handleFilterCategoryChange(e, 'filter')} // Add context parameter
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={DropDownClass}
             >
               <option value="" disabled>Filter by Category</option>
               {data?.map((category) => (
@@ -744,7 +744,7 @@ const ProductPart = () => {
               <select
                 value={filterSubCategory ? JSON.stringify(filterSubCategory) : ""}
                 onChange={(e) => handleFilterSubCategoryChange(e, 'filter')} // Add context parameter
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={DropDownClass}
               >
                 <option value="" disabled>Filter by SubCategory</option>
                 {SubCategoriesData?.filter(subCat => subCat.category?.id === filterCategory?.id)?.map((subCat) => (
@@ -760,7 +760,7 @@ const ProductPart = () => {
                 onClick={handleClearFilter}
                 className={ClearFilter}
               >
-                Clear Filter
+                Clear_Filter
               </button>
             )}
           </div>
@@ -939,7 +939,7 @@ const ProductPart = () => {
                     <select
                       value={filterCategory ? JSON.stringify(filterCategory) : ""}
                       onChange={(e) => handleFilterCategoryChange(e, 'modal')}
-                      className={`${inputClass} ${isEditMode ? "cursor-not-allowed bg-gray-100" : ""}`}
+                      className={`${DropDownClass} ${isEditMode ? "cursor-not-allowed bg-gray-100" : ""}`}
                       disabled={isEditMode}
                     >
                       <option value="" disabled>Select Category</option>
@@ -956,7 +956,7 @@ const ProductPart = () => {
                     <select
                       value={filterSubCategory ? JSON.stringify(filterSubCategory) : ""}
                       onChange={(e) => handleFilterSubCategoryChange(e, 'modal')}
-                      className={`${inputClass} ${isEditMode ? "cursor-not-allowed bg-gray-100" : ""}`}
+                      className={`${DropDownClass} ${isEditMode ? "cursor-not-allowed bg-gray-100" : ""}`}
                       disabled={isEditMode || !filterCategory}
                     >
                       <option value="" disabled>Select Sub Category</option>
@@ -976,7 +976,7 @@ const ProductPart = () => {
                         const selectedObject = JSON.parse(e.target.value);
                         setSelectedModel(selectedObject);
                       }}
-                      className={`${inputClass} ${isEditMode ? "cursor-not-allowed bg-gray-100" : ""}`}
+                      className={`${DropDownClass} ${isEditMode ? "cursor-not-allowed bg-gray-100" : ""}`}
                       disabled={isEditMode || !filterSubCategory}
                     >
                       <option value="" disabled>Select Model Number</option>
@@ -1001,7 +1001,7 @@ const ProductPart = () => {
                       const selectedObject = JSON.parse(e.target.value);
                       setSelectedProductPartLabel(selectedObject);
                     }}
-                    className={`${inputClass} ${isEditMode ? "cursor-not-allowed bg-gray-100" : ""}`}
+                    className={`${DropDownClass} ${isEditMode ? "cursor-not-allowed bg-gray-100" : ""}`}
                     disabled={isEditMode || !selectedModel}
                   >
                     <option value="" disabled>Select Product-Part-Label</option>

@@ -68,20 +68,3 @@
 .animate-shimmer {
   animation: shimmer 1.5s ease-in-out;
 }
-
-
-/* Remove RSuite validation red border */
-.rs-picker-toggle {
-  border: 1px solid #06b6d4 !important; /* cyan border */
-  box-shadow: none !important;
-}
-
-.rs-picker-toggle:hover,
-.rs-picker-toggle:focus,
-.rs-picker-toggle.rs-picker-toggle-active {
-  border: 1px solid #06b6d4 !important; /* cyan border on focus/hover */
-  box-shadow: none !important;
-}
-
-
-

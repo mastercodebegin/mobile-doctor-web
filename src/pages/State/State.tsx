@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import ConfirmationModal from '../../components/ConfirmationModal';
-import { ClearFilter, DeleteClass, DeleteIcon, EditClass, EditIcon, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from '../../helper/ApplicationConstants';
+import { ClearFilter, DeleteClass, DeleteIcon, DropDownClass, EditClass, EditIcon, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from '../../helper/ApplicationConstants';
 import Pagination from '../../helper/Pagination';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
@@ -183,7 +183,7 @@ const handleClearFilter = () =>{
                 <select
                   value={filterCountry || ""}
                   onChange={handleFilterCountryChange}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={DropDownClass}
                 >
                   <option value="" disabled >Filter By Country</option>
                   {countryData.map((item) => (
@@ -198,7 +198,7 @@ const handleClearFilter = () =>{
                               onClick={handleClearFilter}
                               className={ClearFilter}
                             >
-                              Clear Filter
+                              Clear_Filter
                             </button>
                   )}
               </div>
@@ -352,7 +352,7 @@ const handleClearFilter = () =>{
                     const selected = countryData.find(cat => cat.id.toString() === categoryId);
                     setSelectedCountry(selected || null);
                   }}
-                  className="border w-full p-3"
+                  className={DropDownClass}
                 >
                   <option value="">Select...</option>
                   {countryData.map((item) => (

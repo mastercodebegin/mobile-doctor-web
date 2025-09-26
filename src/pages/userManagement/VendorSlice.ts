@@ -99,7 +99,7 @@ localStorage.setItem("card", JSON.stringify(state.data))
       .addCase(GetVendorByEmail.fulfilled, (state ,action) =>{
         state.isLoading = false
         state.isSuccess = true
-        state.data = action.payload.responseDetails
+        state.data = action.payload.responseDetails || action.payload
         LocalStorageManager.saveData(STORAGE_KEYS.USER, action.payload);
       })
       .addCase(GetVendorByEmail.rejected, (state, action) =>{
