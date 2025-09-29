@@ -35,7 +35,7 @@ interface ModalIssues {
 const initialState: ModalIssues = {
   isLoading: false,
   isSuccess: false,
-  ModalIssuesData: storeData,
+  ModalIssuesData: storeData || [],
   Edit: {
     modalIssue: {
       id: 0,

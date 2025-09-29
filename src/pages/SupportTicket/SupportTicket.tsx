@@ -31,7 +31,7 @@ const SupportTicket = () => {
   const { SupportTicketData, isLoading, Edit } = useSelector((state: RootState) => state.SupportTicketSlice)
 
   const usersPerPage = 5;
-  const supportTicketArray = Array.isArray(SupportTicketData) ? SupportTicketData : SupportTicketData ? [SupportTicketData] : [];
+  const supportTicketArray = Array?.isArray(SupportTicketData) ? SupportTicketData : SupportTicketData ? [SupportTicketData] : [];
   const paginatedUsers = supportTicketArray?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage)
 
   const handleClearFilter = () => {
@@ -229,17 +229,17 @@ if(Edit?.isEdit && Edit?.supportTicket) {
                 {/* Table Body */}
                 <tbody className="bg-white divide-y divide-gray-200">
                   {paginatedUsers?.length > 0 ? (
-                    paginatedUsers.map((ticket, index) => (
+                    paginatedUsers?.map((ticket, index) => (
                     <tr
                           className={`transform transition-all duration-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-                            } ${hoveredRow === ticket.id ? 'bg-gray-50' : 'bg-white'}`}
+                            } ${hoveredRow === ticket?.id ? 'bg-gray-50' : 'bg-white'}`}
                           style={{ transitionDelay: `${index * 100}ms` }}
                           onMouseEnter={() => setHoveredRow(ticket.id)}
                           onMouseLeave={() => setHoveredRow(null)}
                         >
-                        <td className={TableDataClass}>{ticket.id}</td>
-                        <td className={TableDataClass}>{ticket.ticketNumber}</td>
-                        <td className={TableDataClass}>{ticket.userIssue}</td>
+                        <td className={TableDataClass}>{ticket?.id}</td>
+                        <td className={TableDataClass}>{ticket?.ticketNumber}</td>
+                        <td className={TableDataClass}>{ticket?.userIssue}</td>
                         <td className={TableDataClass}>
                           {/* <span
                             className={`px-2 py-1 text-xs font-semibold rounded-full
@@ -257,18 +257,18 @@ if(Edit?.isEdit && Edit?.supportTicket) {
                         </td>
                         <td className={TableDataClass}>
                           {ticket.createdBy
-                            ? `${ticket.createdBy.firstName} ${ticket.createdBy.lastName}`
+                            ? `${ticket?.createdBy?.firstName} ${ticket?.createdBy?.lastName}`
                             : '--'}
                         </td>
-                        <td className={TableDataClass}>{ticket.cssescription || '--'}</td>
-                        <td className={TableDataClass}>{ticket.seniorCSDescription || '--'}</td>
+                        <td className={TableDataClass}>{ticket?.cssescription || '--'}</td>
+                        <td className={TableDataClass}>{ticket?.seniorCSDescription || '--'}</td>
                         <td className={TableDataClass}>
                           <button onClick={() => handleEditUser(ticket)} className={EditClass}>
                             {EditIcon}
                           </button>
                         </td>
                         <td className={TableDataClass}>
-                          <button onClick={() => handleDeleteUser(ticket.id)} className={DeleteClass}>
+                          <button onClick={() => handleDeleteUser(ticket?.id)} className={DeleteClass}>
                             {DeleteIcon}
                           </button>
                         </td>
@@ -288,7 +288,7 @@ if(Edit?.isEdit && Edit?.supportTicket) {
             {/* Pagination */}
             <Pagination
               currentPage={currentPage}
-              totalCount={SupportTicketData.length}
+              totalCount={SupportTicketData?.length}
               itemsPerPage={usersPerPage}
               onPageChange={setCurrentPage}
             />

@@ -108,7 +108,7 @@ FORGOT_PASSWORD: 'user/updatePasswordByForgotPassword',
   UPDATE_VENDOR_PRODUCT:'/vendorProduct/updateStock/',
   ADD_COLOR:'color/addColor',
   GET_ALL_COLOR:'color/getAllColor',
-  ADD_VARIANT_COLOR:'/modalColor/create',
+  ADD_VARIANT_COLOR:'/variantColor/create',
   GET_ALL_VARIANT_COLOR:'/modalColor/getAllColor',
 
 

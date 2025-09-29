@@ -41,7 +41,7 @@ const MobileNumberPage = () => {
   const dispatch = useDispatch<AppDispatch>();
   const usersPerPage = 5;
   const displayData = selectedBrand ? BrandModalNumberData : filterSubCategory ? MobileNumberData : AllModalNumberData;
-  const paginatedUsers = displayData.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
+  const paginatedUsers = displayData?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 
   const getSelectedBrandName = () => {
     if (!selectedBrand) return "";
@@ -177,7 +177,7 @@ const MobileNumberPage = () => {
       }));
     }
     else if (name === "brand") {
-      const selectedBrand = BrandData.find(brand => brand.id == value || brand.id === parseInt(value));
+      const selectedBrand = BrandData?.find(brand => brand.id == value || brand.id === parseInt(value));
 
       setFormData((prev) => ({
         ...prev,
@@ -351,7 +351,7 @@ const MobileNumberPage = () => {
       return;
     }
 
-    if (isEditMode && Edit.modalNumber?.id) {
+    if (isEditMode && Edit?.modalNumber?.id) {
       try {
         const updateData = {
           id: Edit.modalNumber.id,
@@ -656,9 +656,9 @@ const MobileNumberPage = () => {
                                   [variant.id]: !prev[variant.id],
                                 }))
                               }
-                              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                              className={EditClass}
                             >
-                              {showImages?.[variant.id] ? 'Hide Images' : 'Show Images'}
+                              {showImages?.[variant.id] ? <ArrowUpIcon /> : <ArrowDownIcon />}
                             </button>
                           </td>
                         </tr>
@@ -841,7 +841,7 @@ const MobileNumberPage = () => {
               <h2 className="text-xl font-semibold">
                 {selectedBrand
                   ? `${getSelectedBrandName()} Models (${displayData.length} total)`
-                  : `All Models (${displayData.length} total)`
+                  : `All Models (${displayData?.length} total)`
                 }
               </h2>
             </div>
@@ -865,7 +865,7 @@ const MobileNumberPage = () => {
 
                 {/* Table Body */}
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedUsers.length === 0 ? (
+                  {paginatedUsers?.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="text-center py-8">
                         <div className="text-gray-500">
@@ -877,7 +877,7 @@ const MobileNumberPage = () => {
                       </td>
                     </tr>
                   ) : (
-                    paginatedUsers.map((user, index) => (
+                    paginatedUsers?.map((user, index) => (
                       <React.Fragment key={user?.id}>
                         <tr
                           className={`transform transition-all duration-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
@@ -917,7 +917,7 @@ const MobileNumberPage = () => {
                           </td>
                           <td className={TableDataClass}>
                             <button
-                              onClick={() => handleVariantToggle(user.id)}
+                              onClick={() => handleVariantToggle(user?.id)}
                               className={`${EditClass}`}
                             >
                               {showVariantId === user?.id ? <ArrowUpIcon /> : <ArrowDownIcon />}
@@ -938,7 +938,7 @@ const MobileNumberPage = () => {
             {displayData.length > 0 && (
               <Pagination
                 currentPage={currentPage}
-                totalCount={displayData.length}
+                totalCount={displayData?.length}
                 itemsPerPage={usersPerPage}
                 onPageChange={(page) => setCurrentPage(page)}
               />

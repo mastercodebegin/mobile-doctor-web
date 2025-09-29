@@ -26,7 +26,7 @@ const State = () => {
   
     const dispatch = useDispatch<AppDispatch>()
     const usersPerPage = 5; 
-    const paginatedUsers = stateData.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
+    const paginatedUsers = stateData?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 
     const handleFilterCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) =>{
 const selectedValue = e.target.value; // dropdown se current value
@@ -237,11 +237,12 @@ const handleClearFilter = () =>{
                 </thead>
                 {/* Table Body */}
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedUsers.map((user, index) => (
+                  {paginatedUsers?.length > 0 ? (
+  paginatedUsers?.map((user, index) => (
                     <tr
-                      key={user.id}
+                      key={user?.id}
                       className={`transform transition-all duration-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-                        } ${hoveredRow === user.id ? 'bg-gray-50' : 'bg-white'}`}
+                        } ${hoveredRow === user?.id ? 'bg-gray-50' : 'bg-white'}`}
                       style={{ transitionDelay: `${index * 100}ms` }}
                       onMouseEnter={() => setHoveredRow(user?.id)}
                       onMouseLeave={() => setHoveredRow(null)}
@@ -249,32 +250,32 @@ const handleClearFilter = () =>{
 
                       {/* Id */}
                       <td className={TableDataClass}>
-                        {user.id}
+                        {user?.id}
                       </td>
 
                       {/* Name */}
                       <td className={TableDataClass}>
-                        <div className="text-sm font-medium text-gray-600">{user.name}</div>
+                        <div className="text-sm font-medium text-gray-600">{user?.name}</div>
                       </td>
 
                       <td className={TableDataClass}>
                         <div className="text-sm font-medium text-gray-600">
                           {(() => {
                             // Category object check
-                            if (user.countries && user.countries.name) {
+                            if (user?.countries && user?.countries?.name) {
                               return (
                                 <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                                  {user.countries.name}
+                                  {user?.countries?.name}
                                 </span>
                               );
                             }
 
                             if (user.countries && countryData.length > 0) {
-                              const category = countryData.find(cat => cat.id === user.countries.id);
+                              const category = countryData?.find(cat => cat?.id === user?.countries?.id);
                               if (category) {
                                 return (
                                   <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
-                                    {category.name}
+                                    {category?.name}
                                   </span>
                                 );
                               }
@@ -307,7 +308,14 @@ const handleClearFilter = () =>{
                         </button>
                       </td>
                     </tr>
-                  ))}
+                  ))
+) : (
+  <tr>
+    <td colSpan={8} className="text-center py-4 text-gray-500">
+      No State Found
+    </td>
+  </tr>
+)}
                 </tbody>
               </table>
             </div>
@@ -315,7 +323,7 @@ const handleClearFilter = () =>{
             {/* Reusable Pagination Component */}
             <Pagination
               currentPage={currentPage}
-              totalCount={stateData.length}
+              totalCount={stateData?.length}
               itemsPerPage={usersPerPage}
               onPageChange={(page) => setCurrentPage(page)}
             />

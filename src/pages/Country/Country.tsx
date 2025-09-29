@@ -24,7 +24,7 @@ const Country = () => {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
 
   const usersPerPage = 5;
-  const roleArray = Array.isArray(countryData) ? countryData : countryData ? [countryData] : [];
+  const roleArray = Array?.isArray(countryData) ? countryData : countryData ? [countryData] : [];
   const paginatedUsers = roleArray?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 
   const handleClearFilter = () => {
@@ -48,7 +48,7 @@ const Country = () => {
     }
 
     if (!country.trim()) {
-      alert("Please enter a country name");
+      toast.warn("Please enter a country name");
       return;
     }
 
@@ -89,6 +89,7 @@ const Country = () => {
     setShowModal(false);
     setCountry("");
     setIsEditMode(false);
+    dispatch(restore())
   };
 
   const handleConfirmSave = () => {
@@ -210,7 +211,8 @@ const Country = () => {
                 </thead>
                 {/* Table Body */}
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedUsers.map((user, index) => (
+                  {paginatedUsers?.length > 0 ? (
+  paginatedUsers?.map((user, index) => (
 
                     <tr
                       key={user?.id || `${user?.name}-${index}`}
@@ -243,7 +245,14 @@ const Country = () => {
                         </button>
                       </td>
                     </tr>
-                  ))}
+                  ))
+) : (
+  <tr>
+    <td colSpan={8} className="text-center py-4 text-gray-500">
+      No Country Found
+    </td>
+  </tr>
+)}
                 </tbody>
               </table>
             </div>
@@ -252,7 +261,7 @@ const Country = () => {
             {/* Reusable Pagination Component */}
             <Pagination
               currentPage={currentPage}
-              totalCount={countryData.length}
+              totalCount={countryData?.length}
               itemsPerPage={usersPerPage}
               onPageChange={(page) => setCurrentPage(page)}
             />

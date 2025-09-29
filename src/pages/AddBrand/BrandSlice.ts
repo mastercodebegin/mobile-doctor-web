@@ -14,7 +14,7 @@ interface Brand {
 isLoading : boolean;
 isSuccess : boolean;
 isError : boolean;
-message : string;
+message : any;
 BrandData : User[];
 Edit : {brand : User | {name : string}, isEdit : boolean};
 }
@@ -24,7 +24,7 @@ const initialState : Brand = {
     isSuccess : false,
     isError : false,
     message : "",
-    BrandData : storeData,
+    BrandData : storeData || [],
     Edit : {brand : {name : ""}, isEdit : false}
 }
 
@@ -52,7 +52,7 @@ const BrandSlice = createSlice({
                         isSuccess: false,
                         isError: false,
                         message: "",
-                        BrandData: storeData ? JSON.parse(storeData) : [],
+                        BrandData: storeData ? storeData : [],
                         Edit: { category: {}, isEdit: false }
                     }
                 }
@@ -135,6 +135,7 @@ export const GetAllBrand = createAsyncThunk('FETCH/BRANDS' , async (_, thunkAPI)
 // Create Brand Thunk
 export const CreateBrand = createAsyncThunk("CREATE/BRAND" , async (newCategory, thukAPI) =>{
     try {
+        console.log(newCategory)
         const response = await postRequestMethod(newCategory , UrlConstants.ADD_BRAND)
         console.log(response)
         return response

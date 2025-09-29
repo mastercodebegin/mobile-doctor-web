@@ -80,7 +80,7 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
     return brand?.name || "";
   };
 
-  const paginatedUsers = filteredVariants.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
+  const paginatedUsers = filteredVariants?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 
   // Handle input changes for basic fields
   const handleInputChange = (e) => {
@@ -573,7 +573,7 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
 
                 {/* Table Body */}
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedUsers.length === 0 ? (
+                  {paginatedUsers?.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="text-center py-8">
                         <div className="text-gray-500">
@@ -585,7 +585,7 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
                       </td>
                     </tr>
                   ) : (
-                    paginatedUsers.map((user, index) => {
+                    paginatedUsers?.map((user, index) => {
                      
                        // Add this safety check
   if (!user || !user.id) {
@@ -619,7 +619,7 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
                              {DeleteIcon}
                             </button>
                           </td>
-                          <td className={TableDataClass}>
+                          <td className={`${TableDataClass}`}>
                             <button onClick={() => toggleSpecRow(openSpecRow === user?.id ? null : user?.id)} className={`${EditClass}`}>
                               {openSpecRow === user?.id ? <ArrowUp /> : <ArrowDown />} 
                             </button>

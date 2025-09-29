@@ -79,7 +79,7 @@ interface Branch {
 const initialState: Branch = {
     isLoading: false,
     isSuccess: false,
-    branchData: storeData,
+    branchData: storeData || [],
 Edit: {
     isEdit: false,
     branch: {
@@ -120,7 +120,6 @@ const BranchSlice = createSlice({
          Restore: (state) =>{
             return {
                 ...state,
-                branchData: [],
                 Edit: {isEdit: false, branch: null}
             }
          }

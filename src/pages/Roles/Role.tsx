@@ -24,8 +24,8 @@ const Role = () => {
     const { roleData, isLoading, Edit } = useSelector((state: RootState) => state.RoleSlice)
 
     const usersPerPage = 5;
-    const roleArray = Array.isArray(roleData) ? roleData : roleData ? [roleData] : [];
-    const paginatedUsers = roleArray.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
+    const roleArray = Array?.isArray(roleData) ? roleData : roleData ? [roleData] : [];
+    const paginatedUsers = roleArray?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 
 
     const handleClearFilter = () => {
@@ -83,9 +83,14 @@ const Role = () => {
     }
 
     const handleCloseModal = () => {
-        setShowModal(false);
-        setIsEditMode(false)
+        setShowConfirmModal(false);
+        setCurrentPage(1)
+        setFilterNumber('');
+        setSearchByTicket(false);
+        setIsEditMode(false);
         setCategory("")
+        setShowModal(false);
+        dispatch(restore())
     }
 
     const handleConfirmSave = () => {
@@ -112,8 +117,9 @@ const Role = () => {
     const handleEditUser = (user: User) => {
         console.log(`Edit user with ID: ${user}`);
         dispatch(Update(user))
-        setShowModal(true)
         setCategory(user.name)
+        setIsEditMode(true);
+        setShowModal(true);
     };
 
 
@@ -191,7 +197,10 @@ const Role = () => {
                                 </thead>
                                 {/* Table Body */}
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {paginatedUsers?.map((user, index) => (
+                                  
+
+                                    {paginatedUsers?.length > 0 ? (
+    paginatedUsers?.map((user, index) => (
 
                                         <tr
                                             key={user?.id || `${user.name}-${index}`}
@@ -216,7 +225,17 @@ const Role = () => {
                                                 </button>
                                             </td>
                                         </tr>
-                                    ))}
+                                    ))
+) : (
+  <tr>
+    <td colSpan={3} className="text-center py-4 text-gray-500">
+      No Roles Found
+    </td>
+  </tr>
+)}
+
+
+
                                 </tbody>
                             </table>
                         </div>
@@ -224,7 +243,7 @@ const Role = () => {
                         {/* Reusable Pagination Component */}
                         <Pagination
                             currentPage={currentPage}
-                            totalCount={roleData.length}
+                            totalCount={roleData?.length}
                             itemsPerPage={usersPerPage}
                             onPageChange={(page) => setCurrentPage(page)}
                         />

@@ -67,7 +67,6 @@ Update: (state, action) =>{
 Restore: (state) =>{
     return {
         ...state,
-        couponData: [],
         Edit: {isEdit: false, coupon: null}
     }
 }

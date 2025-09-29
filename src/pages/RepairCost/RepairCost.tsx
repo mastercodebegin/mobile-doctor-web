@@ -51,7 +51,7 @@ const RepairCost = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   const usersPerPage = 5;
-  const paginatedUsers = RepairCostData.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
+  const paginatedUsers = RepairCostData?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 
   const getDefaultFormData = () => ({
     price: '',
@@ -560,7 +560,7 @@ const RepairCost = () => {
 
                 {/* Table Body */}
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedUsers.length === 0 ? (
+                  {paginatedUsers?.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="text-center py-8">
                         <div className="text-gray-500">
@@ -572,7 +572,7 @@ const RepairCost = () => {
                       </td>
                     </tr>
                   ) : (
-                    paginatedUsers.map((user, index) => {
+                    paginatedUsers?.map((user, index) => {
                       if (!user || !user.id) {
                         return null;
                       }

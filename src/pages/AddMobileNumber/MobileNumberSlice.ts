@@ -3,7 +3,6 @@ import { getRequestMethod, getRequestMethodWithParam, postRequestMethod, putRequ
 import { UrlConstants } from "../../util/practice/UrlConstants";
 import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
-const storedData = localStorage.getItem("Modal-Numbers")
 const storeData = LocalStorageManager.getData(STORAGE_KEYS.MODAL_NUMBER);
 
 // ✅ Product Specification (as per given API response)
@@ -108,7 +107,7 @@ const initialState: MobileNumber = {
   viewVariant: {
 isLoading: false,
 isSuccess: false,
-data: storeData,
+data: storeData || [],
   },
   Edit: {
     modalNumber: {

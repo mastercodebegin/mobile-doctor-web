@@ -5,7 +5,7 @@ import Loading from "../../components/Loading"
 import ConfirmationModal from "../../components/ConfirmationModal"
 import Pagination from "../../helper/Pagination"
 import { AppDispatch, RootState } from "../../redux/store"
-import { CreateColor, GetAllColors, Remove, restore, SetInitialData, Update, UpdateColorName } from "./ColorNameSlice"
+import { CreateColor, GetAllColors, Remove, restore, Update, UpdateColorName } from "./ColorNameSlice"
 import { toast } from "react-toastify"
 
 const ColorName = () => {
@@ -13,7 +13,6 @@ const ColorName = () => {
 const [showConfirmModal , setShowConfirmModal] = useState(false)
 
 const {colorData , isLoading , Edit} = useSelector((state : RootState) => state.ColorNameSlice)
-console.log(colorData)
 const dispatch = useDispatch<AppDispatch>()
 const [showModal , setShowModal] = useState(false)
 const [colorName, setColorName] = useState("")
@@ -22,11 +21,11 @@ const [isEditMode , setIsEditMode] = useState(false)
 const [currentPage , setCurrentPage] = useState(1);
 const [hoveredRow, setHoveredRow] = useState<number | null>(null);
 const usersPerPage = 5; 
-const paginatedUsers = colorData.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
+const paginatedUsers = colorData?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 
 const handleSaveClick = async () => {
     if (!colorCodeName.trim() || !colorName.trim()) {
-        alert("Please Enter Full Details!!");
+        toast.warn("Please Enter Full Details!!");
         return;
     }
 
@@ -64,6 +63,7 @@ const handleCloseModal = () =>{
     setIsEditMode(false);
     setColorName("");
     setColorCodeName("");
+    dispatch(restore(null))
 
 }
 
@@ -88,6 +88,7 @@ const handleConfirmSave = () => {
     })
     .catch((err: any) => {
       toast.error("Color Name Creation Failed" , err);
+      console.log("Color Name Creation Failed Reason :----" , err)
     });
 };
 
@@ -118,11 +119,6 @@ const handleDeleteUser = async (id : string) =>{
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    setIsLoaded(true);
-        dispatch(GetAllColors())
-  }, [dispatch]);
-
-  useEffect(() => {
     if(Edit.isEdit && Edit.Color){
         setIsEditMode(true);
         setColorName(Edit?.Color?.color || "");
@@ -138,7 +134,7 @@ const handleDeleteUser = async (id : string) =>{
   useEffect(() => {
     setIsLoaded(true);
     dispatch(GetAllColors());
-}, [dispatch]);
+}, []);
 
     {isLoading && <Loading overlay={true} />}
 
@@ -181,7 +177,8 @@ const handleDeleteUser = async (id : string) =>{
                 </thead>
                 {/* Table Body */}
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedUsers.map((user, index) => (
+                  {paginatedUsers?.length > 0 ? (
+  paginatedUsers?.map((user, index) => (
 
                     <tr
                       key={user?.id || `${user?.color}-${index}`}
@@ -219,7 +216,14 @@ const handleDeleteUser = async (id : string) =>{
                         </button>
                       </td>
                     </tr>
-                  ))}
+                  ))
+) : (
+  <tr>
+    <td colSpan={3} className="text-center py-4 text-gray-500">
+      No Color Found
+    </td>
+  </tr>
+)}
                 </tbody>
               </table>
             </div>
@@ -228,7 +232,7 @@ const handleDeleteUser = async (id : string) =>{
             {/* Reusable Pagination Component */}
             <Pagination
               currentPage={currentPage}
-              totalCount={colorData.length}
+              totalCount={colorData?.length}
               itemsPerPage={usersPerPage}
               onPageChange={(page) => setCurrentPage(page)}
             />

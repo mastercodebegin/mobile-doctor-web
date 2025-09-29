@@ -18,7 +18,6 @@ const UserManagement = () => {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [openSpecRow, setOpenSpecRow] = useState(null);
-  // const [openSpecImgRow, setOpenSpecImgRow] = useState(null);
   const [searchByEmail, setSearchByEmail] = useState(false);
   const [filterEmail, setFilterEmail] = useState<any>('')
   const [filterStatus, setFilterStatus] = useState<string>('');
@@ -49,9 +48,32 @@ const UserManagement = () => {
   const handleNext = () => setActiveStep((s) => Math.min(s + 1, steps.length - 1));
   const handleBack = () => setActiveStep((s) => Math.max(s - 1, 0));
 
+  // Add just above your return (
+const isCurrentStepValid = () => {
+  if (activeStep === 0) {
+    // Role step: "role" must be filled and have no error
+    return !!formData.role && !errors.role;
+  }
+  if (activeStep === 1) {
+    // Basic Info step
+    const selectedRole = roleData?.find(role => +role.id === +formData.role);
+    const isManager = selectedRole?.id === RoleIds.manager;
+    const baseFields = [
+      "firstName", "lastName", "mobile", "email", "panCard", "aadharNumber",
+      "homeAddress", "pinCode", "state", "city"
+    ];
+    const requiredFields = isManager
+      ? [...baseFields, "businessName", "businessAddress"]
+      : baseFields;
+    return requiredFields.every(field => formData[field] && !errors[field]);
+  }
+  return false;
+};
+
+
 
   const usersPerPage = 5;
-  const roleArray = Array.isArray(data) ? data : data ? [data] : [];
+  const roleArray = Array?.isArray(data) ? data : data ? [data] : [];
   const paginatedUsers = roleArray?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 
   // Role Filter
@@ -81,10 +103,6 @@ const UserManagement = () => {
   const toggleSpecRow = (id: any) => {
     setOpenSpecRow(openSpecRow === id ? null : id);
   };
-
-  // const toggleSpecImgRow = (id: any) => {
-  //   setOpenSpecImgRow(openSpecImgRow === id ? null : id);
-  // };
 
   const handleFilterStatusChange = (e: any) => {
     const selectedStatus = e.target.value;
@@ -555,7 +573,6 @@ const UserManagement = () => {
           setCurrentPage(1);
           dispatch(GetAllVendors());
           setOpenSpecRow(null);
-          setOpenSpecImgRow(null);
           setFormData({});
           setFrontDoc(null);
           setBackDoc(null);
@@ -797,7 +814,6 @@ const UserManagement = () => {
                                                         className="w-24 h-24 object-contain border border-gray-200 rounded-md mb-2 cursor-pointer hover:opacity-80 transition-opacity"
                                                         onClick={() => setSelectedImage(`https://shopax.s3.eu-north-1.amazonaws.com/${doc?.imageName}`)}
                                                       />
-                                                      <div className="text-xs text-gray-600">{doc?.idtype}</div>
                                                     </div>
                                                   ))}
                                                 </div>
@@ -869,38 +885,38 @@ const UserManagement = () => {
               </button>
 
               {searchByEmail ? (
-<>
-                <div className="mb-6">
-                  <label className="block text-lg font-medium mb-2">Enter Email</label>
-                  <input
-                    type="email"
-                    value={filterEmail}
-                    onChange={(e) => setFilterEmail(e.target.value)}
-                    className={`${inputClass} ${filterEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(filterEmail) ? 'border-red-500' : ''}`}
-                    placeholder="Enter Email"
-                  />
-                  {filterEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(filterEmail) && (
-                    <div className="text-red-500 text-xs mt-1">
-                      Please enter a valid email address
-                    </div>
-                  )}
-                </div>
-                              {/*Action  Buttons */}
-              <div className="flex justify-end space-x-4 mt-4">
-                <button type="button" onClick={handleCloseModal} className={ShowModelCloseButtonClass}>
-                  Close
-                </button>
-                <button
-                  onClick={handleSaveClick}
-                  type="submit"
-                  disabled={isLoading}
-                  className={SubmitButtonClass}>
-                  {isEditMode ? 'Update' : 'Save'}
-                </button>
-              </div>
-</>
+                <>
+                  <div className="mb-6">
+                    <label className="block text-lg font-medium mb-2">Enter Email</label>
+                    <input
+                      type="email"
+                      value={filterEmail}
+                      onChange={(e) => setFilterEmail(e.target.value)}
+                      className={`${inputClass} ${filterEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(filterEmail) ? 'border-red-500' : ''}`}
+                      placeholder="Enter Email"
+                    />
+                    {filterEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(filterEmail) && (
+                      <div className="text-red-500 text-xs mt-1">
+                        Please enter a valid email address
+                      </div>
+                    )}
+                  </div>
+                  {/*Action  Buttons */}
+                  <div className="flex justify-end space-x-4 mt-4">
+                    <button type="button" onClick={handleCloseModal} className={ShowModelCloseButtonClass}>
+                      Close
+                    </button>
+                    <button
+                      onClick={handleSaveClick}
+                      type="submit"
+                      disabled={isLoading}
+                      className={SubmitButtonClass}>
+                      {isEditMode ? 'Update' : 'Save'}
+                    </button>
+                  </div>
+                </>
               ) : (
-                       <>
+                <>
                   {/* Stepper Header - Circles with Connecting Lines */}
                   <div className="flex items-center justify-between w-full mb-8">
                     {/* Step 1 */}
@@ -938,12 +954,13 @@ const UserManagement = () => {
                       </span>
                     </div>
                   </div>
+
                   <form>
                     {activeStep === 0 && (
                       // Step 1: Role selection
                       <div className="mb-6">
                         <label className="block font-medium mb-2">Select Role</label>
-                        <select name="role" value={formData.role} onChange={handleInputChange} onBlur={handleFieldBlur} className={DropDownClass}>
+                        <select name="role" value={formData.role} onChange={handleInputChange} onBlur={handleFieldBlur} className={DropDownClass} required>
                           <option value="">Select Role</option>
                           {filteredRoles?.map(role => (
                             <option key={role.id} value={role.id}>{role.name}</option>
@@ -963,6 +980,7 @@ const UserManagement = () => {
                             value={formData.firstName || ''}
                             onChange={handleInputChange}
                             onBlur={handleFieldBlur}
+                            required
                             placeholder="First name"
                             className={`input ${errors.firstName && touched.firstName ? 'border-red-500' : ''}`}
                           />
@@ -975,6 +993,7 @@ const UserManagement = () => {
                             value={formData.lastName || ''}
                             onChange={handleInputChange}
                             onBlur={handleFieldBlur}
+                            required
                             placeholder="Last name"
                             className={`input ${errors.lastName && touched.lastName ? 'border-red-500' : ''}`}
                           />
@@ -987,6 +1006,7 @@ const UserManagement = () => {
                             value={formData.mobile || ''}
                             onChange={handleInputChange}
                             onBlur={handleFieldBlur}
+                            required
                             placeholder="Mobile"
                             className={`input ${errors.mobile && touched.mobile ? 'border-red-500' : ''}`}
                             maxLength={10}
@@ -1000,6 +1020,7 @@ const UserManagement = () => {
                             value={formData.email || ''}
                             onChange={handleInputChange}
                             onBlur={handleFieldBlur}
+                            required
                             placeholder="Email"
                             type="email"
                             className={`input ${errors.email && touched.email ? 'border-red-500' : ''}`}
@@ -1013,6 +1034,7 @@ const UserManagement = () => {
                             value={formData.panCard || ''}
                             onChange={handleInputChange}
                             onBlur={handleFieldBlur}
+                            required
                             placeholder="PAN Card Number (e.g., ABCDE1234F)"
                             className={`input ${errors.panCard && touched.panCard ? 'border-red-500' : ''}`}
                             maxLength={10}
@@ -1027,6 +1049,7 @@ const UserManagement = () => {
                             value={formData.homeAddress || ''}
                             onChange={handleInputChange}
                             onBlur={handleFieldBlur}
+                            required
                             placeholder="Home Address"
                             className={`input ${errors.homeAddress && touched.homeAddress ? 'border-red-500' : ''}`}
                           />
@@ -1039,6 +1062,7 @@ const UserManagement = () => {
                             value={formData.aadharNumber || ''}
                             onChange={handleInputChange}
                             onBlur={handleFieldBlur}
+                            required
                             placeholder="Aadhar Number"
                             className={`input ${errors.aadharNumber && touched.aadharNumber ? 'border-red-500' : ''}`}
                             maxLength={12}
@@ -1052,6 +1076,7 @@ const UserManagement = () => {
                             value={formData.pinCode || ''}
                             onChange={handleInputChange}
                             onBlur={handleFieldBlur}
+                            required
                             placeholder="Pincode"
                             className={`input ${errors.pinCode && touched.pinCode ? 'border-red-500' : ''}`}
                             maxLength={6}
@@ -1066,6 +1091,7 @@ const UserManagement = () => {
                             value={formData.state?.id || ""}
                             onBlur={handleStateBlur}  // Add this line
                             onChange={handleStateChange}
+                            required
                           >
                             <option value="">Select State</option>
                             {stateData.map((item) => (
@@ -1085,6 +1111,7 @@ const UserManagement = () => {
                             value={formData.city?.id || ""}
                             onBlur={handleCityBlur}
                             disabled={!formData.state}
+                            required
                             onChange={handleCityChange}  // Change from inline function to separate handler
                           >
                             <option value="">Select City</option>
@@ -1366,34 +1393,47 @@ const UserManagement = () => {
 
                   {/*Action  Buttons */}
                   <div className="mt-6 flex justify-between">
-                    {activeStep === 0 ? (
-                      <button
-                        type="button"
-                        onClick={handleCloseModal}
-                        className={ShowModelCloseButtonClass}
-                      >
-                        Close
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={handleBack}
-                        className={ShowModelCloseButtonClass}
-                      >
-                        Back
-                      </button>
-                    )}
-                    {activeStep < steps.length - 1
-                      ? <button type="button" onClick={handleNext} className={SubmitButtonClass}>Next</button>
-                      : <button
-                        onClick={handleSaveClick}
-                        type="submit"
-                        disabled={isLoading}
-                        className={SubmitButtonClass}>
-                        {isEditMode ? 'Update' : 'Continue'}
-                      </button>
-                    }
-                  </div>
+  {/* Back/Close buttons */}
+  {activeStep === 0 && (
+    <button
+      type="button"
+      onClick={handleCloseModal}
+      className={ShowModelCloseButtonClass}
+    >
+      Close
+    </button>
+  )}
+  {activeStep > 0 && (
+    <button
+      type="button"
+      onClick={handleBack}
+      className={ShowModelCloseButtonClass}
+    >
+      Back
+    </button>
+  )}
+
+  {/* Next or Submit button */}
+  {activeStep < steps.length - 1 ? (
+    <button
+      type="button"
+      onClick={handleNext}
+      className={SubmitButtonClass}
+      disabled={!isCurrentStepValid()}  
+    >
+      Next
+    </button>
+  ) : (
+    <button
+      onClick={handleSaveClick}
+      type="submit"
+      disabled={isLoading}
+      className={SubmitButtonClass}
+    >
+      {isEditMode ? "Update" : "Continue"}
+    </button>
+  )}
+</div>
 
                 </>
               )}

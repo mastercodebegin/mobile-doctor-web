@@ -23,12 +23,12 @@ const AddBrand = () => {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
 
   const usersPerPage = 5;
-  const paginatedUsers = BrandData.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
+  const paginatedUsers = BrandData?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 
 
   const handleSaveClick = () => {
     if (!category.trim()) {
-      alert("Please enter a Brand name.");
+      toast.warn("Please enter a Brand name.");
       return;
     }
 
@@ -65,6 +65,7 @@ const AddBrand = () => {
     setShowModal(false);
     setIsEditMode(false)
     setCategory("")
+    dispatch(restore(null))
   }
 
   const handleConfirmSave = () => {
@@ -155,21 +156,22 @@ const AddBrand = () => {
                 </thead>
                 {/* Table Body */}
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedUsers.map((user, index) => (
+                  {paginatedUsers?.length > 0 ? (
+  paginatedUsers.map((user, index) => (
 
                     <tr
                       key={user?.id || `${user.name}-${index}`}
                       className={`transform transition-all duration-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-                        } ${hoveredRow === user.id ? 'bg-gray-50' : 'bg-white'}`}
+                        } ${hoveredRow === user?.id ? 'bg-gray-50' : 'bg-white'}`}
                       style={{ transitionDelay: `${index * 100}ms` }}
-                      onMouseEnter={() => setHoveredRow(user.id)}
+                      onMouseEnter={() => setHoveredRow(user?.id)}
                       onMouseLeave={() => setHoveredRow(null)}
                     >
                       <td className={TableDataClass}>
-                        {user.id}
+                        {user?.id}
                       </td>
                       <td className="py-4 px-6 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-600">{user.name}</div>
+                        <div className="text-sm font-medium text-gray-600">{user?.name}</div>
                       </td>
                       <td className={TableDataClass}>
                         <button
@@ -181,14 +183,21 @@ const AddBrand = () => {
                       </td>
                       <td className={TableDataClass}>
                         <button
-                          onClick={() => handleDeleteUser(user.id)}
+                          onClick={() => handleDeleteUser(user?.id)}
                           className={DeleteClass}
                         >
                          {DeleteIcon}
                         </button>
                       </td>
                     </tr>
-                  ))}
+                  ))
+) : (
+  <tr>
+    <td colSpan={8} className="text-center py-4 text-gray-500">
+      No Brand Found
+    </td>
+  </tr>
+)}
                 </tbody>
               </table>
             </div>
@@ -196,7 +205,7 @@ const AddBrand = () => {
             {/* Reusable Pagination Component */}
             <Pagination
               currentPage={currentPage}
-              totalCount={BrandData.length}
+              totalCount={BrandData?.length}
               itemsPerPage={usersPerPage}
               onPageChange={(page) => setCurrentPage(page)}
             />

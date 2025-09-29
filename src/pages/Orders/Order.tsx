@@ -680,7 +680,7 @@ const Order = ({ sidebarMobileOpen }) => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedUsers.length > 0 ? (
+                  {paginatedUsers?.length > 0 ? (
                     paginatedUsers?.map((user, index) => (
                       <tr
                         key={user?.id}
@@ -770,7 +770,7 @@ const Order = ({ sidebarMobileOpen }) => {
             {/* Reusable Pagination Component */}
             <Pagination
               currentPage={currentPage}
-              totalCount={Orders.length}
+              totalCount={Orders?.length}
               itemsPerPage={usersPerPage}
               onPageChange={(page) => setCurrentPage(page)}
             />

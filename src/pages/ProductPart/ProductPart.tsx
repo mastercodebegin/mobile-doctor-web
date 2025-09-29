@@ -48,7 +48,7 @@ const ProductPart = () => {
   const { MobileNumberData } = useSelector((state: RootState) => state.MobileNumberSlice);
 
   const usersPerPage = 5;
-  const paginatedUsers = ProductPartData.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage)
+  const paginatedUsers = ProductPartData?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage)
 
   // 2. Update the unified category handler
   const handleFilterCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>, context = 'filter') => {
@@ -456,7 +456,7 @@ const ProductPart = () => {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                {!userSpecificHistory.length ? (
+                {!userSpecificHistory?.length ? (
                   <div className="text-center text-red-500 py-8">
                     <p className="text-lg">📋 Inventory History Not Available</p>
                     <p className="text-sm text-gray-500 mt-2">
@@ -481,7 +481,7 @@ const ProductPart = () => {
                         {/* Use currentPageData instead of userSpecificHistory */}
                         {currentPageData.map((record) => {
                           // ... rest of the mapping logic remains same
-                          const date = record.usedOn?.split('T')[0] || record.usedOn || '--';
+                          const date = record?.usedOn?.split('T')[0] || record?.usedOn || '--';
 
                           const prevQty = record.previousQuantity ?? 0;
                           const newQty = record.updatedQuantity ?? 0;
@@ -491,7 +491,7 @@ const ProductPart = () => {
                           let statusBadge = { label: '', color: '' };
                           let totalQtyDisplay = '';
 
-                          if (record.new) {
+                          if (record?.new) {
                             qtyChangeDisplay = `+${newQty}`;
                             qtyChangeColor = 'text-yellow-400';
                             statusBadge = { label: "Initial", color: 'text-yellow-400' };
@@ -520,8 +520,8 @@ const ProductPart = () => {
                               <td className={`px-4 py-2 align-middle font-medium ${qtyChangeColor}`}>{qtyChangeDisplay}</td>
                               <td className="px-4 py-2 align-middle">{totalQtyDisplay}</td>
                               <td className="px-4 py-2 align-middle">
-                                <span className={`px-2 py-1 text-xs font-bold rounded-lg ${statusBadge.color}`}>
-  {statusBadge.label}
+                                <span className={`px-2 py-1 text-xs font-bold rounded-lg ${statusBadge?.color}`}>
+  {statusBadge?.label}
 </span>
 
                               </td>
@@ -531,11 +531,14 @@ const ProductPart = () => {
                                 {(() => {
                                   // First check record.user, then fallback to record.inventory.user
                                   const user = record?.user || record?.inventory?.user;
-                                  return user ? `${user.firstName} ${user.lastName ?? ""}`.trim() : '--';
+                                    if (user && (user?.firstName || user?.lastName)) {
+      return `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
+    }
+    return "--";
                                 })()}
                               </td>
                               <td className="px-4 py-2 align-middle">
-                                {statusBadge.label === "Initial"
+                                {statusBadge?.label === "Initial"
                                   ? record?.inventory?.notes || '--'
                                   : record?.notes || '--'}
                               </td>
@@ -605,7 +608,7 @@ const ProductPart = () => {
                               {/* Next Button - Use handlePreviewClick */}
                               {currentPage < totalPages - 1 && (
                                 <button
-                                  onClick={() => handleNextPrevClick(user.id, currentPage + 1)}
+                                  onClick={() => handleNextPrevClick(user?.id, currentPage + 1)}
                                   className={`relative inline-flex hover:rounded-md items-center px-2 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors duration-200 ${currentPage >= totalPages - 1
                                     ? 'bg-gray-100 border-gray-300 hover:bg-gray-100 text-gray-400 cursor-not-allowed'
                                     : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50 cursor-pointer'
@@ -818,7 +821,7 @@ const ProductPart = () => {
                 </thead>
                 {/* Table Body */}
                 <tbody className="bg-white text-center divide-y divide-gray-200">
-                  {paginatedUsers.length > 0 ? (
+                  {paginatedUsers?.length > 0 ? (
                     paginatedUsers?.map((user, index) => (
                       <React.Fragment key={user?.id}>
                         <tr
@@ -828,7 +831,7 @@ const ProductPart = () => {
                           onMouseEnter={() => setHoveredRow(user.id)}
                           onMouseLeave={() => setHoveredRow(null)}
                         >
-                          <td className={TableDataClass}>{user.id}</td>
+                          <td className={TableDataClass}>{user?.id}</td>
                           <td className={TableDataClass}>
                             <div className='flex items-center space-x-2' >
                               <img src={IphoneImage || 'https://tse4.mm.bing.net/th/id/OIP.FVpPrz3IlNVDLpKMLC3D2wHaHa?pid=Api&P=0&h=180'} className="w-20 h-20 object-contain rounded-md" alt="Iphone Image" />
@@ -838,9 +841,9 @@ const ProductPart = () => {
                               </span> */}
                             </div>
                           </td>
-                          <td className={TableDataClass}>{user.productPart.name}</td>
-                          <td className={TableDataClass}>{user.quantity}</td>
-                          <td className={TableDataClass}>{user.notes}</td>
+                          <td className={TableDataClass}>{user?.productPart?.name}</td>
+                          <td className={TableDataClass}>{user?.quantity}</td>
+                          <td className={TableDataClass}>{user?.notes}</td>
                           <td className={TableDataClass}>
                             <button
                               onClick={() => handleEditUser(user)}
@@ -851,7 +854,7 @@ const ProductPart = () => {
                           </td>
                           <td className={TableDataClass}>
                             <button
-                              onClick={() => handleDeleteUser(user.id)}
+                              onClick={() => handleDeleteUser(user?.id)}
                               className={DeleteClass}
                             >
                               {DeleteIcon}
@@ -867,7 +870,7 @@ const ProductPart = () => {
                           </td>
                           <td className={TableDataClass}>
                             <button
-                              onClick={() => handleHistoryToggle(user.id)}
+                              onClick={() => handleHistoryToggle(user?.id)}
                               className={EditClass}
                             >
                               {history === user.id ? (
@@ -895,7 +898,7 @@ const ProductPart = () => {
                   ) : (
                     <tr>
                       <td colSpan={10} className="px-6 py-4 text-center text-gray-500">
-                        {filterSubCategory ? 'No modal issues found for selected subcategory' : 'No modal issues found'}
+                        {filterSubCategory ? 'No Product Part found for selected subcategory' : 'No Product Part found'}
                       </td>
                     </tr>
                   )}
@@ -906,7 +909,7 @@ const ProductPart = () => {
             {/* Reusable Pagination Component */}
             <Pagination
               currentPage={currentPage}
-              totalCount={ProductPartData.length}
+              totalCount={ProductPartData?.length}
               itemsPerPage={usersPerPage}
               onPageChange={(page) => setCurrentPage(page)}
             />

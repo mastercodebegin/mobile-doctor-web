@@ -55,7 +55,7 @@ interface SupportTicketState {
 const initialState: SupportTicketState = {
     isLoading: false,
     isSuccess: false,
-    SupportTicketData: storeData,
+    SupportTicketData: storeData || [],
     Edit: {
         isEdit: false,
         supportTicket: {

@@ -32,7 +32,7 @@ const ModalIssues = () => {
   const usersPerPage = 5;
   
   // Use ModalIssuesData for pagination (API will return filtered data)
-  const paginatedUsers = ModalIssuesData.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
+  const paginatedUsers = ModalIssuesData?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 
   // Filter Category Change - Top Left Filter
   const handleFilterCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -330,19 +330,19 @@ const ModalIssues = () => {
                 </thead>
                 {/* Table Body */}
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedUsers.length > 0 ? (
+                  {paginatedUsers?.length > 0 ? (
                     paginatedUsers?.map((user, index) => (
                       <tr
-                        key={user?.id || `${user.name}-${index}`}
+                        key={user?.id || `${user?.name}-${index}`}
                         className={`transform transition-all duration-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-                          } ${hoveredRow === user.id ? 'bg-gray-50' : 'bg-white'}`}
+                          } ${hoveredRow === user?.id ? 'bg-gray-50' : 'bg-white'}`}
                         style={{ transitionDelay: `${index * 100}ms` }}
-                        onMouseEnter={() => setHoveredRow(user.id)}
+                        onMouseEnter={() => setHoveredRow(user?.id)}
                         onMouseLeave={() => setHoveredRow(null)}
                       >
-                        <td className={TableDataClass}>{user.id}</td>
-                        <td className={TableDataClass}>{user.name}</td>
-                        <td className={TableDataClass}>{user.subCategory?.name}</td>
+                        <td className={TableDataClass}>{user?.id}</td>
+                        <td className={TableDataClass}>{user?.name}</td>
+                        <td className={TableDataClass}>{user?.subCategory?.name}</td>
                         <td className={TableDataClass}>
                           <button
                             onClick={() => handleEditUser(user)}
@@ -353,7 +353,7 @@ const ModalIssues = () => {
                         </td>
                         <td className={TableDataClass}>
                           <button
-                            onClick={() => handleDeleteUser(user.id)}
+                            onClick={() => handleDeleteUser(user?.id)}
                             className={DeleteClass}
                           >
                       {DeleteIcon}
@@ -375,7 +375,7 @@ const ModalIssues = () => {
             {/* Reusable Pagination Component */}
             <Pagination
               currentPage={currentPage}
-              totalCount={ModalIssuesData.length}
+              totalCount={ModalIssuesData?.length}
               itemsPerPage={usersPerPage}
               onPageChange={(page) => setCurrentPage(page)}
             />

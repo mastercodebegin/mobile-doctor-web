@@ -7,6 +7,7 @@ import { AppDispatch, RootState } from "../../redux/store";
 import { useLocation, useNavigate } from "react-router-dom";
 import React, { useEffect, useRef, useState } from "react";
 import UpdatePassword from "../../components/UpdatePassword";
+import { LocalStorageManager } from "../../util/LocalStorageManager";
 
 interface NavbarProps {
   onToggleSidebar: () => void;
@@ -29,6 +30,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
     localStorage.removeItem("token");
     dispatch(clearLoginState());
     setToken(null);
+    LocalStorageManager.clearAllData()
     navigate("/login");
   };
 

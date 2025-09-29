@@ -1,8 +1,10 @@
 export const LocalStorageManager = {
     // Save data for any module
-    saveData: (key: string, data: any[]) => {
+    saveData: (key: string, data: any) => {
         try {
-            localStorage.setItem(key, JSON.stringify(data));
+            const serializedData = JSON.stringify(data);
+            console.log(`Saving ${key} data:`, serializedData);
+            localStorage.setItem(key, serializedData);
             console.log(`✅ ${key} data saved to localStorage`);
         } catch (error) {
             console.error(`❌ Failed to save ${key} data to localStorage:`, error);
@@ -10,13 +12,22 @@ export const LocalStorageManager = {
     },
     
     // Get data for any module
-    getData: (key: string) => {
+  getData: (key: string) => {
         try {
             const data = localStorage.getItem(key);
-            return data ? JSON.parse(data) : [];
+            console.log(`Retrieved ${key} data:`, data);
+            if (data) {
+                try {
+                    return JSON.parse(data);
+                } catch (error) {
+                    console.error(`❌ Failed to parse ${key} data from localStorage:`, error);
+                    return null;
+                }
+            }
+            return null;
         } catch (error) {
             console.error(`❌ Failed to get ${key} data from localStorage:`, error);
-            return [];
+            return null;
         }
     },
     
@@ -33,7 +44,12 @@ export const LocalStorageManager = {
     // Clear all app data
     clearAllData: () => {
         try {
-            const keys = ['branch', 'country', 'state', 'city', 'user', 'vendor', 'role'];
+            const keys = [
+                'branch', 'country', 'state', 'city', 'user', 'vendor', 'role',
+                'dashboard', 'category', 'sub-category', 'brand', 'modal-number',
+                'color-name', 'variant', 'variant-color', 'modal-issue', 'repair-cost',
+                'product-part', 'order', 'support-ticket', 'coupon','authToken', 'token'
+            ];
             keys.forEach(key => localStorage.removeItem(key));
             console.log('🗑️ All app data cleared from localStorage');
         } catch (error) {
@@ -43,14 +59,14 @@ export const LocalStorageManager = {
     
     // Check if data exists
     hasData: (key: string) => {
-       const data = localStorage.getItem(key);
+        const data = localStorage.getItem(key);
         return data !== null && JSON.parse(data).length > 0;
     }
 };
 
 // Define localStorage keys constants
 export const STORAGE_KEYS = {
-    DASHBAORD: 'dashboard',
+    DASHBOARD: 'dashboard',
     USER: 'user',
     CATEGORY: 'category',
     SUB_CATEGORY: 'sub-category',

@@ -2,19 +2,21 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { deleteRequestMethodWithParam, getRequestMethod, postRequestMethod, putRequestMethodWithBodyAndParam } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
 import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
+import { toast } from "react-toastify";
 
 const storeData = LocalStorageManager.getData(STORAGE_KEYS.CATEGORY);
 
 interface User {
     id: string;
     name: string;
+    is_deleted: boolean;
 }
 
 interface AddCategory {
     isLoading: boolean;
     isSuccess: boolean;
     isError: boolean;
-    message: string;
+    message: any;
     data: User[];
     Edit: { category: User | { name: string }, isEdit: boolean };
 }
@@ -24,8 +26,8 @@ const initialState: AddCategory = {
     isSuccess: false,
     isError: false,
     message: "",
-    data: storeData,
-    Edit: { category: { name: "" }, isEdit: false }, 
+    data: storeData || [],
+    Edit: { category: { name: "", is_deleted: false }, isEdit: false }, 
 }
 
 const AddCategorySlice = createSlice({
@@ -54,7 +56,7 @@ const AddCategorySlice = createSlice({
                 isSuccess: false,
                 isError: false,
                 message: "",
-                data: storedData ? JSON.parse(storedData) : [],
+                data: storeData ? storeData : [],
                 Edit: { category: {}, isEdit: false }
             }
         }
@@ -140,7 +142,7 @@ const AddCategorySlice = createSlice({
                     category.id === action.payload?.id ? action.payload : category
                 );
                 LocalStorageManager.saveData(STORAGE_KEYS.CATEGORY, [...state.data]);
-                state.Edit = { isEdit: false, category: { name: "" } }; 
+                state.Edit = { isEdit: false, category: { name: "", is_deleted: false } }; 
             })
             .addCase(UpdateCategory.rejected, (state, action) => {
                 state.isLoading = false
@@ -186,7 +188,8 @@ export const UpdateCategory = createAsyncThunk("UPDATE/CATEGORY", async (id: str
 
         const response = await putRequestMethodWithBodyAndParam(
             {
-                name: updateData.name, 
+                name: updateData.name,
+                is_deleted: updateData.is_deleted, 
             },
             UrlConstants.UPDATE_CATEGORIE, 
             id

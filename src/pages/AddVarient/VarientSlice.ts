@@ -80,7 +80,7 @@ const initialState: Variant = {
     }, 
     isEdit: false
   },
-  AllVariantData: storeData,
+  AllVariantData: storeData || [],
 }
 
 const variantSlice = createSlice({

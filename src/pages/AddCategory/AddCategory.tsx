@@ -21,11 +21,11 @@ const AddCategory = () => {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
 
   const usersPerPage = 5; 
-  const paginatedUsers = data.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
+  const paginatedUsers = data?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 
   const handleSaveClick = async () => {
     if (!category.trim()) {
-      alert("Please enter a category name");
+      toast.warn("Please enter a category name");
       return;
     }
 
@@ -49,7 +49,6 @@ const AddCategory = () => {
           })
           .catch((err: any) => {
             console.error("Update failed:", err); 
-            toast.error("Category update failed: " + err);
           })
       } catch (error) {
         toast.error("Failed to update category");
@@ -62,15 +61,20 @@ const AddCategory = () => {
   };
 
   const handleCloseModal = () => {
+    setShowConfirmModal(false);
     setShowModal(false);
     setCategory("");
     setIsEditMode(false);
+    setCurrentPage(1)
+    dispatch(restore(null))
   };
 
   const handleConfirmSave = () => {
     const newCategory = {
       name: category,
+      is_deleted: false,
     };
+    console.log('Saving category:', newCategory);
     dispatch(CreateCategory(newCategory))
       .unwrap()
       .then((res: any) => {
@@ -91,8 +95,9 @@ const AddCategory = () => {
   const handleEditUser = (user: User) => { 
     console.log(`Edit user:`, user);
     dispatch(Update(user)); 
-    setShowModal(true);
     setCategory(user.name); 
+    setIsEditMode(true)
+    setShowModal(true);
   };
 
   const handleDeleteUser = async (id: string) => {
@@ -119,18 +124,6 @@ const AddCategory = () => {
     setIsLoaded(true);
     dispatch(GetAllCategory())
   }, []);
-
-
-  useEffect(() => {
-    if (Edit.isEdit && Edit.category) {
-      setIsEditMode(true);
-      setCategory(Edit?.category?.name || "");
-      setShowModal(true);
-    } else {
-      setIsEditMode(false);
-      setCategory("");
-    }
-  }, [Edit]);
 
 
     {isLoading && <Loading overlay={true} />}
@@ -167,7 +160,8 @@ const AddCategory = () => {
                 </thead>
                 {/* Table Body */}
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedUsers.map((user, index) => (
+                  {paginatedUsers?.length > 0 ? (
+  paginatedUsers.map((user, index) => (
 
                     <tr
                       key={user?.id || `${user?.name}-${index}`}
@@ -178,7 +172,7 @@ const AddCategory = () => {
                       onMouseLeave={() => setHoveredRow(null)}
                     >
                       <td className={TableDataClass}>
-                        {user.id}
+                        {user?.id}
                       </td>
                       <td className="py-4 px-6 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-600">{user?.name}</div>
@@ -200,7 +194,14 @@ const AddCategory = () => {
                         </button>
                       </td>
                     </tr>
-                  ))}
+                  ))
+) : (
+  <tr>
+    <td colSpan={8} className="text-center py-4 text-gray-500">
+      No Category Found
+    </td>
+  </tr>
+)}
                 </tbody>
               </table>
             </div>
@@ -209,7 +210,7 @@ const AddCategory = () => {
             {/* Reusable Pagination Component */}
             <Pagination
               currentPage={currentPage}
-              totalCount={data.length}
+              totalCount={data?.length}
               itemsPerPage={usersPerPage}
               onPageChange={(page) => setCurrentPage(page)}
             />

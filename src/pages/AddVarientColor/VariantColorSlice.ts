@@ -41,7 +41,7 @@ const initialState: VariantColor = {
   isLoading: false,
   isSuccess: false,
   error: null,
-  AllVariantColorData: storeData,
+  AllVariantColorData: storeData || [],
 };
 
 const VariantColorSlice = createSlice({

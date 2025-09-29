@@ -34,14 +34,12 @@ reducers: {
                 Edit : {role : action.payload , isEdit : true}
             }
         },
-        restore: () => {
-                            return {
-                                isLoading: false,
-                                isSuccess: false,
-                                roleData: [],
-                                Edit: { role: {}, isEdit: false }
-                            }
-                        }
+        restore: (state) => {
+        return {
+            ...state,
+            Edit: { role: null, isEdit: false }
+        }
+    }
 },
 extraReducers: (builder) => {
       builder 

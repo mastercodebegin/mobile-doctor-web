@@ -25,7 +25,7 @@ const AddSubCategory = () => {
 
   const dispatch = useDispatch<AppDispatch>()
   const usersPerPage = 5; 
-  const paginatedUsers = SubCategoriesData.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
+  const paginatedUsers = SubCategoriesData?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 
 
   const handleEditUser = (user: any) => {
@@ -65,12 +65,12 @@ const AddSubCategory = () => {
   const handleSaveClick = async () => {
 
     if (!subCategoryName.trim()) {
-      alert("Please enter a sub-category name");
+      toast.warn("Please enter a sub-category name");
       return;
     }
 
     if (!selectedCategory) {
-      alert("Please select a parent category");
+      toast.warn("Please select a parent category");
       return;
     }
 
@@ -204,44 +204,45 @@ const AddSubCategory = () => {
                 </thead>
                 {/* Table Body */}
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedUsers.map((user, index) => (
+                  {paginatedUsers?.length > 0 ? (
+  paginatedUsers?.map((user, index) => (
                     <tr
-                      key={user.id}
+                      key={user?.id}
                       className={`transform transition-all duration-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
                         } ${hoveredRow === user.id ? 'bg-gray-50' : 'bg-white'}`}
                       style={{ transitionDelay: `${index * 100}ms` }}
-                      onMouseEnter={() => setHoveredRow(user.id)}
+                      onMouseEnter={() => setHoveredRow(user?.id)}
                       onMouseLeave={() => setHoveredRow(null)}
                     >
 
                       {/* Id */}
                       <td className={TableDataClass}>
-                        {user.id}
+                        {user?.id}
                       </td>
 
                       {/* Name */}
                       <td className={TableDataClass}>
-                        <div className="text-sm font-medium text-gray-600">{user.name}</div>
+                        <div className="text-sm font-medium text-gray-600">{user?.name}</div>
                       </td>
 
                       <td className={TableDataClass}>
                         <div className="text-sm font-medium text-gray-600">
                           {(() => {
                             // Category object check
-                            if (user.category && user.category.name) {
+                            if (user?.category && user?.category?.name) {
                               return (
                                 <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                                  {user.category.name}
+                                  {user?.category?.name}
                                 </span>
                               );
                             }
 
-                            if (user.categoryId && data.length > 0) {
-                              const category = data.find(cat => cat.id === user.categoryId);
+                            if (user?.categoryId && data.length > 0) {
+                              const category = data.find(cat => cat?.id === user?.categoryId);
                               if (category) {
                                 return (
                                   <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
-                                    {category.name}
+                                    {category?.name}
                                   </span>
                                 );
                               }
@@ -267,14 +268,21 @@ const AddSubCategory = () => {
                       </td>
                       <td className={TableDataClass}>
                         <button
-                          onClick={() => handleDeleteUser(user.id)}
+                          onClick={() => handleDeleteUser(user?.id)}
                           className={DeleteClass}
                         >
                         {DeleteIcon}
                         </button>
                       </td>
                     </tr>
-                  ))}
+                  ))
+) : (
+  <tr>
+    <td colSpan={3} className="text-center py-4 text-gray-500">
+      No Sub Category Found
+    </td>
+  </tr>
+)}
                 </tbody>
               </table>
             </div>
@@ -282,7 +290,7 @@ const AddSubCategory = () => {
             {/* Reusable Pagination Component */}
             <Pagination
               currentPage={currentPage}
-              totalCount={SubCategoriesData.length}
+              totalCount={SubCategoriesData?.length}
               itemsPerPage={usersPerPage}
               onPageChange={(page) => setCurrentPage(page)}
             />

@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import Loading from "../../components/Loading";
-import { DeleteClass, DeleteIcon, DropDownClass, EditClass, EditIcon, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
+import { DeleteClass, DeleteIcon, DropDownClass, EditClass, EditIcon, inputClass, pageSize, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
 import Pagination from "../../helper/Pagination";
 import { useEffect, useState } from "react";
 import { AppDispatch, RootState } from "../../redux/store";
@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import { GetStateByCountryId } from "../State/StateSlice";
 import { GetCitiesByStateId } from "../City/CitySlice";
 import { GetAllCountries } from "../Country/CountrySlice";
-import { GetAllVendors } from "../userManagement/VendorSlice";
+import { GetAllVendors, GetVendorByRoleId } from "../userManagement/VendorSlice";
 
 const Branch = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false)
@@ -141,28 +141,31 @@ const Branch = () => {
   };
 
   // Updated handleConfirmSave function
-  const handleConfirmSave = async () => {
-    const newBranch = {
-      address: branchName,
-      countries: { id: selectedCountry.id },
-      states: { id: selectedState.id },
-      cities: { id: selectedCity.id },
-      user: { id: selectedUser.id },
-    };
-
-    dispatch(CreateBranch(newBranch))
-      .unwrap()
-      .then((res: any) => {
-        dispatch(GetAllBranch()).then(() => {
-          toast.success(res.message || "Branch added successfully!");
-          handleCloseModal();
-        });
-      })
-      .catch((err: any) => {
-        toast.error("Branch creation failed: " + err);
-        console.log("Branch creation failed: " + err);
-      });
+const handleConfirmSave = async () => {
+  const newBranch = {
+    address: branchName,
+    countries: { id: selectedCountry.id },
+    states: { id: selectedState.id },
+    cities: { id: selectedCity.id },
+    user: { id: selectedUser.id },
   };
+
+  dispatch(CreateBranch(newBranch))
+    .unwrap()
+    .then((res: any) => {
+      toast.success(res.message || "Branch added successfully!");
+      
+      // Close modal and reset form only after successful creation
+      handleCloseModal();
+      
+      // Refresh the branch list
+      dispatch(GetAllBranch());
+    })
+    .catch((err: any) => {
+      toast.error("Branch creation failed: " + err);
+      console.log("Branch creation failed: " + err);
+    });
+};
 
     const handleCloseModal = () => {
     setShowConfirmModal(false);
@@ -173,23 +176,21 @@ const Branch = () => {
     setSelectedState(null)
     setSelectedCity(null)
     setIsEditMode(false);
-    dispatch(Restore());
   };
 
   // Updated handleEditUser function
   const handleEditUser = (user: any) => {
-    if (!user.states || !user.countries || !user.cities) {
+    if (!user.states || !user.countries || !user.cities || !user.user) {
       toast.error("Cannot edit: State/Country/Cities data missing. Please refresh.");
       return;
     }
 
     dispatch(Update(user));
-
-    setBranchName(user.address || "");
     setSelectedUser(user.user || null);
     setSelectedCountry(user.countries || null);
     setSelectedState(user.states || null);
     setSelectedCity(user.cities || null);
+    setBranchName(user.address || "");
 
     if (user.countries?.id) {
       dispatch(GetStateByCountryId(user.countries.id))
@@ -228,32 +229,9 @@ const Branch = () => {
     setIsLoaded(true);
     dispatch(GetAllBranch());
     dispatch(GetAllCountries());
-    dispatch(GetAllVendors())
+    // dispatch(GetAllVendors())
+    dispatch(GetVendorByRoleId(3))
   }, []);
-
-
-  useEffect(() => {
-    if (Edit?.isEdit && Edit?.branch) {
-      const { address, states, countries, cities, user } = Edit.branch;
-
-      setIsEditMode(true);
-      setBranchName(address || "");
-      setSelectedUser(user || null);
-      setSelectedCountry(countries || null);
-      setSelectedState(states || null);
-      setSelectedCity(cities || null);
-
-      if (countries?.id) {
-        dispatch(GetStateByCountryId(countries?.id));
-
-        if (states?.id) {
-          dispatch(GetCitiesByStateId(states?.id));
-        }
-      }
-
-      setShowModal(true);
-    }
-  }, [Edit]);
 
 
 
@@ -309,11 +287,12 @@ const Branch = () => {
                 </thead>
                 {/* Table Body */}
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedUsers.map((user, index) => (
+                  {paginatedUsers?.length > 0 ? (
+  paginatedUsers?.map((user, index) => (
                     <tr
                       key={user.id}
                       className={`transform transition-all duration-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-                        } ${hoveredRow === user.id ? 'bg-gray-50' : 'bg-white'}`}
+                        } ${hoveredRow === user?.id ? 'bg-gray-50' : 'bg-white'}`}
                       style={{ transitionDelay: `${index * 100}ms` }}
                       onMouseEnter={() => setHoveredRow(user?.id)}
                       onMouseLeave={() => setHoveredRow(null)}
@@ -389,7 +368,14 @@ const Branch = () => {
                         </button>
                       </td>
                     </tr>
-                  ))}
+                  ))
+) : (
+  <tr>
+    <td colSpan={8} className="text-center py-4 text-gray-500">
+      No Branch Found
+    </td>
+  </tr>
+)}
                 </tbody>
               </table>
             </div>
@@ -435,9 +421,9 @@ const Branch = () => {
                   className={DropDownClass}
                 >
                   <option value="">Select...</option>
-                  {data.map((item) => (
+                  {data?.map((item) => (
                     <option key={item.id} value={item.id}>
-                      {item?.role?.name}
+                     {`${item?.firstName} ${item?.lastName} (${item?.role?.name})`}
                     </option>
                   ))}
                 </select>
@@ -454,7 +440,7 @@ const Branch = () => {
                     className={DropDownClass}
                   >
                     <option value="">Select...</option>
-                    {countryData.map((item) => (
+                    {countryData?.map((item) => (
                       <option key={item.id} value={item.id}>
                         {item?.name}
                       </option>
@@ -473,7 +459,7 @@ const Branch = () => {
                     className={DropDownClass}
                   >
                     <option value="">Select...</option>
-                    {stateData.map((item) => (
+                    {stateData?.map((item) => (
                       <option key={item.id} value={item.id}>
                         {item?.name}
                       </option>
@@ -495,7 +481,7 @@ const Branch = () => {
                     className={DropDownClass}
                   >
                     <option value="">Select...</option>
-                    {cityData.map((item) => (
+                    {cityData?.map((item) => (
                       <option key={item.id} value={item.id}>
                         {item?.name}
                       </option>

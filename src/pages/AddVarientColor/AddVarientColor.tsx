@@ -68,7 +68,7 @@ const AddVarientColor = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   const usersPerPage = 5;
-  const paginatedUsers = AllVariantColorData.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
+  const paginatedUsers = AllVariantColorData?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 
   // Filter data based on selections
   const filteredSubCategories = SubCategoriesData?.filter(
@@ -129,11 +129,11 @@ const AddVarientColor = () => {
       });
       setSelectedFiles([]);
 
-          if (value) {
-      // Fetch modal numbers by subCategory ID
-      const subCategoryId = formData.subCategory ? parseInt(formData.subCategory) : 0;
-      dispatch(FetchModalBySubCategory(subCategoryId) as any);
-    }
+      if (value) {
+        // Fetch modal numbers by subCategory ID
+        const subCategoryId = formData.subCategory ? parseInt(formData.subCategory) : 0;
+        dispatch(FetchModalBySubCategory(subCategoryId) as any);
+      }
     }
 
     else if (name === "modalNumber") {
@@ -176,15 +176,15 @@ const AddVarientColor = () => {
         ...prev,
         colorName: {
           id: parseInt(value),
-          color: selectedColor?.color || "",         
-          colorCode: selectedColor?.colorCode || "",   
+          color: selectedColor?.color || "",
+          colorCode: selectedColor?.colorCode || "",
           is_deleted: false
         }
       }));
       console.log("Selected color:", selectedColor);
     }
   };
- 
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     console.log("🔍 File input change triggered");
@@ -440,7 +440,7 @@ const AddVarientColor = () => {
     dispatch(GetAllColors());
   }, [dispatch]);
 
-    {isLoading && <Loading overlay={true} />}
+  { isLoading && <Loading overlay={true} /> }
 
   return (
     <>
@@ -473,77 +473,80 @@ const AddVarientColor = () => {
                 </thead>
                 {/* Table Body */}
                 <tbody className="bg-white divide-y divide-gray-200">
-                  
-                  {paginatedUsers.map((user, index) => {
-                    let modalData = user.modalColorString;
-
-                    // ✅ Parse if it's a string
-                    if (typeof modalData === "string") {
-                      try {
-                        modalData = JSON.parse(modalData);
-                      } catch (err) {
-                        console.warn("Invalid JSON in modalColorString", err);
-                        modalData = {};
-                      }
+{paginatedUsers?.length > 0 ? (
+  paginatedUsers?.map((user, index) => {
+                    // Ensure user is an object
+                    if (typeof user !== 'object' || user === null) {
+                      console.warn('Invalid user data:', user);
+                      return null;
                     }
+
+                    // Extract the color data
+                    const colorData = user?.colorName || {};
+                    const modalImages = user?.modalImages || [];
 
                     return (
                       <tr
                         key={user.id}
                         className={`transform transition-all duration-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-                          } ${hoveredRow === user.id ? 'bg-gray-50' : 'bg-white'}`}
+                          } ${hoveredRow === user?.id ? 'bg-gray-50' : 'bg-white'}`}
                         style={{ transitionDelay: `${index * 100}ms` }}
-                        onMouseEnter={() => setHoveredRow(user.id)}
+                        onMouseEnter={() => setHoveredRow(user?.id)}
                         onMouseLeave={() => setHoveredRow(null)}
                       >
-                        {/* ✅ Color ID */}
-                        <td className={TableDataClass}>{modalData?.id || "N/A"}</td>
+                        {/* Color ID */}
+                        <td className={TableDataClass}>{user?.id || "N/A"}</td>
 
-                        {/* ✅ Color Name */}
+                        {/* Color Name */}
                         <td className={TableDataClass}>
                           <div className="text-sm font-medium text-gray-600">
-                            {modalData?.colorName?.color || "N/A"}
+                            {colorData?.color || "N/A"}
                           </div>
                         </td>
 
-                        {/* ✅ Color Code */}
+                        {/* Color Code */}
                         <td className={TableDataClass}>
                           <div className="text-sm font-medium text-gray-600">
-                            {modalData?.colorName?.colorCode || "N/A"}
+                            {colorData?.colorCode || "N/A"}
                           </div>
                         </td>
 
-                        {/* ✅ First Image Name */}
+                        {/* First Image Name */}
                         <td className={TableDataClass}>
                           <div className="text-sm font-medium text-gray-600">
-                            {modalData?.modalImages?.[0]?.imageName || "No image"}
+                            {modalImages?.length > 0 ? modalImages[0]?.imageName : "No image"}
                           </div>
                         </td>
 
-                        {/* ✅ Edit Button */}
+                        {/* Edit Button */}
                         <td className={TableDataClass}>
                           <button
                             onClick={() => handleEditUser(user)}
                             className={EditClass}
                           >
-                           {EditIcon}
+                            {EditIcon}
                           </button>
                         </td>
 
-                        {/* ✅ Delete Button */}
+                        {/* Delete Button */}
                         <td className={TableDataClass}>
                           <button
-                            onClick={() => handleDeleteUser(user.id)}
+                            onClick={() => handleDeleteUser(user?.id)}
                             className={DeleteClass}
                           >
-                           {DeleteIcon}
+                            {DeleteIcon}
                           </button>
                         </td>
                       </tr>
                     );
-                  })}
-
-
+                  })
+) : (
+  <tr>
+    <td colSpan={8} className="text-center py-4 text-gray-500">
+      No Variant Color Found
+    </td>
+  </tr>
+)}
 
                 </tbody>
               </table>
@@ -683,23 +686,23 @@ const AddVarientColor = () => {
                   ))}
                 </select>
               </div>
-              </div>
+            </div>
 
-              {/* File Upload Section */}
-              {variantColorData.colorName.id > 0 && (
-                <div className="mt-3" >
-                  <label className="block font-medium mb-1">Upload Files</label>
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    key={selectedFiles.length}
-                    className="w-full border rounded-md px-4 py-[9px] file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                  />
-                </div>
-              )}
-            
+            {/* File Upload Section */}
+            {variantColorData.colorName.id > 0 && (
+              <div className="mt-3" >
+                <label className="block font-medium mb-1">Upload Files</label>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  key={selectedFiles.length}
+                  className="w-full border rounded-md px-4 py-[9px] file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+              </div>
+            )}
+
 
             {/* File Preview List */}
             {selectedFiles.length > 0 && (
@@ -753,9 +756,9 @@ const AddVarientColor = () => {
         onCancel={() => setShowConfirmModal(false)}
       />
 
-                {/* ADD this overlay loading at the end */}
-    {isLoading && <Loading overlay={true} />}
-    
+      {/* ADD this overlay loading at the end */}
+      {isLoading && <Loading overlay={true} />}
+
     </>
   );
 };

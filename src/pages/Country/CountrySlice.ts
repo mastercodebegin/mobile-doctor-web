@@ -21,7 +21,7 @@ interface Country {
 const initialState: Country = {
     isLoading: false,
     isSuccess: false,
-    countryData: storeData,
+    countryData: storeData || [],
     Edit: {country: {name: ""}, isEdit: false}
 }
 
@@ -29,14 +29,12 @@ const CountrySlice = createSlice({
     name: "CountrySlice",
     initialState,
      reducers: {
-        restore: () => {
-             return {
-                                isLoading: false,
-                                isSuccess: false,
-                                countryData: storeData ? JSON.parse(storeData) : [],
-                                Edit: { country: null, isEdit: false }
-                            }
-        },
+         restore: (state) => {
+        return {
+            ...state,
+            Edit: { country: null, isEdit: false }
+        }
+    },
         Update : (state , action) =>{
             return {
                 ...state,

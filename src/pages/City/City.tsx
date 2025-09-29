@@ -29,7 +29,7 @@ const City = () => {
 
   const dispatch = useDispatch<AppDispatch>()
   const usersPerPage = 5;
-  const paginatedUsers = cityData.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
+  const paginatedUsers = cityData?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 
   const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = e.target.value;
@@ -69,12 +69,12 @@ const City = () => {
   const handleSaveClick = async () => {
 
     if (!cityName.trim()) {
-      alert("Please enter a State name");
+      toast.warn("Please enter a State name");
       return;
     }
 
     if (!selectedState) {
-      alert("Please select a Country");
+      toast.warn("Please select a Country");
       return;
     }
 
@@ -307,9 +307,10 @@ const City = () => {
                 </thead>
                 {/* Table Body */}
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedUsers.map((user, index) => (
+                  {paginatedUsers?.length > 0 ? (
+  paginatedUsers?.map((user, index) => (
                     <tr
-                      key={user.id}
+                      key={user?.id}
                       className={`transform transition-all duration-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
                         } ${hoveredRow === user.id ? 'bg-gray-50' : 'bg-white'}`}
                       style={{ transitionDelay: `${index * 100}ms` }}
@@ -319,7 +320,7 @@ const City = () => {
 
                       {/* Id */}
                       <td className={TableDataClass}>
-                        {user.id}
+                        {user?.id}
                       </td>
 
                       {/* Name */}
@@ -331,20 +332,20 @@ const City = () => {
                         <div className="text-sm font-medium text-gray-600">
                           {(() => {
                             // Category object check
-                            if (user.states && user.states.name) {
+                            if (user?.states && user?.states?.name) {
                               return (
                                 <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                                  {user.states.name}
+                                  {user?.states?.name}
                                 </span>
                               );
                             }
 
-                            if (user.states && stateData.length > 0) {
-                              const category = stateData.find(cat => cat.id === user.states.id);
+                            if (user?.states && stateData?.length > 0) {
+                              const category = stateData?.find(cat => cat?.id === user?.states?.id);
                               if (category) {
                                 return (
                                   <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
-                                    {category.name}
+                                    {category?.name}
                                   </span>
                                 );
                               }
@@ -377,7 +378,14 @@ const City = () => {
                         </button>
                       </td>
                     </tr>
-                  ))}
+                  ))
+) : (
+  <tr>
+    <td colSpan={8} className="text-center py-4 text-gray-500">
+      No City Found
+    </td>
+  </tr>
+)}
                 </tbody>
               </table>
             </div>
@@ -385,7 +393,7 @@ const City = () => {
             {/* Reusable Pagination Component */}
             <Pagination
               currentPage={currentPage}
-              totalCount={cityData.length}
+              totalCount={cityData?.length}
               itemsPerPage={usersPerPage}
               onPageChange={(page) => setCurrentPage(page)}
             />

@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { getRequestMethod, getRequestMethodWithParam } from "../../util/CommonService";
+import { getRequestMethod, getRequestMethodWithParam, postRequestMethod } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
 import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
@@ -113,9 +113,9 @@ const DashboardSlice = createSlice({
 export default DashboardSlice.reducer
 
 // Fetch Card Data Thunk
-export const GetAllOrderCount = createAsyncThunk("FETHC/ALL/ORDER-COUNT", async (_, thunkAPI) =>{
+export const GetAllOrderCount = createAsyncThunk("FETHC/ALL/ORDER-COUNT", async (requestData: any, thunkAPI) =>{
     try {
-        const response = await getRequestMethod(UrlConstants.GET_ALL_ORDER_COUNT);
+        const response = await postRequestMethod(requestData, UrlConstants.GET_ALL_ORDER_COUNT);
         console.log("Response Data :---", response);
         return response
     } catch (error: any) {

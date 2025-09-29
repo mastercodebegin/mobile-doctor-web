@@ -106,7 +106,7 @@ interface ProductPartInterface {
 const initialState: ProductPartInterface = {
     isLoading: false,
     isSuccess: false,
-    ProductPartData: storeData,
+    ProductPartData: storeData || [],
     History: {
   isLoading: false,
   isSuccess: false,

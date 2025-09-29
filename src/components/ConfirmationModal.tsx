@@ -1,5 +1,5 @@
 import React from 'react';
-import { SubmitButtonClass } from '../helper/ApplicationConstants';
+import { ShowModelCloseButtonClass, SubmitButtonClass } from '../helper/ApplicationConstants';
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -25,7 +25,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         <p className="mb-4 text-gray-700">{message}</p>
         <div className="flex justify-end gap-4">
           <button
-            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+            className={ShowModelCloseButtonClass}
             onClick={onCancel}
           >
             Cancel

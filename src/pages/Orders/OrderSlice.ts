@@ -33,7 +33,7 @@ const initialState = {
     isLoading: false,
     isSuccess: false,
     Orders: storeData,
-    FindUsers: storeData,
+    FindUsers: storeData || [],
      Edit: {
     isEdit: false,
     order: {

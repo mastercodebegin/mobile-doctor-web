@@ -129,7 +129,7 @@ useEffect(() => {
 
 
   useEffect(() =>{
-dispatch(GetAllOrderCount())
+dispatch(GetAllOrderCount({}))
   },[dispatch])
 
     {isLoading && <Loading overlay={true} />}

@@ -21,7 +21,7 @@ interface AddColor {
 const initialState : AddColor = {
 isLoading : false,
 isSuccess : false,
-colorData : storeData,
+colorData : storeData || [],
 Edit : {Color : { id : "", color : "", colorCode : ""}, isEdit : false},
 }
 
@@ -33,7 +33,7 @@ const ColorNameSlice = createSlice({
             return{
                 isLoading : false,
                 isSuccess : false,
-                colorData : storedData ? JSON.parse(storedData) : [],
+                colorData : storeData ? storeData : [],
                 Edit : {Color : {}, isEdit : false}
             }
         },
