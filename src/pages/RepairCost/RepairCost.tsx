@@ -768,7 +768,7 @@ const RepairCost = () => {
                     onClick={handleSaveClick}
                     disabled={!formData.price || !formData.message || !formCategory || !formSubCategory || !formProductPart || !formModalNumber}
                   >
-                    {isEditMode ? "Update Repair Cost" : "Continue Repair Cost"}
+                    {isEditMode ? "Update Repair Cost" : "Continue"}
                   </button>
                 </div>
               </div>

@@ -80,7 +80,7 @@ interface ProductPartRecord {
   id: number;
   quantity: number;
   notes: string;
-  productPart: ProductPart;
+  productPartLabel: ProductPart;
   productModelNumber: ProductModelNumber;
   user: UserInterface;
   deleted: boolean;
@@ -120,7 +120,7 @@ const initialState: ProductPartInterface = {
             quantity: 0,
             notes: "",
             deleted: false,
-            productPart: {
+            productPartLabel: {
   id: 0,
         name: "",
         deleted: false,
@@ -196,7 +196,7 @@ const ProductPartSlice = createSlice({
     isLoading: false,
     isSuccess: false,
     ProductPartData: storeData ? JSON.parse(storeData) : [],
-    Edit: { inventory : {quantity: 0, notes: "", productPart: null}, isEdit: false}
+    Edit: { inventory : {quantity: 0, notes: "", productPartLabel: null}, isEdit: false}
   };
 },
 Update: (state,action) =>{
@@ -450,18 +450,18 @@ export const UpdateInventory = createAsyncThunk(
         quantity: updateData.quantity,
         notes: updateData.notes,
         deleted: false,
-        productPart: {
-          id: updateData.productPart.id,
-          name: updateData.productPart.name,
-          deleted: updateData.productPart.deleted,
+        productPartLabel: {
+          id: updateData.productPartLabel.id,
+          name: updateData.productPartLabel.name,
+          deleted: updateData.productPartLabel.deleted,
           subCategory: {
-            id: updateData.productPart.subCategory.id,
-            name: updateData.productPart.subCategory.name,
-            is_deleted: updateData.productPart.subCategory.is_deleted,
+            id: updateData.productPartLabel.subCategory.id,
+            name: updateData.productPartLabel.subCategory.name,
+            is_deleted: updateData.productPartLabel.subCategory.is_deleted,
             category: {
-              id: updateData.productPart.subCategory.category.id,
-              name: updateData.productPart.subCategory.category.name,
-              is_deleted: updateData.productPart.subCategory.category.is_deleted
+              id: updateData.productPartLabel.subCategory.category.id,
+              name: updateData.productPartLabel.subCategory.category.name,
+              is_deleted: updateData.productPartLabel.subCategory.category.is_deleted
             }
           }
         },

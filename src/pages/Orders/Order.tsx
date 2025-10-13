@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Loading from '../../components/Loading'
 import { GetAllCategory } from '../AddCategory/AddCategorySlice';
 import { GetAllSubCategory } from '../AddSubCategory/SubCategorySlice';
@@ -58,6 +58,7 @@ const Order = ({ sidebarMobileOpen }) => {
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [assignEmail, setAssignEmail] = useState('');
+  const [activeAssignmentType, setActiveAssignmentType] = useState(null); // 'engineer' or 'pickupPartner'
 
   const [unitRepairStatusEdit, setUnitRepairStatusEdit] = useState("PENDING");
   const [description, setDescription] = useState("");
@@ -65,7 +66,7 @@ const Order = ({ sidebarMobileOpen }) => {
   const [orderCompletedOn, setOrderCompletedOn] = useState("");
 
   const dispatch = useDispatch<AppDispatch>();
-  const pickerRef = useRef<HTMLDivElement>(null);
+  // const pickerRef = useRef<HTMLDivElement>(null);
   const [unitRepairStatus, setUnitRepairStatus] = useState<string>('');
   const [filterDate, setFilterDate] = useState({
     startDate: null,
@@ -289,9 +290,9 @@ const Order = ({ sidebarMobileOpen }) => {
     if (email && email.length >= 1) {
       try {
         const requestData = {
-          pageSize: 10,
+          pageSize: pageSize,
           pageNumber: 0,
-          email: email,
+          searchText: email,
           roleId: roleId,
         };
         const response = await dispatch(FindUserByEmail(requestData)).unwrap();
@@ -312,13 +313,13 @@ const Order = ({ sidebarMobileOpen }) => {
   const handleSearchInputChange = (e) => {
     const value = e.target.value;
     setAssignEmail(value);
-    if (selectedOrderDetails?.engineer) {
-      debouncedSearch(value, RoleIds.engineer); // Pass roleId for engineer
-    } else if (selectedOrderDetails?.pickupPartner) {
-      debouncedSearch(value, RoleIds.pickupPartner); // Pass roleId for pickup partner
-    } else {
-      debouncedSearch(value, null); // No roleId if neither engineer nor pickup partner is selected
-    }
+    if (activeAssignmentType === 'engineer') {
+    debouncedSearch(value, RoleIds.engineer);
+  } else if (activeAssignmentType === 'pickupPartner') {
+    debouncedSearch(value, RoleIds.pickupPartner);
+  } else {
+    debouncedSearch(value, null);
+  }
   };
 
   // Add user selection handler
@@ -482,7 +483,7 @@ const Order = ({ sidebarMobileOpen }) => {
           {showFilter && (
             <>
               {/* <div className="w-[450px] fixed left-85 bottom-0 z-40 bg-white border border-gray-300 rounded-xl shadow-lg flex flex-col max-h-[90vh]"> */}
-              <div className={`w-[450px] fixed bottom-0 z-40 bg-white border border-gray-300 rounded-xl shadow-lg flex flex-col max-h-[90vh] transition-all duration-300 ${sidebarMobileOpen ? 'left-85' : 'left-20'
+              <div className={`w-[50vw] fixed bottom-0 z-40 bg-white border border-gray-300 rounded-xl shadow-lg flex flex-col max-h-[90vh] transition-all duration-300 ${sidebarMobileOpen ? 'left-85' : 'left-20'
                 }`}>
 
                 {/* Header - Fixed at top */}
@@ -544,7 +545,7 @@ const Order = ({ sidebarMobileOpen }) => {
                       value={expectedDeliveryDate}
                       onChange={(newValue) => setExpectedDeliveryDate(newValue)}
                       style={{
-                       border: `3px solid  #06b6d4`,
+                       border: `3px solid  #5ca1b6ff`,
                         borderRadius: "9px",
                       }}
                       container={() => document.body}
@@ -552,21 +553,6 @@ const Order = ({ sidebarMobileOpen }) => {
                       cleanable={false}
                       placement="bottomStart"
                       appearance="subtle"
-                      // onOpen={() => {
-                      //   if (pickerRef.current) {
-                      //     pickerRef.current.style.border = "2px solid #06b6d4"; 
-                      //   }
-                      // }}
-                      // onOk={() => {
-                      //   if (pickerRef.current) {
-                      //     pickerRef.current.style.border = "2px solid #06b6d4"; 
-                      //   }
-                      // }}
-                      // onClose={() => {
-                      //   if (pickerRef.current) {
-                      //     pickerRef.current.style.border = "2px solid #06b6d4"; 
-                      //   }
-                      // }}
                     />
 
                   </div>
@@ -928,7 +914,7 @@ const Order = ({ sidebarMobileOpen }) => {
 
                         {selectedOrderDetails?.onlineOrder && (
                           <button
-                            onClick={() => setShowAssign(true)}
+                            onClick={() => {setShowAssign(true), setActiveAssignmentType('pickupPartner')}}
                             type='button'
                             dir="ltr"
                             className="flex items-center space-x-2 p-2 border border-gray-300 rounded-xl bg-white">
@@ -941,7 +927,7 @@ const Order = ({ sidebarMobileOpen }) => {
 
                         <button
                           type="button"
-                          onClick={() => setShowAssign(true)}
+                          onClick={() => {setShowAssign(true), setActiveAssignmentType('engineer')}}
                           dir="ltr"
                           className="flex items-center space-x-2 p-2 border border-gray-300 rounded-xl bg-white"
                         >
@@ -1586,7 +1572,6 @@ const Order = ({ sidebarMobileOpen }) => {
           </div>
         </>
       )}
-
 
       {/* Confirmation Modal */}
       {showConfirmModal && (

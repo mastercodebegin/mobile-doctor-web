@@ -297,7 +297,7 @@ const ProductPart = () => {
     const newInventory = {
       quantity: quantity,
       notes: notes,
-      productPart: selectedProductPartLabel,
+      productPartLabel: selectedProductPartLabel,
       productModelNumber: selectedModel,
     }
 
@@ -835,13 +835,9 @@ const ProductPart = () => {
                           <td className={TableDataClass}>
                             <div className='flex items-center space-x-2' >
                               <img src={IphoneImage || 'https://tse4.mm.bing.net/th/id/OIP.FVpPrz3IlNVDLpKMLC3D2wHaHa?pid=Api&P=0&h=180'} className="w-20 h-20 object-contain rounded-md" alt="Iphone Image" />
-                              {/* <span>
-                                <h4 className='text-black' >{user.productPart.subCategory.name}</h4>
-                                <p>{user.productPart.subCategory.category.name}</p>
-                              </span> */}
                             </div>
                           </td>
-                          <td className={TableDataClass}>{user?.productPart?.name}</td>
+                          <td className={TableDataClass}>{user?.productPartLabel?.name || "--"}</td>
                           <td className={TableDataClass}>{user?.quantity}</td>
                           <td className={TableDataClass}>{user?.notes}</td>
                           <td className={TableDataClass}>

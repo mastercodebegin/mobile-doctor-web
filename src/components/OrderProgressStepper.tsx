@@ -12,7 +12,7 @@ const OrderProgressStepper = ({ selectedOrderDetails }) => {
         const time = date.toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
-            hour12: false
+            hour12: true
         });
         return `${day} ${month}, ${time}`;
     };
@@ -36,8 +36,55 @@ const OrderProgressStepper = ({ selectedOrderDetails }) => {
 
     const firstOrder = selectedOrderDetails;
 
-    // Define all steps and filter out those without dates
-    const allSteps = [
+    const isOffline = !firstOrder.onlineOrder;
+const isCancelled = firstOrder.unitRepairStatus === 'CANCELLED';
+const isCompleted = firstOrder.unitRepairStatus === 'COMPLETED';
+
+
+let allSteps = [];
+
+if (isOffline && isCancelled) {
+    allSteps = [
+        {
+            name: 'ORDERED',
+            label: 'Order Placed',
+            date: firstOrder.orderOn,
+            completed: !!firstOrder.orderOn
+        },
+        {
+            name: 'CANCELLED',
+            label: 'Cancelled On',
+            date: firstOrder.cancelledOn,
+            completed: !!firstOrder.cancelledOn
+        }
+    ];
+} else if (isOffline) {
+    allSteps = [
+        {
+            name: 'ORDERED',
+            label: 'Order Placed',
+            date: firstOrder.orderOn,
+            completed: !!firstOrder.orderOn
+        },
+        {
+            name: 'EXPECTED_DELIVERY',
+            label: 'Expected Delivery',
+            date: firstOrder.expectedCompletedOn,
+            completed: !!firstOrder.expectedCompletedOn
+        },
+        ...(isCompleted
+            ? [{
+                name: 'DELIVERED',
+                label: 'Delivered',
+                date: firstOrder.deliveredOn,
+                completed: !!firstOrder.deliveredOn
+            }]
+            : []
+        )
+    ];
+} else {
+    // your existing logic for normal online orders
+    allSteps = [
         {
             name: 'ORDERED',
             label: 'Order Placed',
@@ -66,21 +113,77 @@ const OrderProgressStepper = ({ selectedOrderDetails }) => {
             name: 'COMPLETED',
             label: 'Completed',
             date: firstOrder.completedByEngineerOn,
-            completed: !!firstOrder.completedByEngineerOn || firstOrder.unitRepairStatus === 'COMPLETED'
+            completed: !!firstOrder.completedByEngineerOn || isCompleted
         },
-        {
-            name: 'DELIVERED',
-            label: 'Delivered',
-            date: firstOrder.deliveredOn,
-            completed: !!firstOrder.deliveredOn
-        },
-        ...(firstOrder.unitRepairStatus === 'CANCELLED' ? [{
-            name: 'CANCELLED',
-            label: 'Cancelled',
-            date: firstOrder.cancelledOn,
-            completed: true
-        }] : [])
-    ].filter(step => step.date); // Only show steps that have dates
+        ...(isCompleted
+            ? [{
+                name: 'DELIVERED',
+                label: 'Delivered',
+                date: firstOrder.deliveredOn,
+                completed: !!firstOrder.deliveredOn
+            }]
+            : []
+        ),
+        ...(isCancelled
+            ? [{
+                name: 'CANCELLED',
+                label: 'Cancelled',
+                date: firstOrder.cancelledOn,
+                completed: true
+            }]
+            : []
+        )
+    ];
+}
+
+// Filter only steps with date (keep this line)
+const filteredSteps = allSteps.filter(step => step.date);
+
+    // // Define all steps and filter out those without dates
+    // const allSteps = [
+    //     {
+    //         name: 'ORDERED',
+    //         label: 'Order Placed',
+    //         date: firstOrder.orderOn,
+    //         completed: !!firstOrder.orderOn
+    //     },
+    //     {
+    //         name: 'PICKUP_SCHEDULED',
+    //         label: 'Pickup Scheduled',
+    //         date: firstOrder.pickupScheduleOn,
+    //         completed: !!firstOrder.pickupScheduleOn
+    //     },
+    //     {
+    //         name: 'PICKED_UP',
+    //         label: 'Picked up',
+    //         date: firstOrder.pickedupUnitFromUserOn,
+    //         completed: !!firstOrder.pickedupUnitFromUserOn
+    //     },
+    //     {
+    //         name: 'RECEIVED_FROM_PARTNER',
+    //         label: 'In Progress',
+    //         date: firstOrder.unitRecievedFromPartnerOn,
+    //         completed: !!firstOrder.unitRecievedFromPartnerOn
+    //     },
+    //     {
+    //         name: 'COMPLETED',
+    //         label: 'Completed',
+    //         date: firstOrder.completedByEngineerOn,
+    //         completed: !!firstOrder.completedByEngineerOn || firstOrder.unitRepairStatus === 'COMPLETED'
+    //     },
+    //     {
+    //         name: 'DELIVERED',
+    //         label: 'Delivered',
+    //         date: firstOrder.deliveredOn,
+    //         completed: !!firstOrder.deliveredOn
+    //     },
+    //     ...(firstOrder.unitRepairStatus === 'CANCELLED' ? [{
+    //         name: 'CANCELLED',
+    //         label: 'Cancelled',
+    //         date: firstOrder.cancelledOn,
+    //         completed: true
+    //     }] : [])
+    // ].filter(step => step.date); // Only show steps that have dates
 
     // Calculate completed steps
     const completedSteps = allSteps.filter(step => step.completed);
@@ -110,7 +213,7 @@ const OrderProgressStepper = ({ selectedOrderDetails }) => {
 
                 {/* Steps Container */}
                 <div className="flex justify-between items-start relative">
-                    {allSteps.map((step, index) => {
+                    {filteredSteps.map((step, index) => {
                         const isCompleted = step.completed;
                        const stepDelay = index * 200;
 

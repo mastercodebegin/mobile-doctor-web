@@ -74,7 +74,7 @@ ASSIGN_TO_ENGINEER: 'unitRepair/recieveDeviceFromPartnerAndAssignToEngineer',
 
 
 
-  AWS_IMAGE_BASE_URL:'https://userdocumentx.s3.ap-northeast-1.amazonaws.com/',
+  AWS_IMAGE_BASE_URL:'https://icare-1.s3.ap-southeast-2.amazonaws.com/',
   // LOGIN: 'vendor/login
   CREATE_VENDOR:'vendor/createVendor',
   UPDATE_VENDOR_STATUS:'vendor/updateVendorAccountStatus',

@@ -627,7 +627,7 @@ const isCurrentStepValid = () => {
                 className={DropDownClass}
               >
                 <option value="">Select Status</option>
-                {roleData.map((status) => (
+                {roleData?.map((status) => (
                   <option key={status.id} value={status.id}>
                     {status.name}
                   </option>
@@ -1059,7 +1059,7 @@ const isCurrentStepValid = () => {
                         <div>
                           <input
                             name="aadharNumber"
-                            value={formData.aadharNumber || ''}
+                            value={formData?.aadharNumber || ''}
                             onChange={handleInputChange}
                             onBlur={handleFieldBlur}
                             required
@@ -1088,13 +1088,13 @@ const isCurrentStepValid = () => {
                           <select
                             className={`${DropDownClass} ${errors.state && touched.state ? 'border-red-500' : ''}`}
                             name="state"
-                            value={formData.state?.id || ""}
+                            value={formData?.state?.id || ""}
                             onBlur={handleStateBlur}  // Add this line
                             onChange={handleStateChange}
                             required
                           >
                             <option value="">Select State</option>
-                            {stateData.map((item) => (
+                            {stateData?.map((item) => (
                               <option key={item.id} value={item.id}>
                                 {item.name}
                               </option>
@@ -1126,8 +1126,8 @@ const isCurrentStepValid = () => {
                         </div>
 
                         {(() => {
-                          const selectedRole = roleData?.find((role: any) => role.id == formData.role);
-                          const isManagerRole = selectedRole?.id === RoleIds.manager;
+                          const selectedRole = roleData?.find((role: any) => role.id == formData?.role);
+                          const isManagerRole = selectedRole?.id === RoleIds?.manager;
 
                           return isManagerRole && (
                             <>
