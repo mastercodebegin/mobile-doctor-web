@@ -77,9 +77,7 @@ const handleConfirmSave = () => {
     .unwrap()
     .then(async (res: any) => {
       toast.success(res.message || "Color Name Added Successfully!!");
-
-      await dispatch(GetAllColors());
-
+      dispatch(GetAllColors());
       setColorName("");
       setColorCodeName("");
       setShowModal(false);

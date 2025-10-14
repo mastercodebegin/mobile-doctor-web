@@ -72,15 +72,17 @@ if (isOffline && isCancelled) {
             date: firstOrder.expectedCompletedOn,
             completed: !!firstOrder.expectedCompletedOn
         },
-        ...(isCompleted
-            ? [{
+        // ...(isCompleted
+        //     ? [
+                {
                 name: 'DELIVERED',
                 label: 'Delivered',
-                date: firstOrder.deliveredOn,
-                completed: !!firstOrder.deliveredOn
-            }]
-            : []
-        )
+                date: firstOrder.deliveredOn || "--",
+                completed: !!firstOrder.deliveredOn || "--"
+            }
+        // ]
+        //     : []
+        // )
     ];
 } else {
     // your existing logic for normal online orders
@@ -115,15 +117,17 @@ if (isOffline && isCancelled) {
             date: firstOrder.completedByEngineerOn,
             completed: !!firstOrder.completedByEngineerOn || isCompleted
         },
-        ...(isCompleted
-            ? [{
+        // ...(isCompleted
+        //     ? [
+                {
                 name: 'DELIVERED',
                 label: 'Delivered',
-                date: firstOrder.deliveredOn,
-                completed: !!firstOrder.deliveredOn
-            }]
-            : []
-        ),
+                date: firstOrder.deliveredOn || "--",
+                completed: !!firstOrder.deliveredOn || "--"
+            },
+        // ]
+        //     : []
+        // ),
         ...(isCancelled
             ? [{
                 name: 'CANCELLED',

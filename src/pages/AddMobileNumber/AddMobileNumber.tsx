@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import { GetAllCategory } from "../AddCategory/AddCategorySlice";
 import IphoneImage from "../../assets/Laptop_Image.png"
 import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
+import { UrlConstants } from "../../util/practice/UrlConstants";
 
 const MobileNumberPage = () => {
   // State declarations
@@ -121,7 +122,7 @@ const MobileNumberPage = () => {
     network: "",
   };
 
-    const getDefaultFormData = (autoBrandId = null, autoBrandName = null, autoCategoryId = null, autoCategoryName = null, autoSubCategoryId = null, autoSubCategoryName = null, autoSubCategoryObj = null) => ({
+  const getDefaultFormData = (autoBrandId = null, autoBrandName = null, autoCategoryId = null, autoCategoryName = null, autoSubCategoryId = null, autoSubCategoryName = null, autoSubCategoryObj = null) => ({
     modelNo: "",
     category: {
       id: autoCategoryId || "",
@@ -310,7 +311,7 @@ const MobileNumberPage = () => {
     setModalSubCategories(filteredSubCategories);
   };
 
-    const handleCreateModelClick = () => {
+  const handleCreateModelClick = () => {
     let defaultData = getDefaultFormData();
 
     // Auto-select based on current filters
@@ -679,9 +680,11 @@ const MobileNumberPage = () => {
                           colorObj.modalImages?.map((img: any, idx: number) => (
                             <img
                               key={`${variant.id}-${idx}`}
-                              src={`${img.imageName} ?? ${IphoneImage}`}
+                              src={img?.imageName ? `${UrlConstants.AWS_IMAGE_BASE_URL}${img.imageName}` : `${IphoneImage}`}
+
+
                               alt={img.imageName}
-                              className="w-24 h-24 object-cover border rounded"
+                              className="w-24 h-24 object-cover border border-gray-200 rounded"
                             />
                           )) || []
                         )}
@@ -755,7 +758,7 @@ const MobileNumberPage = () => {
     setCurrentPage(1);
   }, [selectedBrand, filterCategory, filterSubCategory]);
 
-    {isLoading && <Loading overlay={true} />}
+  { isLoading && <Loading overlay={true} /> }
 
   return (
     <>
@@ -840,7 +843,7 @@ const MobileNumberPage = () => {
             <div className={`bg-transparent p-4 rounded-t-lg border border-gray-200 ${ThemeTextColor}`}>
               <h2 className="text-xl font-semibold">
                 {selectedBrand
-                  ? `${getSelectedBrandName()} Models (${displayData.length} total)`
+                  ? `${getSelectedBrandName()} Models (${displayData?.length} total)`
                   : `All Models (${displayData?.length} total)`
                 }
               </h2>
@@ -935,7 +938,7 @@ const MobileNumberPage = () => {
             </div>
 
             {/* Reusable Pagination Component */}
-            {displayData.length > 0 && (
+            {displayData?.length > 0 && (
               <Pagination
                 currentPage={currentPage}
                 totalCount={displayData?.length}
@@ -1146,8 +1149,8 @@ const MobileNumberPage = () => {
         </>
       )}
 
-                {/* ADD this overlay loading at the end */}
-    {isLoading && <Loading overlay={true} />}
+      {/* ADD this overlay loading at the end */}
+      {isLoading && <Loading overlay={true} />}
     </>
   );
 };

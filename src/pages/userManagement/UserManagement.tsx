@@ -10,6 +10,7 @@ import ConfirmationModal from '../../components/ConfirmationModal';
 import { GetAllRoles } from '../Roles/RoleSlice';
 import { GetCitiesByStateId } from '../City/CitySlice';
 import { ArrowDownIcon, ArrowUpIcon, ImageUp, NotebookPen, UserRound } from 'lucide-react';
+import { UrlConstants } from '../../util/practice/UrlConstants';
 
 const UserManagement = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -810,9 +811,9 @@ const isCurrentStepValid = () => {
                                                   {vendor.vendor.vendorDocument.map((doc, i) => (
                                                     <div key={i} className="p-4 bg-white rounded flex flex-col items-center">
                                                       <img
-                                                        src={`https://shopax.s3.eu-north-1.amazonaws.com/${doc?.imageName}`}
+                                                        src={`${UrlConstants.AWS_IMAGE_BASE_URL}${doc?.imageName}`}
                                                         className="w-24 h-24 object-contain border border-gray-200 rounded-md mb-2 cursor-pointer hover:opacity-80 transition-opacity"
-                                                        onClick={() => setSelectedImage(`https://shopax.s3.eu-north-1.amazonaws.com/${doc?.imageName}`)}
+                                                        onClick={() => setSelectedImage(`${UrlConstants.AWS_IMAGE_BASE_URL}${doc?.imageName}`)}
                                                       />
                                                     </div>
                                                   ))}

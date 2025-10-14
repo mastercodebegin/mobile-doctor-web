@@ -48,7 +48,8 @@ export const LocalStorageManager = {
                 'branch', 'country', 'state', 'city', 'user', 'vendor', 'role',
                 'dashboard', 'category', 'sub-category', 'brand', 'modal-number',
                 'color-name', 'variant', 'variant-color', 'modal-issue', 'repair-cost',
-                'product-part', 'order', 'support-ticket', 'coupon','authToken', 'token'
+                'product-part', 'order', 'support-ticket', 'coupon'
+                // ,'authToken', 'token'
             ];
             keys.forEach(key => localStorage.removeItem(key));
             console.log('🗑️ All app data cleared from localStorage');

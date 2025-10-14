@@ -11,6 +11,7 @@ interface User {
     couponCode: string;
     discountInPercent: number;
     expiredOn: string;
+    message: string;
     createdBy: string
 }
 
@@ -23,8 +24,9 @@ Edit: {
     coupon: User | {
         id: number;
         couponCode: string;
-        discountInPercent: number
+        discountInPercent: number;
         expiredOn: string;
+        message: string;
         createdBy: string
     }
 }
@@ -41,6 +43,7 @@ const initialState:Coupon = {
         couponCode: '',
         discountInPercent: 0,
         expiredOn: '',
+        message: '',
         createdBy: ''
         }
     }
@@ -115,7 +118,7 @@ state.isSuccess = false
 state.isLoading = false;
 state.isSuccess = true;
 state.couponData = state.couponData.map((coupon) => coupon.id === action.payload?.id ? action.payload : coupon);
-state.Edit = {isEdit: false, coupon: {id: 0, couponCode: "", discountInPercent: 0, expiredOn: "", createdBy: ""}};
+state.Edit = {isEdit: false, coupon: {id: 0, couponCode: "", discountInPercent: 0, expiredOn: "", message: "", createdBy: ""}};
 LocalStorageManager.saveData(STORAGE_KEYS.COUPON, [...state.couponData])
 })
 .addCase(UpdateCoupon.rejected , (state , action) =>{

@@ -182,12 +182,12 @@ const ProductPart = () => {
     if (isOrderUseMode) {
       // Order Use Mode
       if (!unitRepairOrderId.trim() || !notes.trim()) {
-        alert("Please Enter All Input Fields.");
+        toast.warn("Please Enter All Input Fields.");
         return;
       }
 
       if (!selectedInventoryForReFill) {
-        alert("Please Select An Inventory Item.");
+        toast.warn("Please Select An Inventory Item.");
         return;
       }
 
@@ -249,7 +249,7 @@ const ProductPart = () => {
     } else if (isEditMode && Edit?.inventory?.id) {
       // Edit Mode
       if (!selectedProductPartLabel) {
-        alert("Please Select A Product-Part-Label.");
+        toast.warn("Please Select A Product-Part-Label.");
         return;
       }
 
@@ -258,7 +258,7 @@ const ProductPart = () => {
           ...Edit.inventory,
           quantity: quantity,
           notes: notes,
-          productPart: selectedProductPartLabel
+          productPartLabel: selectedProductPartLabel
         };
 
         dispatch(Update(updatedData));
@@ -285,7 +285,7 @@ const ProductPart = () => {
     } else {
       // Add Mode
       if (!selectedProductPartLabel) {
-        alert("Please Select A Product-Part-Label.");
+        toast.warn("Please Select A Product-Part-Label.");
         return;
       }
 
@@ -336,31 +336,74 @@ const ProductPart = () => {
     dispatch(Update(null))
   }
 
-  const handleEditUser = (user: any) => {
-    console.log("Edit User with User :--", user)
-    dispatch(Update(user))
-    setShowModal(true);
-    setQuantity(user?.quantity)
-    setNotes(user?.notes)
-    setSelectedProductPartLabel(user?.productPart)
-    setSelectedModel(user?.productModelNumber)
-    setIsEditMode(true);
-    setIsReFillMode(false);
-    setIsOrderUseMode(false);
+  // const handleEditUser = (user: any) => {
+  //   console.log("Edit User with User :--", user)
+  //   dispatch(Update(user))
+  //   setShowModal(true);
+  //   setQuantity(user?.quantity)
+  //   setNotes(user?.notes)
+  //   setSelectedProductPartLabel(user?.productPartLabel)
+  //   setSelectedModel(user?.productModelNumber)
+  //   setIsEditMode(true);
+  //   setIsReFillMode(false);
+  //   setIsOrderUseMode(false);
 
-    // If editing, set the quantity and fetch productpartlabel
-    if (user?.productPart?.id) {
-      setSelectedProductPartLabel(user.productPart);
-      dispatch(GetAllProductPartBySubCategoryId(user.productPart.subCategory.id))
-        .unwrap()
-        .then((res: any) => {
-          console.log("Edit Mode SubCategories Fetched :", res)
-        })
-        .catch((err: any) => {
-          console.log("Error Fetching SubCategories For Edit : ", err);
-        })
-    }
+  //   // If editing, set the quantity and fetch productpartlabel
+  //   if (user?.productPartLabel?.id) {
+  //     setSelectedProductPartLabel(user.productPartLabel);
+  //     dispatch(GetAllProductPartBySubCategoryId(user.productPartLabel.subCategory.id))
+  //       .unwrap()
+  //       .then((res: any) => {
+  //         console.log("Edit Mode SubCategories Fetched :", res)
+  //       })
+  //       .catch((err: any) => {
+  //         console.log("Error Fetching SubCategories For Edit : ", err);
+  //       })
+  //   }
+  // }
+
+const handleEditUser = (user: any) => {
+  console.log("Edit User with User :--", user)
+  dispatch(Update(user))
+  setShowModal(true);
+  setQuantity(user?.quantity)
+  setNotes(user?.notes)
+  setSelectedModel(user?.productModelNumber)
+  setIsEditMode(true);
+  setIsReFillMode(false);
+  setIsOrderUseMode(false);
+
+  // Set filter states for Edit Mode to populate dropdowns
+  if (user?.productPartLabel?.subCategory) {
+    const subCategory = user.productPartLabel.subCategory;
+    const category = subCategory.category;
+    
+    // Set category and subcategory (full object, not just name)
+    setFilterCategory(category);
+    setFilterSubCategory(subCategory);  // Changed: Pass full object, not just name
+    
+    // Fetch subcategories for the category
+    dispatch(GetAllSubCategoryById(category.id))
+      .unwrap()
+      .then(() => {
+        // After subcategories are fetched, fetch modal numbers
+        return dispatch(FetchModalBySubCategory(subCategory.id)).unwrap();
+      })
+      .then(() => {
+        // After modal numbers are fetched, fetch product parts
+        return dispatch(GetAllProductPartsBySubCategory(subCategory.id)).unwrap();
+      })
+      .then((res: any) => {
+        console.log("Edit Mode Product Parts Fetched:", res);
+        // Set product part label after data is fetched
+        setSelectedProductPartLabel(user?.productPartLabel);  // Set it here again
+      })
+      .catch((err: any) => {
+        console.log("Error Fetching Data For Edit:", err);
+        toast.error("Failed to fetch dropdown data");
+      });
   }
+}
 
   const handleDeleteUser = (userId: number) => {
     console.log("Delete User with ID: --", userId)
@@ -708,7 +751,7 @@ const ProductPart = () => {
       setIsOrderUseMode(false);
       setQuantity(Edit?.inventory?.quantity || 0);
       setNotes(Edit?.inventory?.notes || "");
-      setSelectedProductPartLabel(Edit?.inventory?.productPart);
+      setSelectedProductPartLabel(Edit?.inventory?.productPartLabel);
       setSelectedModel(Edit?.inventory?.productModelNumber);
       setShowModal(true)
     } else {

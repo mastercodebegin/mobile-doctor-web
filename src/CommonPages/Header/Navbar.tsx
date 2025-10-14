@@ -26,8 +26,8 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, setToken }) => {
 
 
   const handleClearLoginState = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("token");
+    // localStorage.removeItem("authToken");
+    // localStorage.removeItem("token");
     dispatch(clearLoginState());
     setToken(null);
     LocalStorageManager.clearAllData()

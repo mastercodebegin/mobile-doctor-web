@@ -18,6 +18,7 @@ const Coupon = () => {
   const [couponCode, setCouponCode] = useState("");
   const [discountInPercent, setDiscountInPercent] = useState("");
   const [expiredOn, setExpiredOn] = useState("");
+  const [message, setMessage] = useState("");
 
   const dispatch = useDispatch<AppDispatch>()
 
@@ -38,6 +39,7 @@ const Coupon = () => {
           couponCode: couponCode,
           discountInPercent: discountInPercent,
           expiredOn: expiredOn,
+          message: message,
           createdBy: {
             id: Edit?.coupon?.createdBy?.id
           },
@@ -69,6 +71,7 @@ const Coupon = () => {
       couponCode: couponCode,
       discountInPercent: discountInPercent,
       expiredOn: expiredOn,
+      message: message
     }
     dispatch(CreateCoupon(newCouponCode))
       .unwrap()
@@ -90,6 +93,7 @@ const Coupon = () => {
     setCouponCode("");
     setDiscountInPercent("");
     setExpiredOn("")
+    setMessage("");
     setIsEditMode(false);
     dispatch(Restore())
   }
@@ -99,7 +103,7 @@ const Coupon = () => {
     setCouponCode(user?.couponCode || "")
     setDiscountInPercent(user?.discountInPercent || 0);
     setExpiredOn(user?.expiredOn || "");
-
+    setMessage(user?.message || "");
     setIsEditMode(true);
     setShowModal(true);
   }
@@ -120,6 +124,7 @@ const Coupon = () => {
       setCouponCode(Edit?.coupon?.couponCode || "")
       setDiscountInPercent(Edit?.coupon?.discountInPercent || 0);
       setExpiredOn(Edit?.coupon?.expiredOn || "");
+      setMessage(Edit?.coupon?.message || "");
       setShowModal(true);
     }
   }, [Edit])
@@ -299,6 +304,18 @@ const Coupon = () => {
                 className={inputClass}
               />
             </div>
+
+            {/* Message */}
+            <div className="mb-6">
+              <label className="block text-lg font-medium mb-2">Message</label>
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Enter Message"
+                className={`${inputClass} h-24 resize-none`}
+              />
+            </div>
+
 
             {/* Action Buttons */}
             <div className="flex justify-center gap-4 mt-8">

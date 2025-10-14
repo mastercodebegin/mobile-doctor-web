@@ -451,10 +451,10 @@ const RepairCost = () => {
     if (!LocalStorageManager.hasData(STORAGE_KEYS.REPAIR_COST)) {
       dispatch(GetAllRepairCost());
     }
-    dispatch(FetchAllModalNumber());
-    dispatch(GetAllModalIssues());
     dispatch(GetAllCategory());
-    dispatch(GetAllSubCategory());
+    // dispatch(FetchAllModalNumber());
+    // dispatch(GetAllModalIssues());
+    // dispatch(GetAllSubCategory());
   }, [dispatch]);
 
   { isLoading && <Loading overlay={true} /> }

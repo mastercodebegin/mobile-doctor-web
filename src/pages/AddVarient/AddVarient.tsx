@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ClearFilter, DeleteClass, DeleteIcon, DropDownClass, EditClass, EditIcon, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, ShowVarientButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
+import { ClearFilter, DeleteClass, DeleteIcon, DropDownClass, EditClass, EditIcon, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
 import Pagination from "../../helper/Pagination";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import IphoneImage from "../../assets/Laptop_Image.png";
 import { ArrowDown, ArrowUp } from "lucide-react";
+import { UrlConstants } from "../../util/practice/UrlConstants";
 
 const AddVarient = () => {
  const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -651,16 +652,26 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
                                             <div className="text-sm text-gray-800 mt-1">{field?.value}</div>
                                           </div>
                                         ))}
-  <div className="p-4 bg-white rounded shadow-sm border border-gray-200">
+
+<div className="p-4 bg-white rounded shadow-sm border border-gray-200">
   <div className="text-sm font-medium text-cyan-600 mb-1">Image</div>
   <div className="flex items-center gap-3 flex-wrap">
-    <img 
-      src={IphoneImage}
-      alt="Variant"
-      className="w-20 h-20 object-contain border border-gray-300 rounded"
-    />
+    {(variant?.variantColors?.[0]?.modalImages?.length > 0) ? (
+      <img
+        src={UrlConstants.AWS_IMAGE_BASE_URL + variant.variantColors[0].modalImages[0].imageName}
+        alt="Variant"
+        className="w-20 h-20 object-contain border border-gray-300 rounded"
+      />
+    ) : (
+      <img
+        src={IphoneImage}
+        alt="Variant"
+        className="w-20 h-20 object-contain border border-gray-300 rounded"
+      />
+    )}
   </div>
 </div>
+
 
 
 
