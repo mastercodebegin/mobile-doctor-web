@@ -77,7 +77,7 @@ if (isOffline && isCancelled) {
                 {
                 name: 'DELIVERED',
                 label: 'Delivered',
-                date: firstOrder.deliveredOn || "--",
+                date: firstOrder.deliveredOn || null,
                 completed: !!firstOrder.deliveredOn || "--"
             }
         // ]
@@ -122,7 +122,7 @@ if (isOffline && isCancelled) {
                 {
                 name: 'DELIVERED',
                 label: 'Delivered',
-                date: firstOrder.deliveredOn || "--",
+                date: firstOrder.deliveredOn || null,
                 completed: !!firstOrder.deliveredOn || "--"
             },
         // ]
@@ -141,7 +141,8 @@ if (isOffline && isCancelled) {
 }
 
 // Filter only steps with date (keep this line)
-const filteredSteps = allSteps.filter(step => step.date);
+// const filteredSteps = allSteps.filter(step => step.date);
+const filteredSteps = allSteps;
 
     // // Define all steps and filter out those without dates
     // const allSteps = [
@@ -243,7 +244,8 @@ const filteredSteps = allSteps.filter(step => step.date);
                                     </div>
                                     {step.date ? (
                                         <div className="text-sm font-medium text-gray-800 mt-1">
-                                            {formatDate(step.date)}
+                                            {/* {formatDate(step.date)} */}
+                                            {step.date ? formatDate(step.date) : '--'}
                                         </div>
                                     ) : null} 
                                 </div>

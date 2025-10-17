@@ -71,8 +71,6 @@ const isCurrentStepValid = () => {
   return false;
 };
 
-
-
   const usersPerPage = 5;
   const roleArray = Array?.isArray(data) ? data : data ? [data] : [];
   const paginatedUsers = roleArray?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
@@ -158,7 +156,7 @@ const isCurrentStepValid = () => {
 
     // dispatch ke liye sirf id bhejna
     if (selectedState) {
-      dispatch(GetCitiesByStateId(selectedState.id));
+      dispatch(GetCitiesByStateId(selectedState?.id));
     }
   };
 

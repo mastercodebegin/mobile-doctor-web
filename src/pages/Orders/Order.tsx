@@ -7,7 +7,7 @@ import { AppDispatch, RootState } from '../../redux/store';
 import { toast } from 'react-toastify';
 import { capitalizeEachWord, DropDownClass, EditClass, EditIcon, getStatusBadgeClass, inputClass, pageSize, RoleIds, ShowModalMainClass, ShowModelCloseButtonClass, statusOptions, SubmitButtonClass, TableDataClass, TableHadeClass } from '../../helper/ApplicationConstants';
 import Pagination from '../../helper/Pagination';
-import { AssignToEngineer, FindUserByEmail, GetAllRepairUnitOrderByUserId, update, UpdateOrder } from './OrderSlice';
+import { AssignToEngineer, FindUserByEmail, GetAllRepairUnitOrderByUserId, OrderActionClick, OrderCompletedClick, OrderDeliveredClick, update, UpdateOrder } from './OrderSlice';
 import DatePicker from '../../components/DatePicker';
 import { UrlConstants } from '../../util/practice/UrlConstants';
 import { getRequestMethodWithParam } from '../../util/CommonService';
@@ -45,6 +45,7 @@ const Order = ({ sidebarMobileOpen }) => {
   const [showDetailsModel, setShowDetailsModel] = useState(false);
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
   const { Orders, isLoading, Edit, isEmailLoading } = useSelector((state: RootState) => state.OrderSlice);
+  const { data } = useSelector((state: RootState) => state.UserLoginSlice);
   const [filterEmail, setFilterEmail] = useState<any>('')
   const [filterOrderId, setFilterOrderId] = useState('')
   const [managerId, setManagerId] = useState<number | null>(null);
@@ -52,6 +53,7 @@ const Order = ({ sidebarMobileOpen }) => {
   const [pickupPartnerId, setPickupPartnerId] = useState<number | null>(null);
   const [showFilter, setShowFilter] = useState(false);
   const [isFilterApplied, setIsFilterApplied] = useState(false);
+  const [fullscreenImage, setFullscreenImage] = useState(null);
 
   const [showAssign, setShowAssign] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
@@ -59,6 +61,9 @@ const Order = ({ sidebarMobileOpen }) => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [assignEmail, setAssignEmail] = useState('');
   const [activeAssignmentType, setActiveAssignmentType] = useState(null); // 'engineer' or 'pickupPartner'
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [pendingAction, setPendingAction] = useState<"COMPLETE" | "DELIVER" | null>(null);
 
   const [unitRepairStatusEdit, setUnitRepairStatusEdit] = useState("PENDING");
   const [description, setDescription] = useState("");
@@ -66,7 +71,6 @@ const Order = ({ sidebarMobileOpen }) => {
   const [orderCompletedOn, setOrderCompletedOn] = useState("");
 
   const dispatch = useDispatch<AppDispatch>();
-  // const pickerRef = useRef<HTMLDivElement>(null);
   const [unitRepairStatus, setUnitRepairStatus] = useState<string>('');
   const [filterDate, setFilterDate] = useState({
     startDate: null,
@@ -165,7 +169,6 @@ const Order = ({ sidebarMobileOpen }) => {
     console.log('Final API call with filters:', finalFilterObj);
     dispatch(GetAllRepairUnitOrderByUserId(finalFilterObj)).then(() => {
       setShowConfirmModal(false)
-      handleCloseModal()
     })
   };
 
@@ -202,7 +205,6 @@ const Order = ({ sidebarMobileOpen }) => {
 
         if (!roleName || !userId) {
           toast.warning("Invalid user data. Please try again.");
-          setFilterEmail("");
           setLoading(false);
           setShowFilter(true);
           return;
@@ -216,7 +218,6 @@ const Order = ({ sidebarMobileOpen }) => {
           setPickupPartnerId(userId);
         } else {
           toast.warning(`Invalid role: ${roleName}. Please try again.`);
-          setFilterEmail("");
           setLoading(false);
           setShowFilter(true);
           return;
@@ -230,11 +231,9 @@ const Order = ({ sidebarMobileOpen }) => {
 
           if (Orders.length > 0) {
             setSearchModel(false);
-            setFilterOrderId("");
             setLoading(false);
           } else {
             toast.error("Invalid Order ID! Please enter a valid Order ID.");
-            setFilterOrderId("");
             setLoading(false);
             setSearchModel(true);
           }
@@ -278,10 +277,36 @@ const Order = ({ sidebarMobileOpen }) => {
     }
   };
 
-  const handleConfirmSave = () => {
+  const handleConfirmSave = async () => {
+    if (!pendingAction) return;
+
     if (managerId || pickupPartnerId || engineerId) {
       getAllUnitOrderCommonFunction()
     }
+
+
+    try {
+      setLoading(true);
+
+      const requestData = { orderId: selectedOrderDetails.orderId };
+
+      await dispatch(OrderActionClick({ type: pendingAction, requestData })).unwrap();
+
+      toast.success(
+        `Order ${pendingAction === "COMPLETE" ? "completed" : "delivered"} successfully!`
+      );
+
+      await getAllUnitOrderCommonFunction();
+      setShowConfirmModal(false);
+      setPendingAction(null);
+      handleCloseModal();
+    } catch (error: any) {
+      console.error(`${pendingAction} order failed:`, error);
+      toast.error(error.message || `Failed to ${pendingAction.toLowerCase()} order`);
+    } finally {
+      setLoading(false);
+    }
+
     handleCloseModal()
   }
 
@@ -314,12 +339,12 @@ const Order = ({ sidebarMobileOpen }) => {
     const value = e.target.value;
     setAssignEmail(value);
     if (activeAssignmentType === 'engineer') {
-    debouncedSearch(value, RoleIds.engineer);
-  } else if (activeAssignmentType === 'pickupPartner') {
-    debouncedSearch(value, RoleIds.pickupPartner);
-  } else {
-    debouncedSearch(value, null);
-  }
+      debouncedSearch(value, RoleIds.engineer);
+    } else if (activeAssignmentType === 'pickupPartner') {
+      debouncedSearch(value, RoleIds.pickupPartner);
+    } else {
+      debouncedSearch(value, null);
+    }
   };
 
   // Add user selection handler
@@ -383,6 +408,9 @@ const Order = ({ sidebarMobileOpen }) => {
     setShowSearchResults(false);
     setSelectedUser(null);
     setAssignEmail('');
+    setCancelReason("");
+    setShowCancelModal(false);
+    setPendingAction(null);
   }
 
   const handleClearFilter = () => {
@@ -398,7 +426,11 @@ const Order = ({ sidebarMobileOpen }) => {
     setCurrentPage(1);
     setIsFilterApplied(false);
     setShowFilter(false);
-    getAllUnitOrderCommonFunction();
+    const baseFilterObj = {
+      pageSize: pageSize,
+      pageNumber: 0,
+    };
+    dispatch(GetAllRepairUnitOrderByUserId(baseFilterObj));
   };
 
   const handleEditUser = (user) => {
@@ -419,15 +451,15 @@ const Order = ({ sidebarMobileOpen }) => {
     setOrderCompletedOn(orderCompletedOn);
   };
 
-  const handlePrintDetails = () => {
-    const printContent = document.getElementById('order-details-print');
-    const originalContent = document.body.innerHTML;
+  // const handlePrintDetails = () => {
+  //   const printContent = document.getElementById('order-details-print');
+  //   const originalContent = document.body.innerHTML;
 
-    document.body.innerHTML = printContent.innerHTML;
-    window.print();
-    document.body.innerHTML = originalContent;
-    window.location.reload(); // Reload to restore event handlers
-  };
+  //   document.body.innerHTML = printContent.innerHTML;
+  //   window.print();
+  //   document.body.innerHTML = originalContent;
+  //   window.location.reload(); // Reload to restore event handlers
+  // };
 
   useEffect(() => {
     if (Edit.isEdit) {
@@ -456,9 +488,74 @@ const Order = ({ sidebarMobileOpen }) => {
     return `${day} ${dateNum} ${month} ${year}`;
   };
 
+  // Image Slider Section
+  const images = selectedOrderDetails?.repairUnitImages?.map(img =>
+    UrlConstants.AWS_IMAGE_BASE_URL + img.imageName
+  ) || [];
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (!images.length) return;
+    const interval = setInterval(() => {
+      setCurrentIndex(idx => (idx + 1) % images.length);
+    }, 2500); // change 2500 for autoplay speed (ms)
+    return () => clearInterval(interval);
+  }, [images.length]);
+
+  const handlePrev = () => setCurrentIndex(idx => idx === 0 ? images.length - 1 : idx - 1);
+  const handleNext = () => setCurrentIndex(idx => (idx + 1) % images.length);
 
   const firstOrder = Array.isArray(selectedOrderDetails) ? selectedOrderDetails[0] : selectedOrderDetails;
-  const HoverEffect = "rounded-xl p-6 mb-8 rounded-l-lg shadow border-l-4 border-gray-400"
+  const HoverEffect = "rounded-xl p-6 mb-8 rounded-l-lg shadow border-l-4 border-red-400"
+
+
+  const handleOrderAction = async (actionType: "COMPLETE" | "DELIVER" | "CANCEL") => {
+    // If cancel action, show modal first
+    if (actionType === "CANCEL") {
+      setShowCancelModal(true);
+      return;
+    }
+
+    // If complete or deliver, show confirmation modal
+    if (actionType === "COMPLETE" || actionType === "DELIVER") {
+      setPendingAction(actionType);
+      setShowConfirmModal(true);
+      return;
+    }
+
+
+  };
+
+  // function for cancel with reason
+  const handleConfirmCancel = async () => {
+    if (!cancelReason.trim()) {
+      toast.warning("Please enter cancellation reason");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const requestData = {
+        orderId: selectedOrderDetails.orderId,
+        cancelReason: cancelReason
+      };
+
+      await dispatch(OrderActionClick({ type: "CANCEL", requestData })).unwrap();
+
+      toast.success("Order cancelled successfully!");
+      await getAllUnitOrderCommonFunction();
+      setShowCancelModal(false);
+      setCancelReason("");
+      handleCloseModal();
+    } catch (error: any) {
+      console.error("Cancel order failed:", error);
+      toast.error(error.message || "Failed to cancel order");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -545,7 +642,7 @@ const Order = ({ sidebarMobileOpen }) => {
                       value={expectedDeliveryDate}
                       onChange={(newValue) => setExpectedDeliveryDate(newValue)}
                       style={{
-                       border: `3px solid  #5ca1b6ff`,
+                        border: `3px solid  #5ca1b6ff`,
                         borderRadius: "9px",
                       }}
                       container={() => document.body}
@@ -660,7 +757,6 @@ const Order = ({ sidebarMobileOpen }) => {
                     <th scope="col" className={TableHadeClass}>Price</th>
                     <th scope="col" className={TableHadeClass}>Created</th>
                     <th scope="col" className={TableHadeClass}>Expected Delivery</th>
-                    <th scope="col" className={TableHadeClass}>Description</th>
                     <th scope="col" className={TableHadeClass}>Edit</th>
                     <th scope="col" className={TableHadeClass}>Details</th>
                   </tr>
@@ -678,15 +774,15 @@ const Order = ({ sidebarMobileOpen }) => {
                       >
                         {/* Product Image */}
                         <td className={TableDataClass}>
-                          <div className="flex items-center space-x-3">
+                          <div className="flex items-center pr-10 space-x-3">
                             <img
-                              src={`${user.repairUnitImages?.[0]?.imageName}`}
+                              src={`${UrlConstants.AWS_IMAGE_BASE_URL}${user.repairUnitImages?.[0]?.imageName}`}
                               className="w-14 h-14 object-contain border border-gray-300 rounded-md"
                               alt="Product"
                             />
                             <span className='flex flex-col'>
-                              <h4 className='text-black' >{user.productModelNumber?.name || ""}</h4>
-                              <span>{`${user.productModelNumber?.productSpecification?.ram}GB` || ""} / {`${user.productModelNumber?.productSpecification?.rom || ""}GB`}</span>
+                              <h1 className='text-black text-xl' >{user.productModelNumber?.name || ""}</h1>
+                              <small>{`${user.productModelNumber?.productSpecification?.ram}GB` || ""} / {`${user.productModelNumber?.productSpecification?.rom || ""}GB`}</small>
                               <span>{capitalizeEachWord(user.productModelNumber?.brand?.name) || ""}</span>
                             </span>
                           </div>
@@ -714,10 +810,6 @@ const Order = ({ sidebarMobileOpen }) => {
                         <td className={TableDataClass}>
                           {formatDate(user?.expectedCompletedOn)}
                         </td>
-
-
-                        {/* Description */}
-                        <td className={`text-center ${TableDataClass}`}> {user?.defectDescriptionByEngineer ? (user.defectDescriptionByEngineer) : (<span className="font-bold text-lg">-</span>)}</td>
 
                         {/* Edit */}
                         <td className={TableDataClass}>
@@ -885,64 +977,163 @@ const Order = ({ sidebarMobileOpen }) => {
 
                   {/* User Profile Section */}
                   <section>
-                    <div className="flex flex-col mb-4 md:flex-row items-center md:items-start justify-between">
+                    <div className="flex flex-col md:flex-row items-center md:items-start justify-between bg-white shadow-md rounded-2xl p-6">
 
-                      {/* Left Side: Avatar + Name */}
-                      <div className="flex items-center space-x-4">
-                        <div className="w-16 h-16 bg-gray-400 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-md">
+                      {/* Left Side: Avatar + Info */}
+                      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 w-full md:w-auto text-center sm:text-left">
+                        {/* Avatar */}
+                        <div className="w-16 h-16 bg-gradient-to-tr from-gray-500 to-gray-700 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg">
                           {firstOrder.customer?.firstName?.charAt(0)?.toUpperCase() || "AK"}
                         </div>
-                        <div className="flex items-start justify-center flex-col">
-                          <div>
-                            <h3 className="text-xl font-semibold text-gray-800">
-                              {`${capitalizeEachWord(firstOrder?.customer?.firstName)} ${capitalizeEachWord(firstOrder?.customer?.lastName)}`}
-                            </h3>
+
+                        {/* User Info */}
+                        <div className="flex flex-col items-center sm:items-start">
+                          <h3 className="text-lg sm:text-xl font-semibold text-gray-800">
+                            {`${capitalizeEachWord(firstOrder?.customer?.firstName)} ${capitalizeEachWord(firstOrder?.customer?.lastName)}`}
+                          </h3>
+
+                          <div dir="ltr" className="flex items-center justify-center sm:justify-start space-x-2 mt-2 text-gray-700">
+                            <Mail className="w-4 h-4 text-gray-600" />
+                            <span className="text-sm">{firstOrder.customer?.email || "N/A"}</span>
                           </div>
-                          <div dir="ltr" className="flex items-center space-x-2 p-2 rounded-xl bg-white">
-                            <Mail className="w-4 h-4 text-black" />
-                            <span>{firstOrder.customer?.email || ""}</span>
-                          </div>
-                          <div dir="ltr" className="flex items-center space-x-2 px-2 rounded-xl bg-white">
-                            <Phone className="w-4 h-4 text-black" />
-                            <span>+91 {firstOrder.customer?.mobile || ""}</span>
+
+                          <div dir="ltr" className="flex items-center justify-center sm:justify-start space-x-2 mt-1 text-gray-700">
+                            <Phone className="w-4 h-4 text-gray-600" />
+                            <span className="text-sm">+91 {firstOrder.customer?.mobile || "N/A"}</span>
                           </div>
                         </div>
                       </div>
 
-                      {/* Right Side: Details Card */}
-                      <div dir="rtl" className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 md:mt-0 md:ml-8 md:w-auto ">
+                      {/* Right Side: Status + Buttons */}
+                      <div className="flex flex-col items-center md:items-end mt-6 md:mt-0 w-full md:w-auto">
 
-                        {selectedOrderDetails?.onlineOrder && (
+                        {/* Status Badge */}
+                        <span
+                          className={`px-4 py-2 mb-4 rounded-full text-sm md:text-md font-semibold tracking-wider shadow-sm ${getStatusBadgeClass(
+                            selectedOrderDetails?.unitRepairStatus,
+                            true
+                          )}`}
+                        >
+                          {capitalizeEachWord(selectedOrderDetails?.unitRepairStatus?.replace(/_/g, " "))}
+                        </span>
+
+                        {/* Buttons */}
+                        <div className="flex flex-col items-center md:items-end gap-3 w-full max-w-xs">
+                          {selectedOrderDetails?.onlineOrder && (
+                            <button
+                              onClick={() => {
+                                setShowAssign(true);
+                                setActiveAssignmentType("pickupPartner");
+                              }}
+                              type="button"
+                              className="flex items-center justify-center md:justify-end gap-2 px-4 py-2 border border-gray-300 rounded-xl bg-gray-50 shadow hover:shadow-md hover:bg-gray-100 transition w-full sm:w-auto"
+                            >
+                              <User className="w-4 h-4 text-gray-700" />
+                              <span className="text-sm font-medium text-gray-800">
+                                {selectedOrderDetails?.pickupPartner
+                                  ? "Re-Assign to Pickup Partner"
+                                  : "Assign to Pickup Partner"}
+                              </span>
+                            </button>
+                          )}
+
                           <button
-                            onClick={() => {setShowAssign(true), setActiveAssignmentType('pickupPartner')}}
-                            type='button'
-                            dir="ltr"
-                            className="flex items-center space-x-2 p-2 border border-gray-300 rounded-xl bg-white">
-                            <User className="w-4 h-4 text-black" />
-                            <span>
-                              {selectedOrderDetails?.pickupPartner ? 'Re Assign To Pickup Partner' : 'Assign To Pickup Partner'}
+                            type="button"
+                            onClick={() => {
+                              setShowAssign(true);
+                              setActiveAssignmentType("engineer");
+                            }}
+                            className="flex items-center justify-center md:justify-end gap-2 px-4 py-2 border border-gray-300 rounded-xl bg-gray-50 shadow hover:shadow-md hover:bg-gray-100 transition w-full sm:w-auto"
+                          >
+                            <User className="w-4 h-4 text-gray-700" />
+                            <span className="text-sm font-medium text-gray-800">
+                              {selectedOrderDetails?.engineer
+                                ? "Re-Assign to Engineer"
+                                : "Assign to Engineer"}
                             </span>
                           </button>
-                        )}
-
-                        <button
-                          type="button"
-                          onClick={() => {setShowAssign(true), setActiveAssignmentType('engineer')}}
-                          dir="ltr"
-                          className="flex items-center space-x-2 p-2 border border-gray-300 rounded-xl bg-white"
-                        >
-                          <User className="w-4 h-4 text-black" />
-                          <span>
-                            {selectedOrderDetails?.engineer ? 'Re Assign To Engineer' : 'Assign To Engineer'}
-                          </span>
-                        </button>
+                        </div>
                       </div>
                     </div>
                   </section>
 
+
                   {/* Progress Stepper-1 - Show overall progress based on actual dates */}
                   <div className={`rounded-xl p-6 mb-4 rounded-l-lg shadow border-l-4 border-cyan-500`}>
                     <OrderProgressStepper selectedOrderDetails={selectedOrderDetails} />
+                  </div>
+
+                  {/* Image Slider Section */}
+                  <div>
+                    <div className="mb-4 border border-gray-300 rounded-xl p-6">
+                      <h3 className="text-xl font-semibold mb-6 text-gray-800">Images</h3>
+
+                      {images.length > 0 && (
+                        <div className="flex flex-col bg-gray-50">
+                          <div className="relative w-full h-20 flex items-center justify-start pl-5">
+                            {/* Left button */}
+                            {images.length > 1 && (
+                              <button
+                                className="absolute left-2 z-10 bg-white rounded-full shadow px-2 py-1"
+                                onClick={handlePrev}
+                                aria-label="Previous"
+                              >
+                                {"<"}
+                              </button>
+                            )}
+
+                            {/* Image */}
+                            <img
+                              src={images[currentIndex]}
+                              alt={`Order Image ${currentIndex + 1}`}
+                              onClick={() => setFullscreenImage(images[currentIndex])}
+                              className="w-48 h-20 object-contain rounded cursor-pointer"
+                            />
+
+                            {/* Right button */}
+                            {images.length > 1 && (
+                              <button
+                                className="absolute left-56 z-10 bg-white rounded-full shadow px-2 py-1"
+                                onClick={handleNext}
+                                aria-label="Next"
+                              >
+                                {">"}
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Dots below image */}
+                          {images.length > 1 && (
+                            <div className="flex gap-2 justify-start pl-10 mt-2">
+                              {images.map((_, idx) => (
+                                <span
+                                  key={idx}
+                                  onClick={() => setCurrentIndex(idx)}
+                                  className={`w-3 h-3 rounded-full cursor-pointer ${currentIndex === idx ? "bg-gray-800" : "bg-gray-300"
+                                    }`}
+                                ></span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {fullscreenImage && (
+                      <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50">
+                        <img
+                          src={fullscreenImage}
+                          alt="Full view"
+                          className="max-w-full max-h-full rounded-lg shadow-lg"
+                        />
+                        <button
+                          className="absolute top-4 right-4 bg-white text-black px-4 py-2 rounded-full font-semibold"
+                          onClick={() => setFullscreenImage(null)}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Address Information Card Section */}
@@ -1010,30 +1201,36 @@ const Order = ({ sidebarMobileOpen }) => {
                     }
                   })()}
 
-                  {/* User Description Section */}
-                  {(() => {
-                    const description = selectedOrderDetails?.userDefectDescription;
+                  {/* Description Section - Combined User + Engineer Description */}
+                  <div className="mb-8 border border-gray-300 rounded-xl p-6">
+                    {/* Header */}
+                    <div className="flex items-center gap-x-2 mb-6">
+                      <h3 className="text-xl font-semibold text-gray-800">Description</h3>
+                    </div>
 
-                    return (
-                      <div className="mb-8 border border-gray-300 rounded-xl p-6">
-                        {/* Header with Icon */}
-                        <div className="flex items-center gap-x-2 mb-6">
-                          <h3 className="text-xl font-semibold text-gray-800">User Description</h3>
-                        </div>
-
-                        {/* Content based on condition */}
-                        {description && description.trim() !== "" ? (
-                          <div className="bg-gray-50 p-4 rounded-lg">
-                            <p className="text-gray-800 font-medium">{description}</p>
-                          </div>
-                        ) : (
-                          <div className="bg-gray-50 p-4 rounded-lg">
-                            <p className="text-gray-600">Description not available</p>
-                          </div>
-                        )}
+                    {/* Content */}
+                    <div className="bg-gray-50 p-4 rounded-lg space-y-4">
+                      {/* User Description */}
+                      <div>
+                        <p className="text-xs text-gray-500 mb-1">User Description</p>
+                        <p className="font-medium text-gray-800">
+                          {selectedOrderDetails?.userDefectDescription && selectedOrderDetails.userDefectDescription.trim() !== ""
+                            ? selectedOrderDetails.userDefectDescription
+                            : "--"}
+                        </p>
                       </div>
-                    );
-                  })()}
+
+                      {/* Engineer Description */}
+                      <div>
+                        <p className="text-xs text-gray-500 mb-1">Engineer Description</p>
+                        <p className="font-medium text-gray-800">
+                          {selectedOrderDetails?.defectDescriptionByEngineer && selectedOrderDetails.defectDescriptionByEngineer.trim() !== ""
+                            ? selectedOrderDetails.defectDescriptionByEngineer
+                            : "--"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
 
                   {/* Manager Description Section */}
                   {(() => {
@@ -1211,18 +1408,17 @@ const Order = ({ sidebarMobileOpen }) => {
                     </>
                   )}
 
-
                   {/* Global Descriptions Section - Common for all orders */}
                   <div
                     className={`${HoverEffect} px-4 py-2 ${!selectedOrderDetails?.cancelReason && !selectedOrderDetails?.delayReason ? "hidden" : ""
                       }`}
                   >
-                    <h3 className={"text-lg font-semibold mb-2 text-gray-800"}>Overall Problem Description</h3>
+                    <h3 className={"text-lg font-semibold mb-2 text-gray-800"}>Overall Problem</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {selectedOrderDetails?.cancelReason && (
                         <div className="bg-white p-4 rounded-lg">
                           <span className="font-medium text-red-600">Cancel Reason:</span>
-                          <p className="text-red-500 mt-1">{selectedOrderDetails.cancelReason}</p>
+                          <p className="text-black mt-1">{selectedOrderDetails.cancelReason}</p>
                         </div>
                       )}
                       {selectedOrderDetails?.delayReason && (
@@ -1233,7 +1429,6 @@ const Order = ({ sidebarMobileOpen }) => {
                       )}
                     </div>
                   </div>
-
 
                   {/* Defective Part Information */}
                   {selectedOrderDetails?.defectivePart && (
@@ -1260,7 +1455,7 @@ const Order = ({ sidebarMobileOpen }) => {
                 <div className="p-4 rounded-md border border-gray-300">
 
                   {/* Products/Orders List - Row wise display for multiple orders */}
-                  <div className="mb-8 border border-gray-300 rounded-xl p-6">
+                  {/* <div className="mb-8 border border-gray-300 rounded-xl p-6">
                     <h3 className="text-xl font-semibold mb-6 text-gray-800">Orders Summary</h3>
 
                     <div className="overflow-x-auto border border-gray-200 rounded-xl">
@@ -1269,9 +1464,6 @@ const Order = ({ sidebarMobileOpen }) => {
                           <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                               Model Number
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider border-l border-gray-300">
-                              Unit Issue
                             </th>
                             <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-l border-gray-300">
                               Price
@@ -1285,12 +1477,9 @@ const Order = ({ sidebarMobileOpen }) => {
                                 key={`${index}-${detailIndex}`}
                                 className="hover:bg-gray-50"
                               >
-                                {/* Model Number + Specs */}
                                 <td className="px-6 py-4 flex items-center space-x-4">
                                   <img
-                                    src={
-                                      order.variant?.variantColors?.[0]?.modalImages?.[0]
-                                        ?.imageName || DefaultImage
+                                    src={`${UrlConstants.AWS_IMAGE_BASE_URL}${order.variant?.variantColors?.[0]?.modalImages?.[0]?.imageName}` || DefaultImage
                                     }
                                     alt="Product"
                                     className="w-14 h-14 rounded-md object-cover bg-gray-100"
@@ -1315,12 +1504,6 @@ const Order = ({ sidebarMobileOpen }) => {
                                   </div>
                                 </td>
 
-                                {/* Unit Issue */}
-                                <td className="px-6 py-4 text-left border-l border-gray-300">
-                                  {detail?.productPart?.name || ""}
-                                </td>
-
-                                {/* Price (Prefer repairCost.price if available) */}
                                 <td className="px-6 py-4 text-center border-l border-gray-300">
                                   ₹
                                   {detail?.repairCost?.price ||
@@ -1334,7 +1517,66 @@ const Order = ({ sidebarMobileOpen }) => {
                         </tbody>
                       </table>
                     </div>
-                  </div>
+                  </div> */}
+
+ <div className="mb-8 border border-gray-300 rounded-xl p-4 sm:p-6">
+  <h3 className="text-xl font-semibold mb-6 text-gray-800">Orders Summary</h3>
+
+  {/* Responsive Scrollable Wrapper */}
+  <div className="relative w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 rounded-xl">
+    <table className="min-w-[500px] md:min-w-full divide-y divide-gray-200 text-sm">
+      <thead className="bg-gray-50 sticky top-0 z-10">
+        <tr>
+          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">
+            Model Number
+          </th>
+          <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider whitespace-nowrap border-l border-gray-300">
+            Price
+          </th>
+        </tr>
+      </thead>
+
+      <tbody className="divide-y divide-gray-200 bg-white">
+        {(Array.isArray(selectedOrderDetails) ? selectedOrderDetails : [selectedOrderDetails]).map((order, index) =>
+          order?.unitProblemDetails?.map((detail, detailIndex) => (
+            <tr key={`${index}-${detailIndex}`} className="hover:bg-gray-50 overflow-x-scroll">
+              {/* Model Number + Specs */}
+              <td className="px-6 py-4 flex items-center space-x-4 min-w-[250px]">
+                <img
+                  src={`${UrlConstants.AWS_IMAGE_BASE_URL}${order.variant?.variantColors?.[0]?.modalImages?.[0]?.imageName}` || DefaultImage}
+                  alt="Product"
+                  className="w-14 h-14 rounded-md object-cover bg-gray-100 flex-shrink-0"
+                />
+                <div className="min-w-[120px]">
+                  <p className="font-medium text-gray-800 text-sm sm:text-base truncate">
+                    {detail?.repairCost?.productModelNumber?.name ||
+                      order?.productModelNumber?.name ||
+                      "Product Name"}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {detail?.repairCost?.productModelNumber?.productSpecification?.ram
+                      ? `${detail.repairCost.productModelNumber.productSpecification.ram}GB`
+                      : ""}
+                    {detail?.repairCost?.productModelNumber?.productSpecification?.rom
+                      ? ` / ${detail.repairCost.productModelNumber.productSpecification.rom}GB`
+                      : ""}
+                  </p>
+                </div>
+              </td>
+
+              {/* Price */}
+              <td className="px-6 py-4 text-center border-l border-gray-300 whitespace-nowrap">
+                ₹{detail?.repairCost?.price || detail?.price || order?.price || 0}
+              </td>
+            </tr>
+          ))
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
 
                   {/* Summary Section */}
                   <div className="flex justify-end mt-6">
@@ -1418,7 +1660,7 @@ const Order = ({ sidebarMobileOpen }) => {
 
               {/* Action Buttons */}
               <div className="flex justify-end items-center p-8 pt-0">
-                <div className="flex space-x-4">
+                <div className="flex flex-wrap space-y-4 space-x-4">
                   <button
                     type="button"
                     onClick={handleCloseModal}
@@ -1426,19 +1668,184 @@ const Order = ({ sidebarMobileOpen }) => {
                   >
                     Close
                   </button>
-                  <button
+                  {/* <button
                     type="button"
                     onClick={handlePrintDetails}
                     className={SubmitButtonClass}
                   >
                     <span>Print</span>
-                  </button>
+                  </button> */}
+
+                  {/* Dynamic buttons based on role and status */}
+                  {(() => {
+                    const userRole = data?.role?.name?.toLowerCase();
+                    const orderStatus = selectedOrderDetails?.unitRepairStatus;
+                    const isManager = userRole === "manager";
+                    const isEngineer = userRole === "engineer";
+
+                    // IN_SERVICE - Show Complete button (+ Cancel for manager)
+                    if (orderStatus === "IN_SERVICE") {
+                      return (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleOrderAction("COMPLETE")}
+                            disabled={isEngineer || loading}
+                            className={`px-6 py-2 rounded-lg transition-colors ${isEngineer
+                              ? 'bg-white border border-green-500 text-green-500 cursor-not-allowed opacity-50'
+                              : 'bg-green-500 text-white hover:bg-green-600'
+                              }`}
+                          >
+                            {loading ? 'Processing...' : 'Complete Order'}
+                          </button>
+
+                          {isManager && (
+                            <button
+                              type="button"
+                              onClick={() => handleOrderAction("CANCEL")}
+                              className="px-6 py-2 bg-white border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition-colors"
+                            >
+                              Cancel Order
+                            </button>
+                          )}
+                        </>
+                      );
+                    }
+
+                    // PENDING - Show only Cancel button for manager
+                    if (orderStatus === "PENDING") {
+                      return (
+                        <>
+                          {isManager && (
+                            <button
+                              type="button"
+                              onClick={() => handleOrderAction("CANCEL")}
+                              className="px-6 py-2 bg-white border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition-colors"
+                            >
+                              Cancel Order
+                            </button>
+                          )}
+                        </>
+                      );
+                    }
+
+                    // READY_TO_DISPATCH - Show Deliver button (+ Cancel for manager)
+                    if (orderStatus === "READY_TO_DISPATCH") {
+                      return (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleOrderAction("DELIVER")}
+                            disabled={isEngineer || loading}
+                            className={`px-6 py-2 rounded-lg transition-colors ${isEngineer
+                              ? 'bg-white border border-cyan-500 text-cyan-500 cursor-not-allowed opacity-50'
+                              : 'bg-cyan-500 text-white hover:bg-cyan-600'
+                              }`}
+                          >
+                            {loading ? 'Processing...' : 'Deliver Order'}
+                          </button>
+
+                          {isManager && (
+                            <button
+                              type="button"
+                              onClick={() => handleOrderAction("CANCEL")}
+                              className="px-6 py-2 bg-white border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition-colors"
+                            >
+                              Cancel Order
+                            </button>
+                          )}
+                        </>
+                      );
+                    }
+
+                    // DELIVERED - Show disabled button
+                    if (orderStatus === "DELIVERED") {
+                      return (
+                        <button
+                          type="button"
+                          disabled
+                          className="px-6 py-2 bg-white border border-cyan-500 text-cyan-500 rounded-lg cursor-not-allowed opacity-50"
+                        >
+                          Order Delivered
+                        </button>
+                      );
+                    }
+
+                    // CANCELLED - Show disabled button
+                    if (orderStatus === "CANCELLED") {
+                      return (
+                        <button
+                          type="button"
+                          disabled
+                          className="px-6 py-2 bg-white border border-red-500 text-red-500 rounded-lg cursor-not-allowed opacity-50"
+                        >
+                          Order Cancelled
+                        </button>
+                      );
+                    }
+
+                    return null;
+                  })()}
+
                 </div>
               </div>
 
             </div>
           </div>
         </>
+      )}
+
+      {/* Cancel Reason Modal */}
+      {showCancelModal && (
+        <div className={ShowModalMainClass}>
+          <div className="bg-white rounded-2xl shadow-xl p-8 w-[90%] max-w-md relative">
+            <button
+              className="absolute top-4 right-5 text-2xl font-bold text-gray-500 hover:text-black"
+              onClick={() => {
+                setShowCancelModal(false);
+                setCancelReason("");
+              }}
+            >
+              &times;
+            </button>
+
+            <h2 className="text-2xl font-semibold mb-6 text-center">Cancel Order</h2>
+
+            <div className="mb-6">
+              <label className="block text-lg font-medium mb-2">
+                Cancellation Reason <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                className={inputClass}
+                placeholder="Please provide reason for cancellation"
+                rows={4}
+              />
+            </div>
+
+            <div className="flex justify-end space-x-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCancelModal(false);
+                  setCancelReason("");
+                }}
+                className={ShowModelCloseButtonClass}
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmCancel}
+                disabled={loading || !cancelReason.trim()}
+                className={`${SubmitButtonClass} ${(!cancelReason.trim() || loading) ? 'cursor-not-allowed opacity-50' : ''}`}
+              >
+                {loading ? 'Cancelling...' : 'Confirm Cancel'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {showAssign && (
@@ -1475,7 +1882,7 @@ const Order = ({ sidebarMobileOpen }) => {
                 />
 
                 {/* Loader Spinner */}
-                {isEmailLoading && (
+                {/* {isEmailLoading && (
                   <div className="flex justify-center items-center py-8">
                     <div className="relative">
                       <div
@@ -1490,10 +1897,11 @@ const Order = ({ sidebarMobileOpen }) => {
                       <p className="text-center text-gray-600 mt-4">Loading Email...</p>
                     </div>
                   </div>
-                )}
+                )} */}
+
 
                 {/* Search Results Dropdown */}
-                {showSearchResults && searchResults.length > 0 && (
+                {/* {showSearchResults && searchResults.length > 0 && (
                   <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto h-[35vh]">
                     {searchResults.map((user) => (
                       <div
@@ -1518,6 +1926,53 @@ const Order = ({ sidebarMobileOpen }) => {
                       </div>
                     ))}
                   </div>
+                )} */}
+
+                {isEmailLoading ? (
+                  <div className="flex justify-center items-center py-8">
+                    <div className="relative">
+                      <div
+                        className="w-16 h-16 border border-white rounded-full animate-spin"
+                        style={{ animationDuration: '2s' }}
+                      >
+                        <div
+                          className="absolute inset-0 border-3 border-transparent border-y-cyan-600 border-l-cyan-600 rounded-full animate-spin"
+                          style={{ animationDuration: '2s' }}
+                        />
+                      </div>
+                      <p className="text-center text-gray-600 mt-4">Loading Email...</p>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {showSearchResults && searchResults.length > 0 && (
+
+                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto h-[35vh]">
+                        {searchResults.map((user) => (
+                          <div
+                            key={user.id}
+                            onClick={() => handleUserSelect(user)}
+                            className="px-6 py-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                {user.firstName?.charAt(0)?.toUpperCase() || 'U'}
+                              </div>
+                              <div className="flex-1">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {`${user.firstName} ${user.lastName}`}
+                                </div>
+                                <div className="text-xs text-gray-500">{user.email}</div>
+                                <div className="text-xs text-gray-400 capitalize">
+                                  Role: {user.role?.name}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
                 )}
 
                 {/* No Results Found */}

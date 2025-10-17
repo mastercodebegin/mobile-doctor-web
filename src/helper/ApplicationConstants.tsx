@@ -124,7 +124,7 @@ export const getStatusBadgeClass = (status: string, isBackgroundColor: boolean) 
   switch (status) {
     case 'PENDING': return `${isBackgroundColor ? "bg-cyan-100 text-cyan-800" : "bg-white text-blue-800"} `;
     case 'CANCELLED': return `${isBackgroundColor ? 'bg-red-100 text-red-800' : "bg-white text-red-800"}`;
-    case 'COMPLETED': return `${isBackgroundColor ? "'bg-emerald-100 text-emerald-800'" : "bg-white text-green-800"}`;
+    case 'COMPLETED': return `${isBackgroundColor ? "bg-emerald-100 text-emerald-800" : "bg-white text-green-800"}`;
     case 'READY_TO_PICK': return isBackgroundColor ? "bg-purple-100 text-purple-800" : "bg-white text-purple-800";
     case 'PICKED_UP_BY_PARTNER': return isBackgroundColor ? "bg-blue-100 text-blue-800" : "bg-white text-blue-800";
     case 'PICKED_UP_BY_USER': return isBackgroundColor ? "bg-indigo-100 text-indigo-800" : "bg-white text-indigo-800";

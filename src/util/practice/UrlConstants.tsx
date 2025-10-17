@@ -71,6 +71,9 @@ GET_ALL_COUPONS: 'coupon/getAllCoupons',
 ADD_COUPON: 'coupon/create',
 GENERATE_OTP: 'otpverification/sendOtpToEmailForForgotPassword',
 ASSIGN_TO_ENGINEER: 'unitRepair/recieveDeviceFromPartnerAndAssignToEngineer',
+ORDER_COMPLETED: 'unitRepair/markOrderCompleted',
+ORDER_DELIVERED: 'unitRepair/deliverUnitRepairOrderByPickupPartner',
+ORDER_CANCELLED: 'unitRepair/cancelUnitRepairOrderByUserORAdmin',
 
 
 

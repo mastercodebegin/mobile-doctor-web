@@ -155,6 +155,24 @@ const OrderSlice = createSlice({
                         state.isSuccess = false
                         console.log("Assign To Engineer is Rejected With :---", action.payload)
                       })
+
+                      // Order Completed Click
+                         .addCase(OrderActionClick.pending, (state, action) =>{
+                        state.isLoading = true
+                        state.isSuccess = false
+                        console.log("Order Completed is Pending :-----", action.payload)
+                      })
+                      .addCase(OrderActionClick.fulfilled, (state ,action) =>{
+                        state.isLoading = false
+                        state.isSuccess = true
+                        console.log("Order Completed Successfully!!", action.payload)
+                      })
+                      .addCase(OrderActionClick.rejected, (state, action) =>{
+                        state.isLoading = false
+                        state.isSuccess = false
+                        console.log("Order Completed Click is Rejected With :---", action.payload)
+                      })
+
     }
 })
 
@@ -234,3 +252,32 @@ export const AssignToEngineer = createAsyncThunk("ASSIGN/TO/ENGINEER", async (re
     return thunkAPI.rejectWithValue(message)
   }
 })
+
+//  Common Order Action Thunk
+export const OrderActionClick = createAsyncThunk(
+  "ORDER/ACTION",
+  async ({ type, requestData }: { type: string; requestData: any }, thunkAPI) => {
+    try {
+      let url;
+      switch (type) {
+        case "COMPLETE":
+          url = UrlConstants.ORDER_COMPLETED;
+          break;
+        case "DELIVER":
+          url = UrlConstants.ORDER_DELIVERED;
+          break;
+        case "CANCEL":
+          url = UrlConstants.ORDER_CANCELLED;
+          break;
+        default:
+          throw new Error("Invalid order action type");
+      }
+
+      const response = await putRequestMethodWithParam(requestData, url);
+      return response;
+    } catch (error: any) {
+      const message = error?.response?.data?.message || error.message;
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
