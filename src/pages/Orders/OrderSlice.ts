@@ -2,7 +2,6 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { postRequestMethod, putRequestMethod, putRequestMethodWithParam } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
 import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
-import { Satellite } from "lucide-react";
 
 const storeData = LocalStorageManager.getData(STORAGE_KEYS.ORDERS);
 
@@ -39,9 +38,9 @@ const initialState = {
     order: {
       unitRepairStatus: "PENDING",
       orderId: "",
-      defectDescriptionByEngineer: "",
+      engDefectDescription: "",
       price: "",
-      orderCompletedOn: "",
+      expectedCompletedOn: "",
     },
   },
 }
@@ -96,7 +95,7 @@ const OrderSlice = createSlice({
                   state.Orders[itemIndex] = {
                      ...originalItem,
                      ...updatedItem,
-                      defectDescriptionByEngineer: updatedItem.defectDescriptionByEngineer || originalItem.defectDescriptionByEngineer,
+                      engDefectDescription: updatedItem.engDefectDescription || originalItem.engDefectDescription,
                       price: updatedItem.price || originalItem.price,
                   };
 
@@ -156,7 +155,7 @@ const OrderSlice = createSlice({
                         console.log("Assign To Engineer is Rejected With :---", action.payload)
                       })
 
-                      // Order Completed Click
+                      // Order Action
                          .addCase(OrderActionClick.pending, (state, action) =>{
                         state.isLoading = true
                         state.isSuccess = false
@@ -205,13 +204,13 @@ export const UpdateOrder = createAsyncThunk("UPDATE/ORDER", async (actionData, t
     const requestBody = {
       unitRepairStatus: updateData.unitRepairStatus,
       orderId: updateData.orderId,
-      description: updateData.defectDescriptionByEngineer,
+      engDefectDescription: updateData.defectDescriptionByEngineer,
       price: updateData.price,
-      orderCompletedOn: updateData.orderCompletedOn
+      orderExpectedCompletedOn: updateData.expectedCompletedOn
     };
 
     console.log("🛠️ Update payload being sent:", requestBody);
-    console.log("🛠️ orderCompletedOn value:", updateData.orderCompletedOn);
+    console.log("🛠️ orderCompletedOn value:", updateData.expectedCompletedOn);
 
     const response = await putRequestMethod(requestBody, UrlConstants.UPDATE_ORDER);
     console.log("✅ Response Data By Update:", response);

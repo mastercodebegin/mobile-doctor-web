@@ -3,7 +3,7 @@ export const LocalStorageManager = {
     saveData: (key: string, data: any) => {
         try {
             const serializedData = JSON.stringify(data);
-            console.log(`Saving ${key} data:`, serializedData);
+            // console.log(`Saving ${key} data:`, serializedData);
             localStorage.setItem(key, serializedData);
             console.log(`✅ ${key} data saved to localStorage`);
         } catch (error) {
@@ -15,7 +15,7 @@ export const LocalStorageManager = {
   getData: (key: string) => {
         try {
             const data = localStorage.getItem(key);
-            console.log(`Retrieved ${key} data:`, data);
+            // console.log(`Retrieved ${key} data:`, data);
             if (data) {
                 try {
                     return JSON.parse(data);
@@ -57,6 +57,33 @@ export const LocalStorageManager = {
             console.error('❌ Failed to clear all data from localStorage:', error);
         }
     },
+
+    // Clear all data except user & token
+preserveUserAndToken: () => {
+  try {
+    const preservedKeys = ['user', 'authToken', 'token', 'authUser']; // keys to keep
+
+    // Store preserved values temporarily
+    const preservedData: Record<string, any> = {};
+    preservedKeys.forEach(key => {
+      const value = localStorage.getItem(key);
+      if (value) preservedData[key] = value;
+    });
+
+    // Clear everything
+    localStorage.clear();
+
+    // Restore preserved keys
+    Object.entries(preservedData).forEach(([key, value]) => {
+      localStorage.setItem(key, value as string);
+    });
+
+    console.log('♻️ Cleared all data except user & token');
+  } catch (error) {
+    console.error('❌ Failed to preserve user & token:', error);
+  }
+},
+
     
     // Check if data exists
     hasData: (key: string) => {

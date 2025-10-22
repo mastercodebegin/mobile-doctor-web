@@ -1,22 +1,21 @@
 import { useEffect, useState } from 'react'
 import Loading from '../../components/Loading'
-import { GetAllCategory } from '../AddCategory/AddCategorySlice';
-import { GetAllSubCategory } from '../AddSubCategory/SubCategorySlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
 import { toast } from 'react-toastify';
 import { capitalizeEachWord, DropDownClass, EditClass, EditIcon, getStatusBadgeClass, inputClass, pageSize, RoleIds, ShowModalMainClass, ShowModelCloseButtonClass, statusOptions, SubmitButtonClass, TableDataClass, TableHadeClass } from '../../helper/ApplicationConstants';
 import Pagination from '../../helper/Pagination';
-import { AssignToEngineer, FindUserByEmail, GetAllRepairUnitOrderByUserId, OrderActionClick, OrderCompletedClick, OrderDeliveredClick, update, UpdateOrder } from './OrderSlice';
+import { AssignToEngineer, FindUserByEmail, GetAllRepairUnitOrderByUserId, OrderActionClick, update, UpdateOrder } from './OrderSlice';
 import DatePicker from '../../components/DatePicker';
 import { UrlConstants } from '../../util/practice/UrlConstants';
 import { getRequestMethodWithParam } from '../../util/CommonService';
 import ConfirmationModal from '../../components/ConfirmationModal';
-import { Filter, FunnelPlus, Mail, Phone, Search, User, X } from 'lucide-react';
+import { Download, Filter, FunnelPlus, Mail, Phone, Search, User, X } from 'lucide-react';
 import OrderProgressStepper from '../../components/OrderProgressStepper';
 import DefaultImage from "../../assets/Laptop_Image.png"
 import { debounce } from 'lodash';
 import { DateRangePicker } from 'rsuite';
+import { useLocation } from 'react-router-dom';
 
 
 interface FilterObject {
@@ -71,6 +70,7 @@ const Order = ({ sidebarMobileOpen }) => {
   const [orderCompletedOn, setOrderCompletedOn] = useState("");
 
   const dispatch = useDispatch<AppDispatch>();
+  const { state } = useLocation();
   const [unitRepairStatus, setUnitRepairStatus] = useState<string>('');
   const [filterDate, setFilterDate] = useState({
     startDate: null,
@@ -78,9 +78,113 @@ const Order = ({ sidebarMobileOpen }) => {
   });
   const [expectedDeliveryDate, setExpectedDeliveryDate] = useState([null, null]);
 
+  // State for the download modal
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [selectedDateRange, setSelectedDateRange] = useState([null, null]);
+
   const usersPerPage = 5;
   const OrderArray = Array.isArray(Orders) ? Orders : Orders ? [Orders] : [];
   const paginatedUsers = OrderArray?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage)
+
+  // Download-Section Start //
+
+  // Function to handle the download button click
+  const handleDownloadClick = () => {
+    setShowDownloadModal(true);
+  };
+
+  // Function to handle the date range selection
+  const handleDateRangeChange = (ranges) => {
+    setSelectedDateRange(ranges);
+    // Format dates and log to console
+    if (ranges && ranges[0] && ranges[1]) {
+      const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
+      const formattedDates = {
+        startDate: formatDate(ranges[0]),
+        endDate: formatDate(ranges[1])
+      };
+
+      console.log('Selected Date Range:', formattedDates);
+      console.log('Start Date:', formattedDates.startDate);
+      console.log('End Date:', formattedDates.endDate);
+    }
+
+  };
+
+  // Function to handle the pre-defined date range selection
+  const handlePredefinedDateRangeClick = (range) => {
+    const today = new Date();
+    let startDate, endDate;
+
+    if (range === '1-month') {
+      startDate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+      endDate = today;
+    } else if (range === '3-month') {
+      startDate = new Date(today.getFullYear(), today.getMonth() - 3, today.getDate());
+      endDate = today;
+    } else if (range === '6-month') {
+      startDate = new Date(today.getFullYear(), today.getMonth() - 6, today.getDate());
+      endDate = today;
+    }
+
+    setSelectedDateRange([startDate, endDate]);
+
+    // Format and log
+    const formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    const formattedDates = {
+      startDate: formatDate(startDate),
+      endDate: formatDate(endDate)
+    };
+
+    console.log('Predefined Range Selected:', range);
+    console.log('Formatted Dates:', formattedDates);
+
+    toast.info(`Selected date range: ${range}`);
+  };
+
+  // Function to handle the download action 
+  const handleDownload = () => {
+    if (selectedDateRange && selectedDateRange[0] && selectedDateRange[1]) {
+      // Format dates for API or download
+      const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
+      const downloadData = {
+        startDate: formatDate(selectedDateRange[0]),
+        endDate: formatDate(selectedDateRange[1])
+      };
+
+      console.log('Download Data:', downloadData);
+      console.log('Start Date:', downloadData.startDate);
+      console.log('End Date:', downloadData.endDate);
+
+      // Yahan aap API call kar sakte ho with downloadData
+      // Example: dispatch(DownloadOrders(downloadData));
+
+      toast.success('Data downloaded successfully!');
+      setShowDownloadModal(false);
+    } else {
+      toast.warning('Please select a date range first.');
+    }
+  };
+
+  // Download-Section End //
 
   // // Date change handler - This function is Call By DatePicker
   const handleDateChange = (newValue, type = 'creation') => {
@@ -92,7 +196,7 @@ const Order = ({ sidebarMobileOpen }) => {
     }
   };
 
-  const getAllUnitOrderCommonFunction = () => {
+  const getAllUnitOrderCommonFunction = (statusValue: string = "") => {
     const baseFilterObj = {
       pageSize: pageSize,
       pageNumber: 0,
@@ -101,8 +205,8 @@ const Order = ({ sidebarMobileOpen }) => {
     const filterObj: FilterObject = {};
 
     // Add status filter if selected
-    if (unitRepairStatus) {
-      filterObj.unitRepairStatus = unitRepairStatus;
+    if (unitRepairStatus || statusValue) {
+      filterObj.unitRepairStatus = unitRepairStatus || statusValue;
     }
 
     // Role filters
@@ -250,8 +354,8 @@ const Order = ({ sidebarMobileOpen }) => {
             orderId: Edit.order.orderId,
             unitRepairStatus: unitRepairStatusEdit,
             price: price,
-            defectDescriptionByEngineer: description,
-            orderCompletedOn: orderCompletedOn || Edit.order.orderCompletedOn
+            engDefectDescription: description,
+            orderExpectedCompletedOn: orderCompletedOn || Edit.order.expectedCompletedOn
           };
 
           dispatch(update(updateOrder));
@@ -278,7 +382,6 @@ const Order = ({ sidebarMobileOpen }) => {
   };
 
   const handleConfirmSave = async () => {
-    if (!pendingAction) return;
 
     if (managerId || pickupPartnerId || engineerId) {
       getAllUnitOrderCommonFunction()
@@ -287,6 +390,7 @@ const Order = ({ sidebarMobileOpen }) => {
 
     try {
       setLoading(true);
+      if (!pendingAction) return;
 
       const requestData = { orderId: selectedOrderDetails.orderId };
 
@@ -302,7 +406,7 @@ const Order = ({ sidebarMobileOpen }) => {
       handleCloseModal();
     } catch (error: any) {
       console.error(`${pendingAction} order failed:`, error);
-      toast.error(error.message || `Failed to ${pendingAction.toLowerCase()} order`);
+      // toast.error(error.message || `Failed to ${pendingAction.toLowerCase()} order`);
     } finally {
       setLoading(false);
     }
@@ -411,6 +515,9 @@ const Order = ({ sidebarMobileOpen }) => {
     setCancelReason("");
     setShowCancelModal(false);
     setPendingAction(null);
+    setShowDownloadModal(false);
+    setSelectedDateRange([null, null]);
+
   }
 
   const handleClearFilter = () => {
@@ -426,6 +533,7 @@ const Order = ({ sidebarMobileOpen }) => {
     setCurrentPage(1);
     setIsFilterApplied(false);
     setShowFilter(false);
+    window.history.replaceState({}, document.title);
     const baseFilterObj = {
       pageSize: pageSize,
       pageNumber: 0,
@@ -447,34 +555,44 @@ const Order = ({ sidebarMobileOpen }) => {
     setPrice(user?.order?.finalPrice || "");
 
     // FIXED: Use 'completedOn' from API response, not 'orderCompletedOn'
-    const orderCompletedOn = user?.order?.completedOn ? new Date(user.order.completedOn).toISOString().split('T')[0] : "";
+    const orderCompletedOn = user?.order?.expectedCompletedOn ? new Date(user.order.expectedCompletedOn).toISOString().split('T')[0] : "";
     setOrderCompletedOn(orderCompletedOn);
   };
-
-  // const handlePrintDetails = () => {
-  //   const printContent = document.getElementById('order-details-print');
-  //   const originalContent = document.body.innerHTML;
-
-  //   document.body.innerHTML = printContent.innerHTML;
-  //   window.print();
-  //   document.body.innerHTML = originalContent;
-  //   window.location.reload(); // Reload to restore event handlers
-  // };
 
   useEffect(() => {
     if (Edit.isEdit) {
       setDescription(Edit.order.defectDescriptionByEngineer);
-      setPrice(Edit.order.finalPrice);
+      setPrice(Edit.order.price);
       setUnitRepairStatusEdit(Edit.order.unitRepairStatus);
     }
   }, [Edit]);
 
   useEffect(() => {
+    console.log(state?.status);
+
+    if (state?.status === "total") {
+      getAllUnitOrderCommonFunction();
+    } else if (state?.status) {
+      setUnitRepairStatus(state?.status);
+      setIsFilterApplied(true);
+      getAllUnitOrderCommonFunction(state?.status);
+    } else {
+      setUnitRepairStatus('');
+      setIsFilterApplied(false);
+    }
+  }, [state]);
+
+
+  useEffect(() => {
     setIsLoaded(true);
-    dispatch(GetAllCategory());
-    dispatch(GetAllSubCategory());
-    getAllUnitOrderCommonFunction()
+    if (!state?.status) {
+      getAllUnitOrderCommonFunction();
+    }
   }, [])
+
+  useEffect(() => {
+    console.log("Date data :---", orderCompletedOn)
+  })
 
   { isLoading && <Loading overlay={true} /> }
 
@@ -575,6 +693,16 @@ const Order = ({ sidebarMobileOpen }) => {
             ) : (
               <Filter className="text-gray-500 hover:text-gray-600" />
             )}
+          </button>
+
+          {/* Download Button */}
+          <button
+            type="button"
+            title="Download"
+            onClick={handleDownloadClick}
+            className="transition"
+          >
+            <Download className="text-cyan-500" />
           </button>
 
           {showFilter && (
@@ -741,6 +869,78 @@ const Order = ({ sidebarMobileOpen }) => {
             </>
           )}
 
+          {/* Download Modal */}
+          {showDownloadModal && (
+            <div className={ShowModalMainClass}>
+              <div className="bg-white rounded-2xl shadow-xl p-8 max-w-xl w-[90%] relative">
+                <h2 className="text-3xl font-semibold  mb-6">
+                  Download Window
+                </h2>
+
+                {/* Close Icon */}
+                <button
+                  className="absolute top-4 right-5 text-2xl font-bold text-gray-500 hover:text-black"
+                  onClick={handleCloseModal}
+                >
+                  &times;
+                </button>
+
+
+                <h3 className="text-lg font-semibold mb-4">Select Date Range</h3>
+                <DateRangePicker
+                  showMeridian
+                  value={selectedDateRange}
+                  rangeColors={["#06b6d4"]}
+                  onChange={handleDateRangeChange}
+                  style={{
+                    border: `3px solid  #5ca1b6ff`,
+                    borderRadius: "9px",
+                  }}
+                  container={() => document.body}
+                  menuStyle={{ zIndex: 99999 }}
+                  placement="bottomStart"
+                  cleanable={false}
+                  className="mb-5 w-full"
+                  appearance="subtle"
+                />
+                <div className="flex justify-between my-3">
+                  <button
+                    onClick={() => handlePredefinedDateRangeClick('1-month')}
+                    className="px-4 py-2 text-sm bg-gray-200 rounded-md"
+                  >
+                    1-Month
+                  </button>
+                  <button
+                    onClick={() => handlePredefinedDateRangeClick('3-month')}
+                    className="px-4 py-2 text-sm bg-gray-200 rounded-md"
+                  >
+                    3-Month
+                  </button>
+                  <button
+                    onClick={() => handlePredefinedDateRangeClick('6-month')}
+                    className="px-4 py-2 text-sm bg-gray-200 rounded-md"
+                  >
+                    6-Month
+                  </button>
+                </div>
+                <div className="flex justify-between mt-5">
+                  <button
+                    onClick={handleCloseModal}
+                    className={ShowModelCloseButtonClass}
+                  >
+                    Close
+                  </button>
+                  <button
+                    onClick={handleDownload}
+                    className={SubmitButtonClass}
+                  >
+                    Download
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
 
         <div className="bg-gray-50 p-4 mt-2 min-h-screen">
@@ -799,7 +999,7 @@ const Order = ({ sidebarMobileOpen }) => {
                         </td>
 
                         {/* Price */}
-                        <td className={TableDataClass}>{user?.finalPrice ? `₹${user?.finalPrice}` : ""}</td>
+                        <td className={TableDataClass}>{user?.price ? `₹${user?.price}` : ""}</td>
 
                         {/* Created */}
                         <td className={TableDataClass}>
@@ -908,7 +1108,7 @@ const Order = ({ sidebarMobileOpen }) => {
                   </div>
 
                   <div className="mb-6">
-                    <label className="block text-lg font-medium mb-2">Price</label>
+                    <label className="block text-lg font-medium mb-2">Price 1</label>
                     <input
                       type="text"
                       value={price}
@@ -923,7 +1123,7 @@ const Order = ({ sidebarMobileOpen }) => {
 
               {/* ===== Action Buttons ===== */}
               <div className="flex justify-end space-x-4 mt-4">
-                <button type="button" onClick={handleCloseModal} className="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400">
+                <button type="button" onClick={handleCloseModal} className={ShowModelCloseButtonClass}>
                   Close
                 </button>
                 <button
@@ -977,7 +1177,7 @@ const Order = ({ sidebarMobileOpen }) => {
 
                   {/* User Profile Section */}
                   <section>
-                    <div className="flex flex-col md:flex-row items-center md:items-start justify-between bg-white shadow-md rounded-2xl p-6">
+                    <div className="flex flex-col md:flex-row items-center md:items-start justify-between bg-white mb-8 rounded-2xl p-6">
 
                       {/* Left Side: Avatar + Info */}
                       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 w-full md:w-auto text-center sm:text-left">
@@ -1010,9 +1210,7 @@ const Order = ({ sidebarMobileOpen }) => {
                         {/* Status Badge */}
                         <span
                           className={`px-4 py-2 mb-4 rounded-full text-sm md:text-md font-semibold tracking-wider shadow-sm ${getStatusBadgeClass(
-                            selectedOrderDetails?.unitRepairStatus,
-                            true
-                          )}`}
+                            selectedOrderDetails?.unitRepairStatus, false)}`}
                         >
                           {capitalizeEachWord(selectedOrderDetails?.unitRepairStatus?.replace(/_/g, " "))}
                         </span>
@@ -1069,8 +1267,8 @@ const Order = ({ sidebarMobileOpen }) => {
                       <h3 className="text-xl font-semibold mb-6 text-gray-800">Images</h3>
 
                       {images.length > 0 && (
-                        <div className="flex flex-col bg-gray-50">
-                          <div className="relative w-full h-20 flex items-center justify-start pl-5">
+                        <div className="flex flex-col ">
+                          <div className="relative w-full h-20 flex items-center justify-start pl-0">
                             {/* Left button */}
                             {images.length > 1 && (
                               <button
@@ -1455,126 +1653,62 @@ const Order = ({ sidebarMobileOpen }) => {
                 <div className="p-4 rounded-md border border-gray-300">
 
                   {/* Products/Orders List - Row wise display for multiple orders */}
-                  {/* <div className="mb-8 border border-gray-300 rounded-xl p-6">
+                  <div className="mb-8 border border-gray-300 rounded-xl p-4 sm:p-6">
                     <h3 className="text-xl font-semibold mb-6 text-gray-800">Orders Summary</h3>
 
-                    <div className="overflow-x-auto border border-gray-200 rounded-xl">
-                      <table className="min-w-full divide-y divide-gray-200 text-sm">
-                        <thead className="bg-gray-50">
+                    {/* Responsive Scrollable Wrapper */}
+                    <div className="relative w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 rounded-xl">
+                      <table className="min-w-[500px] md:min-w-full divide-y divide-gray-200 text-sm">
+                        <thead className="bg-gray-50 sticky top-0 z-10">
                           <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">
                               Model Number
                             </th>
-                            <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-l border-gray-300">
+                            <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider whitespace-nowrap border-l border-gray-300">
                               Price
                             </th>
                           </tr>
                         </thead>
+
                         <tbody className="divide-y divide-gray-200 bg-white">
-                          {(Array.isArray(selectedOrderDetails) ? selectedOrderDetails : [selectedOrderDetails]).map((order, index) => (
+                          {(Array.isArray(selectedOrderDetails) ? selectedOrderDetails : [selectedOrderDetails]).map((order, index) =>
                             order?.unitProblemDetails?.map((detail, detailIndex) => (
-                              <tr
-                                key={`${index}-${detailIndex}`}
-                                className="hover:bg-gray-50"
-                              >
-                                <td className="px-6 py-4 flex items-center space-x-4">
+                              <tr key={`${index}-${detailIndex}`} className="hover:bg-gray-50 overflow-x-scroll">
+                                {/* Model Number + Specs */}
+                                <td className="px-6 py-4 flex items-center space-x-4 min-w-[250px]">
                                   <img
-                                    src={`${UrlConstants.AWS_IMAGE_BASE_URL}${order.variant?.variantColors?.[0]?.modalImages?.[0]?.imageName}` || DefaultImage
-                                    }
+                                    src={`${UrlConstants.AWS_IMAGE_BASE_URL}${order.variant?.variantColors?.[0]?.modalImages?.[0]?.imageName}` || DefaultImage}
                                     alt="Product"
-                                    className="w-14 h-14 rounded-md object-cover bg-gray-100"
+                                    className="w-14 h-14 rounded-md object-cover bg-gray-100 flex-shrink-0"
                                   />
-                                  <div>
-                                    <p className="font-medium text-gray-800">
+                                  <div className="min-w-[120px]">
+                                    <p className="font-medium text-gray-800 text-sm sm:text-base truncate">
                                       {detail?.repairCost?.productModelNumber?.name ||
                                         order?.productModelNumber?.name ||
                                         "Product Name"}
                                     </p>
                                     <p className="text-xs text-gray-500">
-                                      {detail?.repairCost?.productModelNumber
-                                        ?.productSpecification?.ram
+                                      {detail?.repairCost?.productModelNumber?.productSpecification?.ram
                                         ? `${detail.repairCost.productModelNumber.productSpecification.ram}GB`
-                                        : ""}{" "}
-                                      /{" "}
-                                      {detail?.repairCost?.productModelNumber
-                                        ?.productSpecification?.rom
-                                        ? `${detail.repairCost.productModelNumber.productSpecification.rom}GB`
+                                        : ""}
+                                      {detail?.repairCost?.productModelNumber?.productSpecification?.rom
+                                        ? ` / ${detail.repairCost.productModelNumber.productSpecification.rom}GB`
                                         : ""}
                                     </p>
                                   </div>
                                 </td>
 
-                                <td className="px-6 py-4 text-center border-l border-gray-300">
-                                  ₹
-                                  {detail?.repairCost?.price ||
-                                    detail?.price ||
-                                    order?.price ||
-                                    0}
+                                {/* Price */}
+                                <td className="px-6 py-4 text-center border-l border-gray-300 whitespace-nowrap">
+                                  ₹{detail?.repairCost?.price || detail?.price || order?.price || 0}
                                 </td>
                               </tr>
                             ))
-                          ))}
+                          )}
                         </tbody>
                       </table>
                     </div>
-                  </div> */}
-
- <div className="mb-8 border border-gray-300 rounded-xl p-4 sm:p-6">
-  <h3 className="text-xl font-semibold mb-6 text-gray-800">Orders Summary</h3>
-
-  {/* Responsive Scrollable Wrapper */}
-  <div className="relative w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 rounded-xl">
-    <table className="min-w-[500px] md:min-w-full divide-y divide-gray-200 text-sm">
-      <thead className="bg-gray-50 sticky top-0 z-10">
-        <tr>
-          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">
-            Model Number
-          </th>
-          <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider whitespace-nowrap border-l border-gray-300">
-            Price
-          </th>
-        </tr>
-      </thead>
-
-      <tbody className="divide-y divide-gray-200 bg-white">
-        {(Array.isArray(selectedOrderDetails) ? selectedOrderDetails : [selectedOrderDetails]).map((order, index) =>
-          order?.unitProblemDetails?.map((detail, detailIndex) => (
-            <tr key={`${index}-${detailIndex}`} className="hover:bg-gray-50 overflow-x-scroll">
-              {/* Model Number + Specs */}
-              <td className="px-6 py-4 flex items-center space-x-4 min-w-[250px]">
-                <img
-                  src={`${UrlConstants.AWS_IMAGE_BASE_URL}${order.variant?.variantColors?.[0]?.modalImages?.[0]?.imageName}` || DefaultImage}
-                  alt="Product"
-                  className="w-14 h-14 rounded-md object-cover bg-gray-100 flex-shrink-0"
-                />
-                <div className="min-w-[120px]">
-                  <p className="font-medium text-gray-800 text-sm sm:text-base truncate">
-                    {detail?.repairCost?.productModelNumber?.name ||
-                      order?.productModelNumber?.name ||
-                      "Product Name"}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {detail?.repairCost?.productModelNumber?.productSpecification?.ram
-                      ? `${detail.repairCost.productModelNumber.productSpecification.ram}GB`
-                      : ""}
-                    {detail?.repairCost?.productModelNumber?.productSpecification?.rom
-                      ? ` / ${detail.repairCost.productModelNumber.productSpecification.rom}GB`
-                      : ""}
-                  </p>
-                </div>
-              </td>
-
-              {/* Price */}
-              <td className="px-6 py-4 text-center border-l border-gray-300 whitespace-nowrap">
-                ₹{detail?.repairCost?.price || detail?.price || order?.price || 0}
-              </td>
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
-  </div>
-</div>
+                  </div>
 
 
 
@@ -1618,7 +1752,7 @@ const Order = ({ sidebarMobileOpen }) => {
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-600">Coupons</span>
-                        <span className="text-gray-900">{selectedOrderDetails?.coupon || ""}</span>
+                        <span className="text-gray-900">{selectedOrderDetails?.coupon || "--"}</span>
                       </div>
                       <div className="flex justify-between border-t pt-3 text-base font-bold">
                         <span className="text-gray-800">Total</span>
@@ -1659,23 +1793,15 @@ const Order = ({ sidebarMobileOpen }) => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-end items-center p-8 pt-0">
-                <div className="flex flex-wrap space-y-4 space-x-4">
-                  <button
-                    type="button"
-                    onClick={handleCloseModal}
-                    className={ShowModelCloseButtonClass}
-                  >
-                    Close
-                  </button>
-                  {/* <button
-                    type="button"
-                    onClick={handlePrintDetails}
-                    className={SubmitButtonClass}
-                  >
-                    <span>Print</span>
-                  </button> */}
-
+              <div className="flex justify-between flex-wrap items-center p-8 pt-0">
+                <button
+                  type="button"
+                  onClick={handleCloseModal}
+                  className={ShowModelCloseButtonClass}
+                >
+                  Close
+                </button>
+                <div className='flex space-x-4 flex-wrap items-center'>
                   {/* Dynamic buttons based on role and status */}
                   {(() => {
                     const userRole = data?.role?.name?.toLowerCase();
@@ -1703,7 +1829,7 @@ const Order = ({ sidebarMobileOpen }) => {
                             <button
                               type="button"
                               onClick={() => handleOrderAction("CANCEL")}
-                              className="px-6 py-2 bg-white border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition-colors"
+                              className="px-4 py-2 bg-white border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition-colors"
                             >
                               Cancel Order
                             </button>
@@ -1786,7 +1912,6 @@ const Order = ({ sidebarMobileOpen }) => {
 
                     return null;
                   })()}
-
                 </div>
               </div>
 
@@ -1841,7 +1966,7 @@ const Order = ({ sidebarMobileOpen }) => {
                 disabled={loading || !cancelReason.trim()}
                 className={`${SubmitButtonClass} ${(!cancelReason.trim() || loading) ? 'cursor-not-allowed opacity-50' : ''}`}
               >
-                {loading ? 'Cancelling...' : 'Confirm Cancel'}
+                {loading ? 'Cancelling...' : 'Submit'}
               </button>
             </div>
           </div>

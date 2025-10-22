@@ -186,7 +186,7 @@ export default function Sidebar({ collapsed, onNavigate }: SidebarProps) {
     <div
       className={`
         relative group cursor-pointer transition-all duration-300 ease-in-out overflow-hidden
-        ${isSubItem ? "ml-4 my-1" : "mx-3 my-1"}
+        ${isSubItem ? "ml-4 my-1" : "mx-3 my-2"}
         ${isActive ? `${bgColor} rounded-lg shadow-sm` : ""}
       `}
     >
@@ -214,12 +214,13 @@ export default function Sidebar({ collapsed, onNavigate }: SidebarProps) {
         `}
       >
         <Icon
-          size={isSubItem ? 18 : 20}
+          size={isSubItem ? 16 : 18}
           className={`
             ${isSubItem ? "mr-3" : "mr-4"} transition-all duration-300
             ${isActive ? "text-gray-800" : "text-gray-500 group-hover:text-gray-700"}
           `}
-          style={{ color: isActive ? color : undefined }}
+          // style={{ color: isActive ? color : undefined }}
+          style={{ color: color }}
         />
         {!collapsed && <span className={`font-medium transition-all duration-300 ${isSubItem ? "text-sm" : ""}`}>{children}</span>}
       </Link>
@@ -234,17 +235,17 @@ export default function Sidebar({ collapsed, onNavigate }: SidebarProps) {
   // ==========================
   const DropdownButton = ({ icon: Icon, children, isOpen, onClick, color }) => (
     <div
-      className="relative group cursor-pointer transition-all duration-300 ease-in-out mx-3 my-1 overflow-hidden"
+      className="relative group cursor-pointer transition-all duration-300 ease-in-out mx-3 my-2 overflow-hidden"
       onClick={onClick}
     >
       <div className="absolute inset-0 rounded-lg transition-all duration-300 ease-out w-0 group-hover:w-full" style={{ backgroundColor: color + "20" }} />
       <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-6 rounded-r-full transition-all duration-300 opacity-0 group-hover:opacity-100 z-10" style={{ backgroundColor: color }} />
       <div className="relative flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-300 text-gray-600 group-hover:text-gray-800 z-10">
         <div className="flex items-center">
-          <Icon size={20} className="mr-4 transition-all duration-300 text-gray-500 group-hover:text-gray-700" />
+          <Icon size={18} className="mr-4 transition-all duration-300 text-gray-500 group-hover:text-gray-700" style={{ color: color }} />
           {!collapsed && <span className="font-medium">{children}</span>}
         </div>
-        {!collapsed && <div className="transition-transform duration-300">{isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</div>}
+        {!collapsed && <div className="transition-transform duration-300">{isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}</div>}
       </div>
     </div>
   );

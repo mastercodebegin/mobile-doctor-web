@@ -35,6 +35,7 @@ import Coupon from "./pages/Coupons/Coupon";
 import Settings from "./pages/Settings/Settings";
 import ForgetPassword from "./pages/Password/ForgetPassword";
 import Loading from "./components/Loading";
+import { LocalStorageManager } from "./util/LocalStorageManager";
 
 function App() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
@@ -82,6 +83,10 @@ function App() {
     return () => clearInterval(interval);
   }, [token]);
 
+  // Clear everything except user and token on refresh
+window.addEventListener("beforeunload", () => {
+  LocalStorageManager.preserveUserAndToken();
+});
 
   // Adjust sidebar state based on screen size
   useEffect(() => {

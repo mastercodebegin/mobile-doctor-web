@@ -65,7 +65,6 @@ export const SearchIcon = <svg
 
 
 // Sidebar Color Tokens
-
 export const SidebarColors = {
   dashboard: { bgColor: 'bg-blue-50', color: '#3B82F6' },
   userManagement: { bgColor: 'bg-blue-50', color: '#3B82F6' },
@@ -101,9 +100,6 @@ export const SidebarColors = {
     location: { bgColor: 'bg-green-50', color: '#10B981' },
   },
 };
-
-
-
 
 export const pageSize = 10;
 

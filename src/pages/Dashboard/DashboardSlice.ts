@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { getRequestMethod, getRequestMethodWithParam, postRequestMethod } from "../../util/CommonService";
+import { getRequestMethodWithParam, postRequestMethod } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
 import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
-const storeData = LocalStorageManager.getData(STORAGE_KEYS.DASHBAORD);
+const storeData = LocalStorageManager.getData(STORAGE_KEYS.DASHBOARD);
 
 interface OrdersCounts {
   total: number;
@@ -82,7 +82,7 @@ const DashboardSlice = createSlice({
             state.isLoading = false
             state.isSuccess = true
             state.dashboardData = action?.payload
-            LocalStorageManager.saveData(STORAGE_KEYS.DASHBAORD, action.payload);
+            LocalStorageManager.saveData(STORAGE_KEYS.DASHBOARD, action.payload);
         })
         .addCase(GetAllOrderCount.rejected, (state, action) =>{
             state.isLoading = false
@@ -99,7 +99,7 @@ const DashboardSlice = createSlice({
             state.isLoading = false
             state.isSuccess = true
             state.productVisitData = action.payload.responseDetails
-            LocalStorageManager.saveData(STORAGE_KEYS.DASHBAORD, action.payload);
+            LocalStorageManager.saveData(STORAGE_KEYS.DASHBOARD, action.payload);
         })
         .addCase(GetAllOrdersInGraph.rejected, (state, action) =>{
             state.isLoading = false

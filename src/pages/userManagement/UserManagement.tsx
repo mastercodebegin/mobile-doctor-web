@@ -11,6 +11,7 @@ import { GetAllRoles } from '../Roles/RoleSlice';
 import { GetCitiesByStateId } from '../City/CitySlice';
 import { ArrowDownIcon, ArrowUpIcon, ImageUp, NotebookPen, UserRound } from 'lucide-react';
 import { UrlConstants } from '../../util/practice/UrlConstants';
+import { GetAllState } from '../State/StateSlice';
 
 const UserManagement = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -50,30 +51,36 @@ const UserManagement = () => {
   const handleBack = () => setActiveStep((s) => Math.max(s - 1, 0));
 
   // Add just above your return (
-const isCurrentStepValid = () => {
-  if (activeStep === 0) {
-    // Role step: "role" must be filled and have no error
-    return !!formData.role && !errors.role;
-  }
-  if (activeStep === 1) {
-    // Basic Info step
-    const selectedRole = roleData?.find(role => +role.id === +formData.role);
-    const isManager = selectedRole?.id === RoleIds.manager;
-    const baseFields = [
-      "firstName", "lastName", "mobile", "email", "panCard", "aadharNumber",
-      "homeAddress", "pinCode", "state", "city"
-    ];
-    const requiredFields = isManager
-      ? [...baseFields, "businessName", "businessAddress"]
-      : baseFields;
-    return requiredFields.every(field => formData[field] && !errors[field]);
-  }
-  return false;
-};
+  const isCurrentStepValid = () => {
+    if (activeStep === 0) {
+      // Role step: "role" must be filled and have no error
+      return !!formData.role && !errors.role;
+    }
+    if (activeStep === 1) {
+      // Basic Info step
+      const selectedRole = roleData?.find(role => +role.id === +formData.role);
+      const isManager = selectedRole?.id === RoleIds.manager;
+      const baseFields = [
+        "firstName", "lastName", "mobile", "email", "panCard", "aadharNumber",
+        "homeAddress", "pinCode", "state", "city"
+      ];
+      const requiredFields = isManager
+        ? [...baseFields, "businessName", "businessAddress"]
+        : baseFields;
+      return requiredFields.every(field => formData[field] && !errors[field]);
+    }
+    return false;
+  };
 
   const usersPerPage = 5;
   const roleArray = Array?.isArray(data) ? data : data ? [data] : [];
   const paginatedUsers = roleArray?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
+
+  // Open Add Window + Show all Roles
+   const handleAddClick = () => {
+    setShowModal(true);
+    dispatch(GetAllRoles());
+  };
 
   // Role Filter
   const filteredRoles = useMemo(() => {
@@ -603,6 +610,12 @@ const isCurrentStepValid = () => {
     dispatch(GetAllRoles());
   }, []);
 
+  useEffect(() => {
+  if (activeStep === 1) {
+    dispatch(GetAllState());
+  }
+}, [activeStep, dispatch]);
+
   { isLoading && <Loading overlay={true} /> }
 
   return (
@@ -610,6 +623,7 @@ const isCurrentStepValid = () => {
       <div className=" md:overflow-y-hidden overflow-x-hidden">
         <div className="mt-10 flex items-center justify-between">
 
+          {/* Left */}
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -645,9 +659,9 @@ const isCurrentStepValid = () => {
 
           </div>
 
-          {/* Add Button */}
+          {/* Right :- Add Button */}
           <div className="flex items-center gap-4">
-            <button onClick={() => setShowModal(true)} className={SubmitButtonClass}>
+            <button onClick={handleAddClick} className={SubmitButtonClass}>
               Add
             </button>
           </div>
@@ -803,21 +817,29 @@ const isCurrentStepValid = () => {
                                                 </div>
                                               </div>
                                             ))}
-                                            <div className="p-4 bg-white w-[100] rounded shadow-sm border border-gray-200">
-                                              {Array.isArray(vendor?.vendor?.vendorDocument) && vendor.vendor.vendorDocument.length > 0 && (
-                                                <div className="flex flex-wrap gap-4 mt-6">
-                                                  {vendor.vendor.vendorDocument.map((doc, i) => (
-                                                    <div key={i} className="p-4 bg-white rounded flex flex-col items-center">
-                                                      <img
-                                                        src={`${UrlConstants.AWS_IMAGE_BASE_URL}${doc?.imageName}`}
-                                                        className="w-24 h-24 object-contain border border-gray-200 rounded-md mb-2 cursor-pointer hover:opacity-80 transition-opacity"
-                                                        onClick={() => setSelectedImage(`${UrlConstants.AWS_IMAGE_BASE_URL}${doc?.imageName}`)}
-                                                      />
-                                                    </div>
-                                                  ))}
-                                                </div>
-                                              )}
-                                            </div>
+
+                                            {Array.isArray(vendor?.vendor?.vendorDocument) && vendor.vendor.vendorDocument.length > 0 && (
+                                              // <div className="p-4 bg-white w-full rounded shadow-sm border border-gray-200">
+                                              <div className="flex gap-4 mt-6">
+                                                {vendor.vendor.vendorDocument.map((doc, i) => (
+                                                  <div
+                                                    key={i}
+                                                    className="flex h-30 items-center justify-center bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition"
+                                                  >
+                                                    <img
+                                                      src={`${UrlConstants.AWS_IMAGE_BASE_URL}${doc?.imageName}`}
+                                                      className="w-28 h-28 object-contain rounded-md cursor-pointer hover:scale-105 transition-transform"
+                                                      onClick={() => setSelectedImage(`${UrlConstants.AWS_IMAGE_BASE_URL}${doc?.imageName}`)}
+                                                    />
+                                                  </div>
+                                                ))}
+                                              </div>
+                                              // </div>
+                                            )}
+
+
+
+
                                           </>
                                         );
                                       })()}
@@ -1392,47 +1414,47 @@ const isCurrentStepValid = () => {
 
                   {/*Action  Buttons */}
                   <div className="mt-6 flex justify-between">
-  {/* Back/Close buttons */}
-  {activeStep === 0 && (
-    <button
-      type="button"
-      onClick={handleCloseModal}
-      className={ShowModelCloseButtonClass}
-    >
-      Close
-    </button>
-  )}
-  {activeStep > 0 && (
-    <button
-      type="button"
-      onClick={handleBack}
-      className={ShowModelCloseButtonClass}
-    >
-      Back
-    </button>
-  )}
+                    {/* Back/Close buttons */}
+                    {activeStep === 0 && (
+                      <button
+                        type="button"
+                        onClick={handleCloseModal}
+                        className={ShowModelCloseButtonClass}
+                      >
+                        Close
+                      </button>
+                    )}
+                    {activeStep > 0 && (
+                      <button
+                        type="button"
+                        onClick={handleBack}
+                        className={ShowModelCloseButtonClass}
+                      >
+                        Back
+                      </button>
+                    )}
 
-  {/* Next or Submit button */}
-  {activeStep < steps.length - 1 ? (
-    <button
-      type="button"
-      onClick={handleNext}
-      className={SubmitButtonClass}
-      disabled={!isCurrentStepValid()}  
-    >
-      Next
-    </button>
-  ) : (
-    <button
-      onClick={handleSaveClick}
-      type="submit"
-      disabled={isLoading}
-      className={SubmitButtonClass}
-    >
-      {isEditMode ? "Update" : "Continue"}
-    </button>
-  )}
-</div>
+                    {/* Next or Submit button */}
+                    {activeStep < steps.length - 1 ? (
+                      <button
+                        type="button"
+                        onClick={handleNext}
+                        className={SubmitButtonClass}
+                        disabled={!isCurrentStepValid()}
+                      >
+                        Next
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handleSaveClick}
+                        type="submit"
+                        disabled={isLoading}
+                        className={SubmitButtonClass}
+                      >
+                        {isEditMode ? "Update" : "Continue"}
+                      </button>
+                    )}
+                  </div>
 
                 </>
               )}

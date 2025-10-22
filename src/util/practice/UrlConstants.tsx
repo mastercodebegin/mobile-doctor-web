@@ -77,7 +77,8 @@ ORDER_CANCELLED: 'unitRepair/cancelUnitRepairOrderByUserORAdmin',
 
 
 
-  AWS_IMAGE_BASE_URL:'https://icare-1.s3.ap-southeast-2.amazonaws.com/',
+  // AWS_IMAGE_BASE_URL:'https://icare-1.s3.ap-southeast-2.amazonaws.com/',
+  AWS_IMAGE_BASE_URL:'https://storage.googleapis.com/icare-gcp-1/',
   // LOGIN: 'vendor/login
   CREATE_VENDOR:'vendor/createVendor',
   UPDATE_VENDOR_STATUS:'vendor/updateVendorAccountStatus',
