@@ -167,69 +167,6 @@ const Order = ({ sidebarMobileOpen }) => {
   };
 
   // Function to handle the download action 
-  // const handleDownload = async () => {
-  //   try {
-  //     const downloadObj: DownloadObject = {};
-
-  //     // ✅ Validate date range
-  //     if (selectedDateRange && selectedDateRange[0] && selectedDateRange[1]) {
-  //       const formatDate = (date: Date) => {
-  //         const year = date.getFullYear();
-  //         const month = String(date.getMonth() + 1).padStart(2, "0");
-  //         const day = String(date.getDate()).padStart(2, "0");
-  //         return `${year}-${month}-${day}`;
-  //       };
-
-  //       const fromDate = formatDate(selectedDateRange[0]);
-  //       const toDate = formatDate(selectedDateRange[1]);
-
-  //       downloadObj.fromDate = fromDate;
-  //       downloadObj.toDate = toDate;
-
-  //       console.log("📅 Download Date Range:", { fromDate, toDate });
-  //     } else {
-  //       toast.warning("⚠️ Please select a valid date range before downloading.");
-  //       // return;
-  //     }
-
-  //     // ✅ Add optional fields
-  //     if (downloadStatus) {
-  //       downloadObj.unitRepairStatus = downloadStatus;
-  //     }
-
-  //     if (selectedUser?.id) {
-  //       downloadObj.userId = selectedUser.id;
-  //     }
-
-  //     console.log("📦 Final Download Payload:", downloadObj);
-
-  //     // ✅ API Call
-  //     setLoading(true);
-  //     const response = await dispatch(DownloadOrders(downloadObj));
-
-  //     if (response?.payload?.success || response?.payload?.status === 200) {
-  //       toast.success("✅ Data downloaded successfully!");
-  //     } else {
-  //       toast.error(
-  //         response?.payload?.message || "❌ Failed to download data. Try again!"
-  //       );
-  //     }
-
-  //     // ✅ Close Modals
-  //     setShowDownloadModal(false);
-  //     handleCloseModal();
-
-  //     // ✅ Refresh table/list
-  //     await getAllUnitOrderCommonFunction();
-
-  //   } catch (error: any) {
-  //     console.error("❌ Download error:", error);
-  //     toast.error(error?.message || "Something went wrong while downloading!");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleDownload = async () => {
     try {
       // Step 1️: Validation
@@ -417,20 +354,7 @@ const Order = ({ sidebarMobileOpen }) => {
         return;
       }
 
-      if (selectedUser) {
-        if (selectedUser?.role?.name === "engineer") {
-          setEngineerId(selectedUser?.id);
-        } else if (selectedUser?.role?.name === "manager") {
-          setManagerId(selectedUser?.id);
-        } else if (selectedUser?.role?.name === "pickupPartner") {
-          setPickupPartnerId(selectedUser?.id);
-        } else if (selectedUser?.role?.name === "customer") {
-          setCustomerId && setCustomerId(selectedUser?.id);
-        }
-        await getAllUnitOrderCommonFunction()
-        setShowConfirmModal(false)
-        setSearchModel(false)
-      } else if (filterEmail && !filterOrderId) {
+      if (filterEmail && !filterOrderId) {
         console.log("Calling API with email:", filterEmail);
         const res = await getRequestMethodWithParam({ email: filterEmail }, UrlConstants.GET_USRE_BY_EMAIL);
         console.log(res);
@@ -594,6 +518,9 @@ const Order = ({ sidebarMobileOpen }) => {
     setCurrentPage(1);
     setIsFilterApplied(false);
     setShowFilter(false);
+     setSelectedUser(null); // Add this line
+  setAssignEmail(''); // Add this line
+  setSearchResults([]); // Add this line
     window.history.replaceState({}, document.title);
     const baseFilterObj = {
       pageSize: pageSize,
@@ -648,6 +575,28 @@ const Order = ({ sidebarMobileOpen }) => {
     setSelectedUser(user);
     setAssignEmail(user.email);
     setShowSearchResults(false);
+
+    // Set role-based ID for filtering
+  const roleName = user.role?.name?.toLowerCase();
+  
+  // Clear all role IDs first
+  setManagerId(null);
+  setEngineerId(null);
+  setPickupPartnerId(null);
+  setCustomerId(null);
+  
+  // Set appropriate role ID based on user's role
+  if (roleName === "manager") {
+    setManagerId(user.id);
+  } else if (roleName === "engineer") {
+    setEngineerId(user.id);
+  } else if (roleName === "pickuppartner") {
+    setPickupPartnerId(user.id);
+  } else if (roleName === "customer") {
+    setCustomerId(user.id);
+  }
+
+
   };
 
   // Add assign engineer handler
@@ -800,6 +749,7 @@ useEffect(() => {
     setManagerId(null);
     setEngineerId(null);
     setPickupPartnerId(null);
+    setCustomerId(null);
     setUnitRepairStatusEdit("");
     setDescription("");
     setPrice("");
@@ -817,10 +767,10 @@ useEffect(() => {
     setCancelReason("");
     setShowCancelModal(false);
     setPendingAction(null);
-    setDelayReason(""); // Add this
+    setDelayReason(""); 
     setOrderCompletedOn([null, null]);
-    setShowDelayReason(false); // Add this
-    setOriginalExpectedDate(""); // Add this
+    setShowDelayReason(false); 
+    setOriginalExpectedDate(""); 
     setShowDownloadModal(false);
     setDownloadStatus('');
     setSelectedDateRange([null, null]);
@@ -943,7 +893,7 @@ useEffect(() => {
             onClick={() => setShowDownloadModal(true)}
             className="transition"
           >
-            <Download className='transition' />
+            <Download className='text-cyan-500' />
           </button>
 
           {showFilter && (
@@ -2099,21 +2049,23 @@ useEffect(() => {
                     className={`${HoverEffect} px-4 py-2 ${!selectedOrderDetails?.cancelReason && !selectedOrderDetails?.delayReason ? "hidden" : ""
                       }`}
                   >
-                    <h3 className={"text-lg font-semibold mb-2 text-gray-800"}>Overall Problem</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <h3 className={"text-xl font-semibold mb-2 text-gray-800"}>Cancel/Delay Reason</h3>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
                       {selectedOrderDetails?.cancelReason && (
-                        <div className="bg-white p-4 rounded-lg">
-                          <span className="font-medium text-red-600">Cancel Reason:</span>
-                          <p className="text-black mt-1">{selectedOrderDetails.cancelReason}</p>
+                        <div>
+                          <span className="text-xs text-gray-500">Cancel Reason:</span>
+                          <p className="font-medium text-gray-800">{selectedOrderDetails.cancelReason}</p>
                         </div>
                       )}
                       {selectedOrderDetails?.delayReason && (
-                        <div className="bg-white p-4 rounded-lg">
-                          <span className="font-medium text-orange-600">Delay Reason:</span>
-                          <p className="text-orange-500 mt-1">{selectedOrderDetails.delayReason}</p>
+                        <div>
+                          <span className="text-xs text-gray-500">Delay Reason:</span>
+                          <p className="font-medium text-gray-800">{selectedOrderDetails.delayReason}</p>
                         </div>
                       )}
                     </div>
+                  </div>
                   </div>
 
                   {/* Defective Part Information */}
