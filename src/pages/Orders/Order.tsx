@@ -54,6 +54,7 @@ const Order = ({ sidebarMobileOpen }) => {
   const [isFilterApplied, setIsFilterApplied] = useState(false);
   const [fullscreenImage, setFullscreenImage] = useState(null);
 
+  // State for the Order-Update Detail-Modal
   const [showAssign, setShowAssign] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -72,6 +73,7 @@ const Order = ({ sidebarMobileOpen }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { state } = useLocation();
   const [unitRepairStatus, setUnitRepairStatus] = useState<string>('');
+  const [expectedDeliveryDate, setExpectedDeliveryDate] = useState([null, null]);
   const [filterDate, setFilterDate] = useState({
     startDate: null,
     endDate: null
@@ -86,7 +88,14 @@ const Order = ({ sidebarMobileOpen }) => {
   const OrderArray = Array.isArray(Orders) ? Orders : Orders ? [Orders] : [];
   const paginatedUsers = OrderArray?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage)
 
-  // Download-Section Start //
+  // Download Section Start
+
+  // Function to handle the Filter button click
+  const handleFilterClick = () => {
+  setModalType('filter');
+  setShowFDModal(true);
+  setIsFilterApplied(true);
+};
 
   // Function to handle the download button click
   const handleDownloadClick = () => {
@@ -515,8 +524,12 @@ const Order = ({ sidebarMobileOpen }) => {
     setCancelReason("");
     setShowCancelModal(false);
     setPendingAction(null);
+    setShowFDModal(false);
+    setDelayReason(""); // Add this
+    setOrderCompletedOn([null, null]);
+    setShowDelayReason(false); // Add this
+    setOriginalExpectedDate(""); // Add this
     setShowDownloadModal(false);
-    setSelectedDateRange([null, null]);
 
   }
 
@@ -541,6 +554,8 @@ const Order = ({ sidebarMobileOpen }) => {
     dispatch(GetAllRepairUnitOrderByUserId(baseFilterObj));
   };
 
+
+  // handleEditUser function
   const handleEditUser = (user) => {
     console.log("Edit User with User :--", user);
 
@@ -550,13 +565,46 @@ const Order = ({ sidebarMobileOpen }) => {
     setSearchModel(true);
 
     // Populate input fields with user data
-    setUnitRepairStatusEdit(user?.order?.unitRepairStatus || "");
-    setDescription(user?.order?.defectDescriptionByEngineer || "");
-    setPrice(user?.order?.finalPrice || "");
+    setUnitRepairStatusEdit(user?.unitRepairStatus || "");
+    setDescription(user?.defectDescriptionByEngineer || "");
+    setPrice(user?.price || "");
 
-    // FIXED: Use 'completedOn' from API response, not 'orderCompletedOn'
-    const orderCompletedOn = user?.order?.expectedCompletedOn ? new Date(user.order.expectedCompletedOn).toISOString().split('T')[0] : "";
-    setOrderCompletedOn(orderCompletedOn);
+    // Store original date for comparison
+    const originalDate = user?.expectedCompletedOn ? new Date(user.expectedCompletedOn) : null;
+    setOriginalExpectedDate(user?.expectedCompletedOn || "");
+
+    // Set date in DateRangePicker format [date, date]
+    if (originalDate) {
+      setOrderCompletedOn([originalDate, originalDate]);
+    } else {
+      setOrderCompletedOn([null, null]);
+    }
+
+    setShowDelayReason(false);
+    setDelayReason("");
+  };
+
+  // Add handler for date change in edit modal
+  const handleEditDateChange = (newValue) => {
+    setOrderCompletedOn(newValue);
+
+    // Check if date is changed from original
+    if (newValue && newValue[0] && originalExpectedDate) {
+      const newDate = new Date(newValue[0]);
+      const originalDate = new Date(originalExpectedDate);
+
+      // Compare dates (ignore time for comparison)
+      const isDateChanged = newDate.toDateString() !== originalDate.toDateString();
+
+      setShowDelayReason(isDateChanged);
+
+      if (!isDateChanged) {
+        setDelayReason(""); // Clear delay reason if date is same
+      }
+    } else if (newValue && newValue[0] && !originalExpectedDate) {
+      // If there was no original date but user is selecting new date
+      setShowDelayReason(true);
+    }
   };
 
   useEffect(() => {
@@ -564,8 +612,17 @@ const Order = ({ sidebarMobileOpen }) => {
       setDescription(Edit.order.defectDescriptionByEngineer);
       setPrice(Edit.order.price);
       setUnitRepairStatusEdit(Edit.order.unitRepairStatus);
+
+      // Handle date properly
+      if (Edit.order.expectedCompletedOn) {
+        const date = new Date(Edit.order.expectedCompletedOn);
+        setOrderCompletedOn([date, date]);
+        setOriginalExpectedDate(Edit.order.expectedCompletedOn);
+      }
     }
   }, [Edit]);
+
+
 
   useEffect(() => {
     console.log(state?.status);
@@ -1088,14 +1145,48 @@ const Order = ({ sidebarMobileOpen }) => {
                   </div>
 
                   <div className="mb-6">
-                    <label className="block text-lg font-medium mb-2">Order Completed On</label>
-                    <input
-                      type="date"
+                    <label className="block text-lg font-medium mb-2">Expected Completed On</label>
+                    <DateRangePicker
+                      format="dd MMM yyyy hh:mm aa"
+                      showMeridian
                       value={orderCompletedOn}
-                      onChange={(e) => setOrderCompletedOn(e.target.value)}
-                      className={inputClass}
+                      onChange={handleEditDateChange}
+                      oneTap
+                      style={{
+                        border: `3px solid #5ca1b6ff`,
+                        borderRadius: "9px",
+                        width: "100%"
+                      }}
+                      container={() => document.body}
+                      menuStyle={{ zIndex: 99999 }}
+                      cleanable={false}
+                      placement="bottomStart"
+                      appearance="subtle"
+                      ranges={[]}
                     />
                   </div>
+
+                  {/* Conditional Delay Reason Field */}
+                  {showDelayReason && (
+                    <div className="mb-6 animate-fadeIn">
+                      <label className="block text-lg font-medium mb-2">
+                        Delay Reason <span className="text-red-500">*</span>
+                      </label>
+                      <textarea
+                        value={delayReason}
+                        onChange={(e) => setDelayReason(e.target.value)}
+                        className={inputClass}
+                        placeholder="Enter reason for date change"
+                        rows={3}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Required when changing expected completion date
+                      </p>
+                    </div>
+                  )}
+
+
+
 
                   <div className="mb-6">
                     <label className="block text-lg font-medium mb-2">Description</label>
@@ -1108,7 +1199,7 @@ const Order = ({ sidebarMobileOpen }) => {
                   </div>
 
                   <div className="mb-6">
-                    <label className="block text-lg font-medium mb-2">Price 1</label>
+                    <label className="block text-lg font-medium mb-2">Price</label>
                     <input
                       type="text"
                       value={price}
@@ -1709,8 +1800,6 @@ const Order = ({ sidebarMobileOpen }) => {
                       </table>
                     </div>
                   </div>
-
-
 
                   {/* Summary Section */}
                   <div className="flex justify-end mt-6">

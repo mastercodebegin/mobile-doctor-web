@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { postRequestMethod, putRequestMethod, putRequestMethodWithParam } from "../../util/CommonService";
+import { postRequestMethod, putRequestMethod, putRequestMethodForDownload, putRequestMethodWithParam } from "../../util/CommonService";
 import { UrlConstants } from "../../util/practice/UrlConstants";
 import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
 
@@ -11,6 +11,7 @@ interface IEditOrder {
   defectDescriptionByEngineer: string;
   price: string;
   orderCompletedOn: string;
+  delayReason: string;
 }
 
 interface EditOrder {
@@ -38,9 +39,10 @@ const initialState = {
     order: {
       unitRepairStatus: "PENDING",
       orderId: "",
-      engDefectDescription: "",
+      defectDescriptionByEngineer: "",
       price: "",
       expectedCompletedOn: "",
+      delayReason: "",
     },
   },
 }
@@ -82,36 +84,50 @@ const OrderSlice = createSlice({
                     console.log("Update Order is Pending :--", action.payload)
                 })
       .addCase(UpdateOrder.fulfilled, (state, action) => {
-              state.isLoading = false;
-              state.isSuccess = true;
-              console.log("Update fulfilled payload:", action.payload);
-              const updatedItem = action.payload;
-              if (updatedItem && updatedItem.orderId) {
-                const itemIndex = state.Orders.findIndex((item) => item.id === updatedItem.orderId);
-
-                if (itemIndex !== -1) {
-                  const originalItem = state.Orders[itemIndex];
-
-                  state.Orders[itemIndex] = {
-                     ...originalItem,
-                     ...updatedItem,
-                      engDefectDescription: updatedItem.engDefectDescription || originalItem.engDefectDescription,
-                      price: updatedItem.price || originalItem.price,
-                  };
-
-                  console.log("✅ Order updated at index", itemIndex);
-                }
-              }
-
-              LocalStorageManager.saveData(STORAGE_KEYS.ORDERS, [...state.Orders]);
-
-              state.Edit = {
-                 isEdit: false,
-                 order: initialState.Edit.order,
-              };
-
-              console.log("Updated Order Data:", state.Orders);
-          })
+  state.isLoading = false;
+  state.isSuccess = true;
+  
+  const response = action.payload;
+  console.log("✅ Update API Response:", response);
+  
+  // Check if response has data
+  if (!response || !response.orderId) {
+    console.error("❌ Invalid response from update API");
+    return;
+  }
+  
+  // Find and update order
+  const orderIndex = state.Orders.findIndex(
+    (order) => order.orderId === response.orderId
+  );
+  
+  if (orderIndex !== -1) {
+    // Create updated order object
+    state.Orders[orderIndex] = {
+      ...state.Orders[orderIndex],
+      // Update with response data (handle different field names)
+      unitRepairStatus: response.unitRepairStatus || state.Orders[orderIndex].unitRepairStatus,
+      price: response.price || state.Orders[orderIndex].price,
+      defectDescriptionByEngineer: response.engDefectDescription || response.defectDescriptionByEngineer || state.Orders[orderIndex].defectDescriptionByEngineer,
+      expectedCompletedOn: response.orderExpectedCompletedOn || response.expectedCompletedOn || state.Orders[orderIndex].expectedCompletedOn,
+      delayReason: response.delayReason || state.Orders[orderIndex].delayReason || null,
+    };
+    
+    console.log("✅ Order updated successfully at index:", orderIndex);
+    console.log("✅ Updated Order Data:", state.Orders[orderIndex]);
+    
+    // Save to localStorage
+    LocalStorageManager.saveData(STORAGE_KEYS.ORDERS, state.Orders);
+  } else {
+    console.error("❌ Order not found with orderId:", response.orderId);
+  }
+  
+  // Reset edit state
+  state.Edit = {
+    isEdit: false,
+    order: { ...initialState.Edit.order },
+  };
+})
                  .addCase(UpdateOrder.rejected, (state, action) =>{
                         state.isLoading = false
                         state.isSuccess = false
@@ -189,7 +205,48 @@ export const GetAllRepairUnitOrderByUserId = createAsyncThunk("FETCH/ALL/REPAIR/
         const message = error?.response?.data?.message || error.message
     return thunkAPI.rejectWithValue(message)
     }
-})
+  }
+);
+
+const handleFileDownload = (response: any, filename: string) => {
+  return new Promise((resolve, reject) => {
+    try {
+      // Create blob from response data
+      const blob = new Blob([response.data], { type: response.headers['content-type'] });
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Get filename from response headers or use default
+      const contentDisposition = response.headers['content-disposition'];
+      let downloadFilename = filename;
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+        if (filenameMatch && filenameMatch.length === 2) {
+          downloadFilename = filenameMatch[1];
+        }
+      }
+      
+      link.setAttribute('download', downloadFilename);
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      if (link.parentNode) {
+        link.parentNode.removeChild(link);
+      }
+      window.URL.revokeObjectURL(url);
+      
+      resolve(true);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 
 // Update Order Thunk
 export const UpdateOrder = createAsyncThunk("UPDATE/ORDER", async (actionData, thunkAPI) => {
@@ -201,16 +258,24 @@ export const UpdateOrder = createAsyncThunk("UPDATE/ORDER", async (actionData, t
       return thunkAPI.rejectWithValue("No Data To Update!");
     }
 
-    const requestBody = {
-      unitRepairStatus: updateData.unitRepairStatus,
+    const requestBody: any = {
       orderId: updateData.orderId,
-      engDefectDescription: updateData.defectDescriptionByEngineer,
+      unitRepairStatus: updateData.unitRepairStatus,
       price: updateData.price,
-      orderExpectedCompletedOn: updateData.expectedCompletedOn
+      engDefectDescription: updateData.engDefectDescription,
     };
 
+    // Add orderExpectedCompletedOn if present
+    if (updateData.orderExpectedCompletedOn) {
+      requestBody.orderExpectedCompletedOn = updateData.orderExpectedCompletedOn;
+    }
+
+    // Add delayReason only if present
+    if (updateData.delayReason) {
+      requestBody.delayReason = updateData.delayReason;
+    }
+
     console.log("🛠️ Update payload being sent:", requestBody);
-    console.log("🛠️ orderCompletedOn value:", updateData.expectedCompletedOn);
 
     const response = await putRequestMethod(requestBody, UrlConstants.UPDATE_ORDER);
     console.log("✅ Response Data By Update:", response);
