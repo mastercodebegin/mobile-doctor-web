@@ -52,7 +52,7 @@ interface RepairCost {
   price: string;
   message: string;
   productModelNumber: ProductModelNumber;
-  productPart: ProductPart;
+  productPartLabel: ProductPart;
 }
 
 interface RepairCostState {
@@ -106,7 +106,7 @@ const initialState: RepairCostState = {
       ram: ""
     }
   },
-  productPart: {
+  productPartLabel: {
     id: 0,
     name: "",
     subCategory: {
@@ -486,20 +486,20 @@ export const UpdateRepairCost = createAsyncThunk(
             ram: updateData.productModelNumber?.productSpecification?.ram || "",
           },
         },
-        productPart: {
-          id: updateData.productPart?.id || 0,
-          name: updateData.productPart?.name || "",
+        productPartLabel: {
+          id: updateData.productPartLabel?.id || 0,
+          name: updateData.productPartLabel?.name || "",
           subCategory: {
-            id: updateData.productPart?.subCategory?.id || 0,
-            name: updateData.productPart?.subCategory?.name || "",
+            id: updateData.productPartLabel?.subCategory?.id || 0,
+            name: updateData.productPartLabel?.subCategory?.name || "",
             category: {
-              id: updateData.productPart?.subCategory?.category?.id || 0,
-              name: updateData.productPart?.subCategory?.category?.name || "",
-              is_deleted: updateData.productPart?.subCategory?.category?.is_deleted || false,
+              id: updateData.productPartLabel?.subCategory?.category?.id || 0,
+              name: updateData.productPartLabel?.subCategory?.category?.name || "",
+              is_deleted: updateData.productPartLabel?.subCategory?.category?.is_deleted || false,
             },
-            is_deleted: updateData.productPart?.subCategory?.is_deleted || false,
+            is_deleted: updateData.productPartLabel?.subCategory?.is_deleted || false,
           },
-          deleted: updateData.productPart?.deleted || false,
+          deleted: updateData.productPartLabel?.deleted || false,
         },
       };
 

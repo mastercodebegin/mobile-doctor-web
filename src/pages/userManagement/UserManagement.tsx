@@ -652,7 +652,7 @@ const UserManagement = () => {
                   onClick={handleClearFilter}
                   className={ClearFilter}
                 >
-                  Clear_Filter
+                  Clear Filter
                 </button>
               )}
             </div>
@@ -932,7 +932,7 @@ const UserManagement = () => {
                       type="submit"
                       disabled={isLoading}
                       className={SubmitButtonClass}>
-                      {isEditMode ? 'Update' : 'Save'}
+                      {isEditMode ? 'Update' : 'Search'}
                     </button>
                   </div>
                 </>

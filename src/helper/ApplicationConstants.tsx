@@ -38,7 +38,7 @@ export const TableHadeClass = `py-4 px-6 text-left text-sm font-medium ${ThemeTe
 
 export const ShowModalMainClass = "fixed inset-0 z-50 flex items-center justify-center bg-transparent/30 backdrop-blur-sm"
 
-export const ClearFilter = "px-3 py-1.5 text-sm font-medium border rounded-md transition-all text-red-500 border-red-500 hover:bg-red-600 hover:text-white cursor-pointer"
+export const ClearFilter = "px-3 py-1.5 text-sm w-full font-medium border rounded-md transition-all text-red-500 border-red-500 hover:bg-red-600 hover:text-white cursor-pointer"
 
 export const EditIcon = <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
   <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />

@@ -806,7 +806,7 @@ const handleEditUser = (user: any) => {
                 onClick={handleClearFilter}
                 className={ClearFilter}
               >
-                Clear_Filter
+                Clear Filter
               </button>
             )}
           </div>

@@ -197,7 +197,7 @@ const Dashboard = () => {
                 {Object?.entries(userCountsByRole).map(([role, count]) => (
                   <div
                     key={role}
-                    className="bg-white px-6 pt-2 border-x border-gray-200 hover:shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-105 w-full sm:w-[50%] lg:w-[33%] max-w-[16rem]"
+                    className="bg-white px-6 pt-2 border-x border-gray-100 hover:shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-105 w-full sm:w-[50%] lg:w-[33%] max-w-[16rem]"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <Users size={20} className="text-green-500 mr-2" />
@@ -217,7 +217,7 @@ const Dashboard = () => {
                 {Object.entries(dashboardData?.responseDetails?.ordersCounts || {}).map(([status, count], index) => (
                   <div
                     key={status}
-                    className={`bg-white px-6 py-2 border-x border-gray-200 hover:shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-105 w-full sm:w-[50%] lg:w-[33%] max-w-[16rem] ${index >= 3 && !showAllCards ? 'hidden' : ''}`}
+                    className={`bg-white px-6 py-2 border-x border-gray-100 hover:shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-105 w-full sm:w-[50%] lg:w-[33%] max-w-[16rem] ${index >= 3 && !showAllCards ? 'hidden' : ''}`}
                     onClick={() => handleCardClick(status)}
                   >
                     <div className="flex justify-between items-center">

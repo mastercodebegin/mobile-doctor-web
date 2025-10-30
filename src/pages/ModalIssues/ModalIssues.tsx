@@ -231,7 +231,6 @@ const ModalIssues = () => {
   useEffect(() => {
     setIsLoaded(true);
     dispatch(GetAllModalIssues());
-    dispatch(GetAllSubCategory());
     dispatch(GetAllCategory());
   }, [])
 
@@ -291,7 +290,7 @@ const ModalIssues = () => {
                 onClick={handleClearFilter}
                 className={ClearFilter}
               >
-                Clear_Filter
+                Clear Filter
               </button>
             )}
           </div>

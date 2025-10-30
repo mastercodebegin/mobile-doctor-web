@@ -59,7 +59,7 @@ const OrderSlice = createSlice({
 
     extraReducers: (builder) =>{
         builder
-         // Fetch By Id
+         // Fetch By Id & Filter
                 .addCase(GetAllRepairUnitOrderByUserId.pending, (state, action) =>{
                     state.isLoading = true
                     state.isSuccess = false
@@ -75,7 +75,26 @@ const OrderSlice = createSlice({
                     state.isLoading = false
                     state.isSuccess = false
                     console.log("All Repair Unit Order By User Id Data Fetching Failed :--", action.payload)
-                })     
+                })  
+                
+                // Download Orders
+                .addCase(DownloadOrders.pending, (state, action) =>{
+                    state.isLoading = true
+                    state.isSuccess = false
+                    console.log("Data Download is Pending ----", action.payload)
+                })
+                .addCase(DownloadOrders.fulfilled, (state, action) =>{
+                    state.isLoading = false
+                    state.isSuccess = true
+                    console.log("Response Data :----", action.payload)
+                    // state.Orders = action.payload?.content;
+                    // LocalStorageManager.saveData(STORAGE_KEYS.ORDERS, action.payload);
+                })
+                .addCase(DownloadOrders.rejected, (state, action) =>{
+                    state.isLoading = false
+                    state.isSuccess = false
+                    console.log("Download Repair Unit Order By User Id Data Fetching Failed :--", action.payload)
+                })
                 
                 // Update
                 .addCase(UpdateOrder.pending, (state, action) =>{
@@ -83,7 +102,7 @@ const OrderSlice = createSlice({
                     state.isSuccess = false
                     console.log("Update Order is Pending :--", action.payload)
                 })
-      .addCase(UpdateOrder.fulfilled, (state, action) => {
+                .addCase(UpdateOrder.fulfilled, (state, action) => {
   state.isLoading = false;
   state.isSuccess = true;
   
@@ -110,7 +129,7 @@ const OrderSlice = createSlice({
       price: response.price || state.Orders[orderIndex].price,
       defectDescriptionByEngineer: response.engDefectDescription || response.defectDescriptionByEngineer || state.Orders[orderIndex].defectDescriptionByEngineer,
       expectedCompletedOn: response.orderExpectedCompletedOn || response.expectedCompletedOn || state.Orders[orderIndex].expectedCompletedOn,
-      delayReason: response.delayReason || state.Orders[orderIndex].delayReason || null,
+      delayReason: response.delayReason !== undefined ? response.delayReason : state.Orders[orderIndex].delayReason,
     };
     
     console.log("✅ Order updated successfully at index:", orderIndex);
@@ -187,7 +206,6 @@ const OrderSlice = createSlice({
                         state.isSuccess = false
                         console.log("Order Completed Click is Rejected With :---", action.payload)
                       })
-
     }
 })
 
@@ -195,15 +213,24 @@ const OrderSlice = createSlice({
 export default OrderSlice.reducer;
 export const {update} = OrderSlice.actions;
 
-// Fetch All Repair Unit Order By User Id
-export const GetAllRepairUnitOrderByUserId = createAsyncThunk("FETCH/ALL/REPAIR/UNIT/ORDER/BY/USER/ID", async (data:any, thunkAPI) =>{
+//  Download Thunk
+export const DownloadOrders = createAsyncThunk(
+  "DOWNLOAD/REPAIR/UNIT/ORDER/BY/USER/ID", 
+  async (requestData, thunkAPI) => {
     try {
-        const response = await postRequestMethod(data, UrlConstants.GET_ALL_REPAIR_UNIT_ORDER_BY_USER_ID);
-        console.log("Response Data To Fetch All Repair Unit Order By User Id :---", response);
-        return response;
+
+      const response = await putRequestMethodForDownload(requestData, UrlConstants.DOWNLOAD_REPAIR_UNIT_ORDER, true) 
+
+      console.log(`Response from Download Repair Unit Order API: `, response );
+
+      if (response) {
+        await handleFileDownload(response, 'repair_unit_orders.pdf');
+      }
+
+      return response ? { success: true } : response;
     } catch (error: any) {
-        const message = error?.response?.data?.message || error.message
-    return thunkAPI.rejectWithValue(message)
+      const message = error?.response?.data?.message || error.message;
+      return thunkAPI.rejectWithValue(message);
     }
   }
 );
@@ -247,21 +274,32 @@ const handleFileDownload = (response: any, filename: string) => {
   });
 };
 
+// Filter Order Thunk
+export const GetAllRepairUnitOrderByUserId = createAsyncThunk("FETCH/ALL/REPAIR/UNIT/ORDER/BY/USER/ID", async (requestData, thunkAPI) =>{
+  try {
+    const response = await postRequestMethod(requestData, UrlConstants.GET_ALL_REPAIR_UNIT_ORDER_BY_USER_ID);
+    console.log("Response Data :---", response);
+    return response
+  } catch (error: any) {
+    const message = error?.response?.data?.message || error.message;
+      return thunkAPI.rejectWithValue(message);
+  }
+})
 
 // Update Order Thunk
-export const UpdateOrder = createAsyncThunk("UPDATE/ORDER", async (actionData, thunkAPI) => {
+export const UpdateOrder = createAsyncThunk("UPDATE/ORDER", async (orderId: string, thunkAPI) => {
   try {
     const state = thunkAPI.getState() as any;
     const updateData = state.OrderSlice.Edit.order;
 
-    if (!updateData || !updateData.price) {
+    if (!updateData || !updateData.orderId) {
       return thunkAPI.rejectWithValue("No Data To Update!");
     }
 
     const requestBody: any = {
       orderId: updateData.orderId,
       unitRepairStatus: updateData.unitRepairStatus,
-      price: updateData.price,
+      price: updateData.price.toString(),
       engDefectDescription: updateData.engDefectDescription,
     };
 
@@ -270,9 +308,12 @@ export const UpdateOrder = createAsyncThunk("UPDATE/ORDER", async (actionData, t
       requestBody.orderExpectedCompletedOn = updateData.orderExpectedCompletedOn;
     }
 
-    // Add delayReason only if present
-    if (updateData.delayReason) {
+       // Add delayReason only if present and not empty
+    if (updateData.delayReason && updateData.delayReason.trim() !== "") {
       requestBody.delayReason = updateData.delayReason;
+    } else {
+      // If delayReason is empty, don't send it or send null
+      requestBody.delayReason = null;
     }
 
     console.log("🛠️ Update payload being sent:", requestBody);
@@ -291,7 +332,6 @@ export const UpdateOrder = createAsyncThunk("UPDATE/ORDER", async (actionData, t
     return thunkAPI.rejectWithValue(message);
   }
 });
-
 
 // Filter User By Email Thunk
 export const FindUserByEmail = createAsyncThunk("FIND/BY/EMAIL", async (requestData, thunkAPI) =>{

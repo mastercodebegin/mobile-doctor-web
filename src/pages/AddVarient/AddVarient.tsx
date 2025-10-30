@@ -539,7 +539,7 @@ const [originalModalNumber, setOriginalModalNumber] = useState("");
                   onClick={handleClear}
                   className={ClearFilter}
                 >
-                  Clear_Filter
+                  Clear Filter
                 </button>
               )}
             </div> 

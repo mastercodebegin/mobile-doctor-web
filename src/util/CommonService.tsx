@@ -242,7 +242,50 @@ export const postRequestMethodWithBodyAndParam = async (
     }
 };
 
-
+export const putRequestMethodForDownload = async (formData: any, requestUrl: any, isDownload: boolean = false) => {
+    const headers = await ApiHeader();
+    
+    // For download requests, we need different configuration
+    if (isDownload) {
+        const response = await Axios({
+            method: 'put',
+            data: formData,
+            headers: headers,
+            url: UrlConstants.BASE_URL + requestUrl,
+            responseType: 'blob' // This is crucial for file downloads
+        }).catch((error) => {
+            if (error.response) {
+                console.log('error--------------', error.response.data.message);
+                shoErrorModalHandler(error)
+                throw new Error(error.response.data.message);
+            } else {
+                console.log('error--------------', error.message);
+                throw new Error(error.message);
+            }
+        });
+        
+        return response; // Return the full response, not just response.data
+    } else {
+        // Regular JSON requests
+        const response = await Axios({
+            method: 'put',
+            data: formData,
+            headers: headers,
+            url: UrlConstants.BASE_URL + requestUrl,
+        }).catch((error) => {
+            if (error.response) {
+                console.log('error--------------', error.response.data.message);
+                shoErrorModalHandler(error)
+                throw new Error(error.response.data.message);
+            } else {
+                console.log('error--------------', error.message);
+                throw new Error(error.message);
+            }
+        });
+        
+        return response?.data;
+    }
+}
 
 export const putRequestMethod = async (formData:any, requestUrl:any) => {
     const headers = await ApiHeader();

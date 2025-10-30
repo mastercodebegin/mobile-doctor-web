@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { AppDispatch, RootState } from "../../redux/store";
 import { useDispatch, useSelector } from "react-redux";
 import Loading from "../../components/Loading";
-import { capitalizeEachWord, ClearFilter, DeleteClass, DeleteIcon, DropDownClass, EditClass, EditIcon, getStatusBadgeClass, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, statusOptions, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
+import { capitalizeEachWord, ClearFilter, DeleteClass, DeleteIcon, DropDownClass, EditClass, EditIcon, getStatusBadgeClass, inputClass, SearchIcon, ShowModalMainClass, ShowModelCloseButtonClass, statusOptions, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
 import Pagination from "../../helper/Pagination";
 import { AddsupportTicket, GetAllSupportTicket, GetAllSupportTicketByTicketNumber, Update, UpdateSupportTicket } from "./SupportTicketSlice";
 import ConfirmationModal from "../../components/ConfirmationModal";
@@ -176,20 +176,7 @@ if(Edit?.isEdit && Edit?.supportTicket) {
               className={"p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-all"}
               onClick={handleSearchIconClick}
             >
-              <svg
-                className="w-5 h-5 text-gray-600"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1116.65 5.65a7.5 7.5 0 010 10.6z"
-                />
-              </svg>
+              {SearchIcon}
             </button>
 
               <button

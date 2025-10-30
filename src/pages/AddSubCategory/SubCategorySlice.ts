@@ -110,6 +110,25 @@ const SubCategorySlice = createSlice({
         console.log("Add Category fetch Failed ----------", action.payload)
       })
 
+      // Get By CategoryId
+      .addCase(GetAllSubCategoryById.pending, (state) => {
+  state.isLoading = true;
+  state.isSuccess = false;
+})
+.addCase(GetAllSubCategoryById.fulfilled, (state, action) => {
+  state.isLoading = false;
+  state.isSuccess = true;
+  state.SubCategoriesData = action.payload;
+  LocalStorageManager.saveData(STORAGE_KEYS.SUB_CATEGORY, action.payload);
+  console.log("📦 Subcategories fetched successfully:", action.payload);
+})
+.addCase(GetAllSubCategoryById.rejected, (state, action) => {
+  state.isLoading = false;
+  state.isSuccess = false;
+  console.error("❌ GetAllSubCategoryById failed:", action.payload);
+})
+
+
       // Create
       .addCase(CreateSubCategory.pending, (state) => {
         state.isLoading = true
@@ -160,8 +179,6 @@ const SubCategorySlice = createSlice({
           isEdit: false
         };
       })
-
-
       .addCase(UpdateSubCategory.rejected, (state, action) => {
         state.isLoading = false
         state.isSuccess = false

@@ -254,7 +254,7 @@ const City = () => {
       disabled={!selectedCountry}
     >
       <option value="">Filter State</option>
-      {stateData.map((item) => (
+      {stateData?.map((item) => (
         <option key={item.id} value={item.id}>
           {item?.name}
         </option>

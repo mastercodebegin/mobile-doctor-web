@@ -5,17 +5,17 @@ import { AppDispatch, RootState } from '../../redux/store';
 import { toast } from 'react-toastify';
 import { capitalizeEachWord, DropDownClass, EditClass, EditIcon, getStatusBadgeClass, inputClass, pageSize, RoleIds, ShowModalMainClass, ShowModelCloseButtonClass, statusOptions, SubmitButtonClass, TableDataClass, TableHadeClass } from '../../helper/ApplicationConstants';
 import Pagination from '../../helper/Pagination';
-import { AssignToEngineer, FindUserByEmail, GetAllRepairUnitOrderByUserId, OrderActionClick, update, UpdateOrder } from './OrderSlice';
+import { AssignToEngineer, DownloadOrders, FindUserByEmail, GetAllRepairUnitOrderByUserId, OrderActionClick, update, UpdateOrder } from './OrderSlice';
 import DatePicker from '../../components/DatePicker';
 import { UrlConstants } from '../../util/practice/UrlConstants';
-import { getRequestMethodWithParam } from '../../util/CommonService';
 import ConfirmationModal from '../../components/ConfirmationModal';
-import { Download, Filter, FunnelPlus, Mail, Phone, Search, User, X } from 'lucide-react';
+import { Download, DownloadCloudIcon, Filter, FunnelPlus, Mail, Phone, Search, User, X } from 'lucide-react';
 import OrderProgressStepper from '../../components/OrderProgressStepper';
 import DefaultImage from "../../assets/Laptop_Image.png"
 import { debounce } from 'lodash';
 import { DateRangePicker } from 'rsuite';
 import { useLocation } from 'react-router-dom';
+import { getRequestMethodWithParam } from '../../util/CommonService';
 
 
 interface FilterObject {
@@ -32,6 +32,16 @@ interface FilterObject {
   expectedCompletedToDate?: string;
 }
 
+interface DownloadObject {
+  fromDate: string;
+  toDate: string;
+  unitRepairStatus: string;
+  userId: number;
+  managerId: string;
+  pickupPartnerId: string;
+  engineerId: string;
+}
+
 
 const Order = ({ sidebarMobileOpen }) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -45,16 +55,10 @@ const Order = ({ sidebarMobileOpen }) => {
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
   const { Orders, isLoading, Edit, isEmailLoading } = useSelector((state: RootState) => state.OrderSlice);
   const { data } = useSelector((state: RootState) => state.UserLoginSlice);
-  const [filterEmail, setFilterEmail] = useState<any>('')
-  const [filterOrderId, setFilterOrderId] = useState('')
-  const [managerId, setManagerId] = useState<number | null>(null);
-  const [engineerId, setEngineerId] = useState<number | null>(null);
-  const [pickupPartnerId, setPickupPartnerId] = useState<number | null>(null);
-  const [showFilter, setShowFilter] = useState(false);
-  const [isFilterApplied, setIsFilterApplied] = useState(false);
   const [fullscreenImage, setFullscreenImage] = useState(null);
 
-  // State for the Order-Update Detail-Modal
+
+  // State for the Order-Update & Assign To Engineer Detail-Modal
   const [showAssign, setShowAssign] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -65,42 +69,41 @@ const Order = ({ sidebarMobileOpen }) => {
   const [cancelReason, setCancelReason] = useState("");
   const [pendingAction, setPendingAction] = useState<"COMPLETE" | "DELIVER" | null>(null);
 
+  // State for the Edit Modal
   const [unitRepairStatusEdit, setUnitRepairStatusEdit] = useState("PENDING");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [orderCompletedOn, setOrderCompletedOn] = useState("");
+  const [originalExpectedDate, setOriginalExpectedDate] = useState("");
+  const [delayReason, setDelayReason] = useState("");
+  const [showDelayReason, setShowDelayReason] = useState(false);
 
   const dispatch = useDispatch<AppDispatch>();
   const { state } = useLocation();
+
+  // State for the Filter modal
+  const [filterEmail, setFilterEmail] = useState<any>('')
+  const [filterOrderId, setFilterOrderId] = useState('')
+  const [managerId, setManagerId] = useState<number | null>(null);
+  const [engineerId, setEngineerId] = useState<number | null>(null);
+  const [pickupPartnerId, setPickupPartnerId] = useState<number | null>(null);
+  const [customerId, setCustomerId] = useState<number | null>(null);
   const [unitRepairStatus, setUnitRepairStatus] = useState<string>('');
   const [expectedDeliveryDate, setExpectedDeliveryDate] = useState([null, null]);
-  const [filterDate, setFilterDate] = useState({
-    startDate: null,
-    endDate: null
-  });
-  const [expectedDeliveryDate, setExpectedDeliveryDate] = useState([null, null]);
+  const [filterDate, setFilterDate] = useState({ startDate: null, endDate: null });
+  const [showFilter, setShowFilter] = useState(false);
+  const [isFilterApplied, setIsFilterApplied] = useState(false);
 
   // State for the download modal
   const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [downloadStatus, setDownloadStatus] = useState('');
   const [selectedDateRange, setSelectedDateRange] = useState([null, null]);
 
   const usersPerPage = 5;
   const OrderArray = Array.isArray(Orders) ? Orders : Orders ? [Orders] : [];
   const paginatedUsers = OrderArray?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage)
 
-  // Download Section Start
-
-  // Function to handle the Filter button click
-  const handleFilterClick = () => {
-  setModalType('filter');
-  setShowFDModal(true);
-  setIsFilterApplied(true);
-};
-
-  // Function to handle the download button click
-  const handleDownloadClick = () => {
-    setShowDownloadModal(true);
-  };
+  // Download Section Start //
 
   // Function to handle the date range selection
   const handleDateRangeChange = (ranges) => {
@@ -164,36 +167,146 @@ const Order = ({ sidebarMobileOpen }) => {
   };
 
   // Function to handle the download action 
-  const handleDownload = () => {
-    if (selectedDateRange && selectedDateRange[0] && selectedDateRange[1]) {
-      // Format dates for API or download
+  // const handleDownload = async () => {
+  //   try {
+  //     const downloadObj: DownloadObject = {};
+
+  //     // ✅ Validate date range
+  //     if (selectedDateRange && selectedDateRange[0] && selectedDateRange[1]) {
+  //       const formatDate = (date: Date) => {
+  //         const year = date.getFullYear();
+  //         const month = String(date.getMonth() + 1).padStart(2, "0");
+  //         const day = String(date.getDate()).padStart(2, "0");
+  //         return `${year}-${month}-${day}`;
+  //       };
+
+  //       const fromDate = formatDate(selectedDateRange[0]);
+  //       const toDate = formatDate(selectedDateRange[1]);
+
+  //       downloadObj.fromDate = fromDate;
+  //       downloadObj.toDate = toDate;
+
+  //       console.log("📅 Download Date Range:", { fromDate, toDate });
+  //     } else {
+  //       toast.warning("⚠️ Please select a valid date range before downloading.");
+  //       // return;
+  //     }
+
+  //     // ✅ Add optional fields
+  //     if (downloadStatus) {
+  //       downloadObj.unitRepairStatus = downloadStatus;
+  //     }
+
+  //     if (selectedUser?.id) {
+  //       downloadObj.userId = selectedUser.id;
+  //     }
+
+  //     console.log("📦 Final Download Payload:", downloadObj);
+
+  //     // ✅ API Call
+  //     setLoading(true);
+  //     const response = await dispatch(DownloadOrders(downloadObj));
+
+  //     if (response?.payload?.success || response?.payload?.status === 200) {
+  //       toast.success("✅ Data downloaded successfully!");
+  //     } else {
+  //       toast.error(
+  //         response?.payload?.message || "❌ Failed to download data. Try again!"
+  //       );
+  //     }
+
+  //     // ✅ Close Modals
+  //     setShowDownloadModal(false);
+  //     handleCloseModal();
+
+  //     // ✅ Refresh table/list
+  //     await getAllUnitOrderCommonFunction();
+
+  //   } catch (error: any) {
+  //     console.error("❌ Download error:", error);
+  //     toast.error(error?.message || "Something went wrong while downloading!");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  const handleDownload = async () => {
+    try {
+      // Step 1️: Validation
+      if (
+        !selectedDateRange ||
+        !selectedDateRange[0] ||
+        !selectedDateRange[1]
+      ) {
+        toast.warning("Please select a valid date range before downloading.");
+        return;
+      }
+
+      // Step 2️: Format Dates
       const formatDate = (date) => {
         const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
         return `${year}-${month}-${day}`;
       };
 
-      const downloadData = {
-        startDate: formatDate(selectedDateRange[0]),
-        endDate: formatDate(selectedDateRange[1])
+      const downloadObj: DownloadObject = {
+        fromDate: formatDate(selectedDateRange[0]),
+        toDate: formatDate(selectedDateRange[1]),
       };
 
-      console.log('Download Data:', downloadData);
-      console.log('Start Date:', downloadData.startDate);
-      console.log('End Date:', downloadData.endDate);
+      // Step 3️: Add Optional Fields
+      if (downloadStatus) {
+        downloadObj.unitRepairStatus = downloadStatus;
+      }
 
-      // Yahan aap API call kar sakte ho with downloadData
-      // Example: dispatch(DownloadOrders(downloadData));
 
-      toast.success('Data downloaded successfully!');
+      // Step 4: Add UserId/EngineerId/ManagerId/PickupPartnerId Optional Fields
+      if (selectedUser?.id && selectedUser?.role?.name === "customer") {
+        downloadObj.userId = selectedUser.id;
+      } else if (selectedUser?.id && selectedUser?.role?.name === "manager") {
+        downloadObj.managerId = selectedUser.id;
+      } else if (selectedUser?.id && selectedUser?.role?.name === "pickupPartner") {
+        downloadObj.pickupPartnerId = selectedUser.id;
+      } else if (selectedUser?.id && selectedUser?.role?.name === "engineer") {
+        downloadObj.engineerId = selectedUser.id;
+      } else {
+        console.log("No User Data To Download...")
+      }
+
+      console.log("Selected User Data :---", selectedUser)
+      console.log("📦 Download Payload:", downloadObj);
+
+      setLoading(true);
+
+      // Step 4️: Dispatch Download Action
+      const response = await dispatch(DownloadOrders(downloadObj)).unwrap();
+      console.log("📄 Download Response:", response);
+
+      if (response?.success || response?.status === 200) {
+        toast.success("Data downloaded successfully!");
+      } else {
+        toast.error(response?.message || "❌ Download failed!");
+      }
+
+      // Step 5️: Close modal
       setShowDownloadModal(false);
-    } else {
-      toast.warning('Please select a date range first.');
+      handleCloseModal();
+
+      // Step 6️: Refresh table/list after download
+      await getAllUnitOrderCommonFunction();
+
+    } catch (error: any) {
+      console.error("❌ Download error:", error);
+      toast.error(error?.message || "Something went wrong while downloading!");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Download-Section End //
+  // Download Section End //
+  // ------------------------------------------------------------X--X--X------------------------------------------------------------// 
+  // Filter Section Start //
 
   // // Date change handler - This function is Call By DatePicker
   const handleDateChange = (newValue, type = 'creation') => {
@@ -225,6 +338,8 @@ const Order = ({ sidebarMobileOpen }) => {
       filterObj.engineerId = engineerId;
     } else if (pickupPartnerId) {
       filterObj.pickupPartnerId = pickupPartnerId;
+    } else if (customerId) {
+      filterObj.userId = customerId;
     }
 
     // Add Order Id filter
@@ -287,10 +402,12 @@ const Order = ({ sidebarMobileOpen }) => {
 
   const handleSearchEmail = async () => {
 
+    console.log("Selected Userd Data :----", selectedUser)
     const isUpdating = isEditMode && Edit?.order?.orderId;
 
     try {
       setLoading(true);
+      console.log("Selected Userd Data :----", selectedUser)
       const isApplyAction = !filterEmail && !filterOrderId && !isUpdating;
 
       if (isApplyAction) {
@@ -300,7 +417,20 @@ const Order = ({ sidebarMobileOpen }) => {
         return;
       }
 
-      if (filterEmail && !filterOrderId) {
+      if (selectedUser) {
+        if (selectedUser?.role?.name === "engineer") {
+          setEngineerId(selectedUser?.id);
+        } else if (selectedUser?.role?.name === "manager") {
+          setManagerId(selectedUser?.id);
+        } else if (selectedUser?.role?.name === "pickupPartner") {
+          setPickupPartnerId(selectedUser?.id);
+        } else if (selectedUser?.role?.name === "customer") {
+          setCustomerId && setCustomerId(selectedUser?.id);
+        }
+        await getAllUnitOrderCommonFunction()
+        setShowConfirmModal(false)
+        setSearchModel(false)
+      } else if (filterEmail && !filterOrderId) {
         console.log("Calling API with email:", filterEmail);
         const res = await getRequestMethodWithParam({ email: filterEmail }, UrlConstants.GET_USRE_BY_EMAIL);
         console.log(res);
@@ -329,6 +459,8 @@ const Order = ({ sidebarMobileOpen }) => {
           setEngineerId(userId);
         } else if (roleName === "pickuppartner") {
           setPickupPartnerId(userId);
+        } else if (roleName === "customer") {
+          setCustomerId(userId);
         } else {
           toast.warning(`Invalid role: ${roleName}. Please try again.`);
           setLoading(false);
@@ -359,13 +491,40 @@ const Order = ({ sidebarMobileOpen }) => {
         console.log("✅ UPDATE FLOW");
 
         try {
+          // Check if date changed and delay reason is required
+          if (showDelayReason && !delayReason.trim()) {
+            toast.warning("Please provide delay reason for date change");
+            setLoading(false);
+            return;
+          }
+
+          // Format date in ISO format with time
+          const formatDateTimeForAPI = (date) => {
+            if (!date) return null;
+            const dateObj = date instanceof Date ? date : new Date(date);
+
+            // A new date with the same year, month, day but at noon UTC to avoid timezone issues
+            const utcDate = new Date(Date.UTC(
+              dateObj.getFullYear(),
+              dateObj.getMonth(),
+              dateObj.getDate(),
+              12, 0, 0, 0  // Set to noon UTC to avoid crossing day boundaries
+            ));
+            return utcDate.toISOString(); // Returns format: "2025-10-25T15:53:36.686Z"
+          };
+
           const updateOrder = {
             orderId: Edit.order.orderId,
             unitRepairStatus: unitRepairStatusEdit,
             price: price,
             engDefectDescription: description,
-            orderExpectedCompletedOn: orderCompletedOn || Edit.order.expectedCompletedOn
+            orderExpectedCompletedOn: orderCompletedOn && orderCompletedOn[0]
+              ? formatDateTimeForAPI(orderCompletedOn[0])
+              : Edit.order.expectedCompletedOn,
+            ...(showDelayReason && delayReason.trim() && { delayReason: delayReason.trim() })
           };
+
+          console.log("Update Payload:", updateOrder);
 
           dispatch(update(updateOrder));
 
@@ -392,7 +551,7 @@ const Order = ({ sidebarMobileOpen }) => {
 
   const handleConfirmSave = async () => {
 
-    if (managerId || pickupPartnerId || engineerId) {
+    if (managerId || pickupPartnerId || engineerId || customerId) {
       getAllUnitOrderCommonFunction()
     }
 
@@ -415,13 +574,37 @@ const Order = ({ sidebarMobileOpen }) => {
       handleCloseModal();
     } catch (error: any) {
       console.error(`${pendingAction} order failed:`, error);
-      // toast.error(error.message || `Failed to ${pendingAction.toLowerCase()} order`);
     } finally {
       setLoading(false);
     }
 
     handleCloseModal()
   }
+
+  const handleClearFilter = () => {
+    setFilterDate({ startDate: null, endDate: null });
+    setExpectedDeliveryDate([null, null]);
+    setUnitRepairStatus('');
+    setManagerId(null);
+    setEngineerId(null);
+    setPickupPartnerId(null);
+    setSearchModel(false);
+    setFilterEmail("");
+    setFilterOrderId("");
+    setCurrentPage(1);
+    setIsFilterApplied(false);
+    setShowFilter(false);
+    window.history.replaceState({}, document.title);
+    const baseFilterObj = {
+      pageSize: pageSize,
+      pageNumber: 0,
+    };
+    dispatch(GetAllRepairUnitOrderByUserId(baseFilterObj));
+  };
+
+  // Filter Section End //
+  // ------------------------------------------------------------X--X--X------------------------------------------------------------// 
+  // Assign Engineer Section Start //
 
   // Add debounced search function after state declarations
   const debouncedSearch = debounce(async (email, roleId) => {
@@ -495,13 +678,123 @@ const Order = ({ sidebarMobileOpen }) => {
     }
   };
 
+  // Assign Engineer Section End //
+  // ------------------------------------------------------------X--X--X------------------------------------------------------------// 
+  // Edit Section Start //
+
+  const handleEditUser = (user) => {
+  console.log("Edit User with User :--", user);
+
+  dispatch(update(user));
+
+  setIsEditMode(true);
+  setSearchModel(true);
+
+  // Populate input fields with user data
+  setUnitRepairStatusEdit(user?.unitRepairStatus || "");
+  setDescription(user?.defectDescriptionByEngineer || "");
+  setPrice(user?.price || "");
+  setDelayReason(user?.delayReason || "");
+
+  // Store original date for comparison
+  const originalDate = user?.expectedCompletedOn ? new Date(user.expectedCompletedOn) : null;
+  setOriginalExpectedDate(user?.expectedCompletedOn || "");
+
+  // Set date in DateRangePicker format [date, date]
+  if (originalDate) {
+    setOrderCompletedOn([originalDate, originalDate]);
+    
+    // Initialize showDelayReason based on whether delayReason exists
+    setShowDelayReason(!!user?.delayReason);
+  } else {
+    setOrderCompletedOn([null, null]);
+    setShowDelayReason(false);
+  }
+};
+
+// Add handler for date change in edit modal
+const handleEditDateChange = (newValue) => {
+  setOrderCompletedOn(newValue);
+
+  // Check if date is changed from original
+  if (newValue && newValue[0] && originalExpectedDate) {
+    const newDate = new Date(newValue[0]);
+    const originalDate = new Date(originalExpectedDate);
+
+    // Compare dates (ignore time for comparison - compare only date parts)
+    const isDateChanged = 
+      newDate.getFullYear() !== originalDate.getFullYear() ||
+      newDate.getMonth() !== originalDate.getMonth() || 
+      newDate.getDate() !== originalDate.getDate();
+
+    setShowDelayReason(isDateChanged);
+
+    if (!isDateChanged) {
+      setDelayReason(""); // Clear delay reason if date is same
+    }
+  } else if (newValue && newValue[0] && !originalExpectedDate) {
+    // If there was no original date but user is selecting new date
+    setShowDelayReason(true);
+  } else if (!newValue || !newValue[0]) {
+    // If date is cleared
+    setShowDelayReason(false);
+    setDelayReason("");
+  }
+};
+
+// Edit UseEffect
+useEffect(() => {
+  if (Edit.isEdit) {
+    setDescription(Edit.order.defectDescriptionByEngineer);
+    setPrice(Edit.order.price);
+    setUnitRepairStatusEdit(Edit.order.unitRepairStatus);
+    setDelayReason(Edit.order.delayReason || ""); // Make sure delay reason is set
+
+    // Handle date properly
+    if (Edit.order.expectedCompletedOn) {
+      const date = new Date(Edit.order.expectedCompletedOn);
+      setOrderCompletedOn([date, date]);
+      setOriginalExpectedDate(Edit.order.expectedCompletedOn);
+      
+      // Show delay reason field if delay reason exists
+      setShowDelayReason(!!Edit.order.delayReason);
+    } else {
+      setOrderCompletedOn([null, null]);
+      setShowDelayReason(false);
+    }
+  }
+}, [Edit]);
+
+  // Edit Section End //
+  // ------------------------------------------------------------X--X--X------------------------------------------------------------// 
+  // Navigate Status Filter Section Start //
+
+  useEffect(() => {
+    console.log(state?.status);
+
+    if (state?.status === "total") {
+      getAllUnitOrderCommonFunction();
+    } else if (state?.status) {
+      setUnitRepairStatus(state?.status);
+      setIsFilterApplied(true);
+      getAllUnitOrderCommonFunction(state?.status);
+    } else {
+      setUnitRepairStatus('');
+      setIsFilterApplied(false);
+    }
+  }, [state]);
+
+  // Navigate Status Filter Section End //
+
   const handleCloseModal = () => {
     setShowAssign(false);
     setShowConfirmModal(false);
+    setIsFilterApplied(false);
     setIsEditMode(false);
     setLoading(false);
     setSearchModel(false);
     setShowDetailsModel(false);
+    setShowFilter(false);
     setFilterEmail("");
     setFilterOrderId("");
     setManagerId(null);
@@ -524,121 +817,15 @@ const Order = ({ sidebarMobileOpen }) => {
     setCancelReason("");
     setShowCancelModal(false);
     setPendingAction(null);
-    setShowFDModal(false);
     setDelayReason(""); // Add this
     setOrderCompletedOn([null, null]);
     setShowDelayReason(false); // Add this
     setOriginalExpectedDate(""); // Add this
     setShowDownloadModal(false);
+    setDownloadStatus('');
+    setSelectedDateRange([null, null]);
 
   }
-
-  const handleClearFilter = () => {
-    setFilterDate({ startDate: null, endDate: null });
-    setExpectedDeliveryDate([null, null]);
-    setUnitRepairStatus('');
-    setManagerId(null);
-    setEngineerId(null);
-    setPickupPartnerId(null);
-    setSearchModel(false);
-    setFilterEmail("");
-    setFilterOrderId("");
-    setCurrentPage(1);
-    setIsFilterApplied(false);
-    setShowFilter(false);
-    window.history.replaceState({}, document.title);
-    const baseFilterObj = {
-      pageSize: pageSize,
-      pageNumber: 0,
-    };
-    dispatch(GetAllRepairUnitOrderByUserId(baseFilterObj));
-  };
-
-
-  // handleEditUser function
-  const handleEditUser = (user) => {
-    console.log("Edit User with User :--", user);
-
-    dispatch(update(user));
-
-    setIsEditMode(true);
-    setSearchModel(true);
-
-    // Populate input fields with user data
-    setUnitRepairStatusEdit(user?.unitRepairStatus || "");
-    setDescription(user?.defectDescriptionByEngineer || "");
-    setPrice(user?.price || "");
-
-    // Store original date for comparison
-    const originalDate = user?.expectedCompletedOn ? new Date(user.expectedCompletedOn) : null;
-    setOriginalExpectedDate(user?.expectedCompletedOn || "");
-
-    // Set date in DateRangePicker format [date, date]
-    if (originalDate) {
-      setOrderCompletedOn([originalDate, originalDate]);
-    } else {
-      setOrderCompletedOn([null, null]);
-    }
-
-    setShowDelayReason(false);
-    setDelayReason("");
-  };
-
-  // Add handler for date change in edit modal
-  const handleEditDateChange = (newValue) => {
-    setOrderCompletedOn(newValue);
-
-    // Check if date is changed from original
-    if (newValue && newValue[0] && originalExpectedDate) {
-      const newDate = new Date(newValue[0]);
-      const originalDate = new Date(originalExpectedDate);
-
-      // Compare dates (ignore time for comparison)
-      const isDateChanged = newDate.toDateString() !== originalDate.toDateString();
-
-      setShowDelayReason(isDateChanged);
-
-      if (!isDateChanged) {
-        setDelayReason(""); // Clear delay reason if date is same
-      }
-    } else if (newValue && newValue[0] && !originalExpectedDate) {
-      // If there was no original date but user is selecting new date
-      setShowDelayReason(true);
-    }
-  };
-
-  useEffect(() => {
-    if (Edit.isEdit) {
-      setDescription(Edit.order.defectDescriptionByEngineer);
-      setPrice(Edit.order.price);
-      setUnitRepairStatusEdit(Edit.order.unitRepairStatus);
-
-      // Handle date properly
-      if (Edit.order.expectedCompletedOn) {
-        const date = new Date(Edit.order.expectedCompletedOn);
-        setOrderCompletedOn([date, date]);
-        setOriginalExpectedDate(Edit.order.expectedCompletedOn);
-      }
-    }
-  }, [Edit]);
-
-
-
-  useEffect(() => {
-    console.log(state?.status);
-
-    if (state?.status === "total") {
-      getAllUnitOrderCommonFunction();
-    } else if (state?.status) {
-      setUnitRepairStatus(state?.status);
-      setIsFilterApplied(true);
-      getAllUnitOrderCommonFunction(state?.status);
-    } else {
-      setUnitRepairStatus('');
-      setIsFilterApplied(false);
-    }
-  }, [state]);
-
 
   useEffect(() => {
     setIsLoaded(true);
@@ -647,9 +834,6 @@ const Order = ({ sidebarMobileOpen }) => {
     }
   }, [])
 
-  useEffect(() => {
-    console.log("Date data :---", orderCompletedOn)
-  })
 
   { isLoading && <Loading overlay={true} /> }
 
@@ -756,10 +940,10 @@ const Order = ({ sidebarMobileOpen }) => {
           <button
             type="button"
             title="Download"
-            onClick={handleDownloadClick}
+            onClick={() => setShowDownloadModal(true)}
             className="transition"
           >
-            <Download className="text-cyan-500" />
+            <Download className='transition' />
           </button>
 
           {showFilter && (
@@ -882,6 +1066,91 @@ const Order = ({ sidebarMobileOpen }) => {
                     </div>
                   </div>
 
+                  {/* Email */}
+                  <div className='my-6'>
+                    <div className="relative">
+                      <label className="block text-sm font-medium mb-2">Search User By Email</label>
+                      <input
+                        type="email"
+                        value={assignEmail}
+                        onChange={handleSearchInputChange}
+                        className={`${inputClass}`}
+                        placeholder="Enter Email"
+                      />
+
+                      {isEmailLoading ? (
+                        <div className="flex justify-center items-center py-8">
+                          <div className="relative">
+                            <div
+                              className="w-16 h-16 border border-white rounded-full animate-spin"
+                              style={{ animationDuration: '2s' }}
+                            >
+                              <div
+                                className="absolute inset-0 border-3 border-transparent border-y-cyan-600 border-l-cyan-600 rounded-full animate-spin"
+                                style={{ animationDuration: '2s' }}
+                              />
+                            </div>
+                            <p className="text-center text-gray-600 mt-4">Loading Email...</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          {showSearchResults && searchResults.length > 0 && (
+
+                            <div className="absolute z-50 w-full my-2 bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto h-[35vh]">
+                              {searchResults.map((user) => (
+                                <div
+                                  key={user.id}
+                                  onClick={() => handleUserSelect(user)}
+                                  className="px-6 py-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                                >
+                                  <div className="flex items-center space-x-3">
+                                    <div className="w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                      {user.firstName?.charAt(0)?.toUpperCase() || 'U'}
+                                    </div>
+                                    <div className="flex-1">
+                                      <div className="text-sm font-medium text-gray-900">
+                                        {`${user.firstName} ${user.lastName}`}
+                                      </div>
+                                      <div className="text-xs text-gray-500">{user.email}</div>
+                                      <div className="text-xs text-gray-400 capitalize">
+                                        Role: {user.role?.name}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      )}
+
+                      {/* No Results Found */}
+                      {!isEmailLoading && showSearchResults && searchResults.length === 0 && assignEmail.length >= 1 && (
+                        <div className="absolute z-50 w-full mt-2 bg-white border border-gray-300 rounded-md shadow-lg p-4">
+                          <p className="text-gray-500 text-center">No users found</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Selected User Display */}
+                    {selectedUser && (
+                      <div className="mb-6 mt-1 p-4 bg-gray-50 rounded-lg">
+                        <h4 className="text-sm font-medium text-gray-700 mb-2">Selected User:</h4>
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-gray-400 rounded-full flex items-center justify-center text-white font-bold">
+                            {selectedUser.firstName?.charAt(0)?.toUpperCase() || 'U'}
+                          </div>
+                          <div>
+                            <div className="font-medium">{`${selectedUser.firstName} ${selectedUser.lastName}`}</div>
+                            <div className="text-sm text-gray-500">{selectedUser.email}</div>
+                            <div className="text-sm text-gray-400 capitalize">Role: {selectedUser.role?.name}</div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <hr className='text-gray-300 w-full pt-3 mb-4' />
 
                   {/* Order-ID Search */}
@@ -929,10 +1198,17 @@ const Order = ({ sidebarMobileOpen }) => {
           {/* Download Modal */}
           {showDownloadModal && (
             <div className={ShowModalMainClass}>
-              <div className="bg-white rounded-2xl shadow-xl p-8 max-w-xl w-[90%] relative">
-                <h2 className="text-3xl font-semibold  mb-6">
-                  Download Window
-                </h2>
+              <div
+                className={`bg-white rounded-2xl shadow-xl p-8 max-w-xl w-[90%] relative overflow-y-auto transition-all duration-300
+        ${showSearchResults && assignEmail.length > 0 ? "max-h-[90vh]" : "max-h-[70vh]"}
+      `}
+              >
+                <div className="flex items-center gap-2 mb-6">
+                  <DownloadCloudIcon className="w-5 h-5 text-cyan-500" />
+                  <h2 className="text-lg font-semibold text-gray-800">
+                    Download Window
+                  </h2>
+                </div>
 
                 {/* Close Icon */}
                 <button
@@ -942,44 +1218,165 @@ const Order = ({ sidebarMobileOpen }) => {
                   &times;
                 </button>
 
-
-                <h3 className="text-lg font-semibold mb-4">Select Date Range</h3>
-                <DateRangePicker
-                  showMeridian
-                  value={selectedDateRange}
-                  rangeColors={["#06b6d4"]}
-                  onChange={handleDateRangeChange}
-                  style={{
-                    border: `3px solid  #5ca1b6ff`,
-                    borderRadius: "9px",
-                  }}
-                  container={() => document.body}
-                  menuStyle={{ zIndex: 99999 }}
-                  placement="bottomStart"
-                  cleanable={false}
-                  className="mb-5 w-full"
-                  appearance="subtle"
-                />
-                <div className="flex justify-between my-3">
-                  <button
-                    onClick={() => handlePredefinedDateRangeClick('1-month')}
-                    className="px-4 py-2 text-sm bg-gray-200 rounded-md"
+                {/* Status */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium text-gray-700">Status</label>
+                    <button onClick={() => setDownloadStatus('')} className="text-sm text-cyan-600 hover:underline">Reset</button>
+                  </div>
+                  <select
+                    value={downloadStatus}
+                    onChange={(e) => setDownloadStatus(e.target.value)}
+                    className={DropDownClass}
                   >
-                    1-Month
-                  </button>
-                  <button
-                    onClick={() => handlePredefinedDateRangeClick('3-month')}
-                    className="px-4 py-2 text-sm bg-gray-200 rounded-md"
-                  >
-                    3-Month
-                  </button>
-                  <button
-                    onClick={() => handlePredefinedDateRangeClick('6-month')}
-                    className="px-4 py-2 text-sm bg-gray-200 rounded-md"
-                  >
-                    6-Month
-                  </button>
+                    <option value="">Select Status</option>
+                    {statusOptions.map((status) => (
+                      <option key={status} value={status}>
+                        {capitalizeEachWord(status.replace(/_/g, ' '))}
+                      </option>
+                    ))}
+                  </select>
                 </div>
+
+                {/* Expected Date */}
+                <div className='mb-6'>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium text-gray-700">Selected Date Range</label>
+                    <button
+                      onClick={() => {
+                        setSelectedDateRange([null, null]);
+                      }}
+                      className="text-sm text-cyan-600 hover:underline"
+                    >
+                      Reset
+                    </button>
+                  </div>
+                  <DateRangePicker
+                    showMeridian
+                    value={selectedDateRange}
+                    rangeColors={["#06b6d4"]}
+                    onChange={handleDateRangeChange}
+                    style={{
+                      border: `3px solid  #5ca1b6ff`,
+                      borderRadius: "9px",
+                    }}
+                    container={() => document.body}
+                    menuStyle={{ zIndex: 99999 }}
+                    placement="bottomStart"
+                    cleanable={false}
+                    className="mb-5 w-full"
+                    appearance="subtle"
+                  />
+
+                  <div className="flex justify-between">
+                    <button
+                      onClick={() => handlePredefinedDateRangeClick('1-month')}
+                      className="px-4 py-2 text-sm bg-gray-200 rounded-md"
+                    >
+                      1-Month
+                    </button>
+                    <button
+                      onClick={() => handlePredefinedDateRangeClick('3-month')}
+                      className="px-4 py-2 text-sm bg-gray-200 rounded-md"
+                    >
+                      3-Month
+                    </button>
+                    <button
+                      onClick={() => handlePredefinedDateRangeClick('6-month')}
+                      className="px-4 py-2 text-sm bg-gray-200 rounded-md"
+                    >
+                      6-Month
+                    </button>
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div className='my-6'>
+                  <div className="relative">
+                    <label className="block text-sm font-medium mb-2">Search User By Email</label>
+                    <input
+                      type="email"
+                      value={assignEmail}
+                      onChange={handleSearchInputChange}
+                      className={`${inputClass}`}
+                      placeholder="Enter Email"
+                    />
+
+                    {isEmailLoading ? (
+                      <div className="flex justify-center items-center py-8">
+                        <div className="relative">
+                          <div
+                            className="w-16 h-16 border border-white rounded-full animate-spin"
+                            style={{ animationDuration: '2s' }}
+                          >
+                            <div
+                              className="absolute inset-0 border-3 border-transparent border-y-cyan-600 border-l-cyan-600 rounded-full animate-spin"
+                              style={{ animationDuration: '2s' }}
+                            />
+                          </div>
+                          <p className="text-center text-gray-600 mt-4">Loading Email...</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {showSearchResults && searchResults.length > 0 && (
+
+                          <div className="absolute z-50 w-full my-2 bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto h-[35vh]">
+                            {searchResults.map((user) => (
+                              <div
+                                key={user.id}
+                                onClick={() => handleUserSelect(user)}
+                                className="px-6 py-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                              >
+                                <div className="flex items-center space-x-3">
+                                  <div className="w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                    {user.firstName?.charAt(0)?.toUpperCase() || 'U'}
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="text-sm font-medium text-gray-900">
+                                      {`${user.firstName} ${user.lastName}`}
+                                    </div>
+                                    <div className="text-xs text-gray-500">{user.email}</div>
+                                    <div className="text-xs text-gray-400 capitalize">
+                                      Role: {user.role?.name}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {/* No Results Found */}
+                    {!isEmailLoading && showSearchResults && searchResults.length === 0 && assignEmail.length >= 1 && (
+                      <div className="absolute z-50 w-full mt-2 bg-white border border-gray-300 rounded-md shadow-lg p-4">
+                        <p className="text-gray-500 text-center">No users found</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Selected User Display */}
+                  {selectedUser && (
+                    <div className="mb-6 mt-1 p-4 bg-gray-50 rounded-lg">
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">Selected User:</h4>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gray-400 rounded-full flex items-center justify-center text-white font-bold">
+                          {selectedUser.firstName?.charAt(0)?.toUpperCase() || 'U'}
+                        </div>
+                        <div>
+                          <div className="font-medium">{`${selectedUser.firstName} ${selectedUser.lastName}`}</div>
+                          <div className="text-sm text-gray-500">{selectedUser.email}</div>
+                          <div className="text-sm text-gray-400 capitalize">Role: {selectedUser.role?.name}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+
+                {/* Action Button's */}
                 <div className="flex justify-between mt-5">
                   <button
                     onClick={handleCloseModal}
@@ -2094,53 +2491,6 @@ const Order = ({ sidebarMobileOpen }) => {
                   className={`${inputClass}`}
                   placeholder="Enter Email"
                 />
-
-                {/* Loader Spinner */}
-                {/* {isEmailLoading && (
-                  <div className="flex justify-center items-center py-8">
-                    <div className="relative">
-                      <div
-                        className="w-16 h-16 border border-white rounded-full animate-spin"
-                        style={{ animationDuration: '2s' }}
-                      >
-                        <div
-                          className="absolute inset-0 border-3 border-transparent border-y-cyan-600 border-l-cyan-600 rounded-full animate-spin"
-                          style={{ animationDuration: '2s' }}
-                        />
-                      </div>
-                      <p className="text-center text-gray-600 mt-4">Loading Email...</p>
-                    </div>
-                  </div>
-                )} */}
-
-
-                {/* Search Results Dropdown */}
-                {/* {showSearchResults && searchResults.length > 0 && (
-                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto h-[35vh]">
-                    {searchResults.map((user) => (
-                      <div
-                        key={user.id}
-                        onClick={() => handleUserSelect(user)}
-                        className="px-6 py-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                            {user.firstName?.charAt(0)?.toUpperCase() || 'U'}
-                          </div>
-                          <div className="flex-1">
-                            <div className="text-sm font-medium text-gray-900">
-                              {`${user.firstName} ${user.lastName}`}
-                            </div>
-                            <div className="text-xs text-gray-500">{user.email}</div>
-                            <div className="text-xs text-gray-400 capitalize">
-                              Role: {user.role?.name}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )} */}
 
                 {isEmailLoading ? (
                   <div className="flex justify-center items-center py-8">

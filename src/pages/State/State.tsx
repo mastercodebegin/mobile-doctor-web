@@ -198,7 +198,7 @@ const handleClearFilter = () =>{
                               onClick={handleClearFilter}
                               className={ClearFilter}
                             >
-                              Clear_Filter
+                              Clear Filter
                             </button>
                   )}
               </div>

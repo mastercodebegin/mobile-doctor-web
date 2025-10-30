@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import ConfirmationModal from "../../components/ConfirmationModal";
-import { ClearFilter, DeleteClass, DeleteIcon, DropDownClass, EditClass, EditIcon, inputClass, DropDownClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
+import { ClearFilter, DeleteClass, DeleteIcon, DropDownClass, EditClass, EditIcon, inputClass, ShowModalMainClass, ShowModelCloseButtonClass, SubmitButtonClass, TableDataClass, TableHadeClass } from "../../helper/ApplicationConstants";
 import Pagination from "../../helper/Pagination";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import Loading from "../../components/Loading";
-import { FetchAllModalNumber, FetchModalBySubCategory } from "../AddMobileNumber/MobileNumberSlice";
-import { GetAllModalIssues, GetAllProductPartsBySubCategory } from "../ModalIssues/ModalIssuesSlice";
+import { FetchModalBySubCategory } from "../AddMobileNumber/MobileNumberSlice";
+import { GetAllProductPartsBySubCategory } from "../ModalIssues/ModalIssuesSlice";
 import { GetAllRepairCost, GetRepairCostByModalId, CreateRepairCost, setEditRepairCost, UpdateRepairCost, GetRepairCostBySubCategoryId } from "./RepairCostSlice";
-import { GetAllSubCategory, GetAllSubCategoryById } from "../AddSubCategory/SubCategorySlice";
+import { GetAllSubCategoryById } from "../AddSubCategory/SubCategorySlice";
 import { GetAllCategory } from "../AddCategory/AddCategorySlice";
 import { toast } from "react-toastify";
 import { LocalStorageManager, STORAGE_KEYS } from "../../util/LocalStorageManager";
@@ -28,19 +28,12 @@ const RepairCost = () => {
   const [selectedProductPart, setSelectedProductPart] = useState("");
   const [selectedModalNumber, setSelectedModalNumber] = useState(0);
   const [isFiltered, setIsFiltered] = useState(false);
-
-  // Initial selection states
-  const [formModalNumber, setFormModalNumber] = useState("");
-
-  // Filtered data for dropdowns
-  const [filteredSubCategories, setFilteredSubCategories] = useState<any[]>([]);
-
-  // Form states
+  
+  // Form Add/Edit states
   const [formCategory, setFormCategory] = useState("");
   const [formSubCategory, setFormSubCategory] = useState("");
+  const [formModalNumber, setFormModalNumber] = useState("");
   const [formProductPart, setFormProductPart] = useState("");
-  const [formFilteredSubCategories, setFormFilteredSubCategories] = useState<any[]>([]);
-  const [formFilteredProductParts, setFormFilteredProductParts] = useState<any[]>([]);
 
   const { MobileNumberData } = useSelector((state: RootState) => state.MobileNumberSlice);
   const { ModalIssuesData } = useSelector((state: RootState) => state.ModalIssuesSlice);
@@ -71,7 +64,7 @@ const RepairCost = () => {
       },
       is_deleted: false
     },
-    productPart: {
+    productPartLabel: {
       id: 0,
       name: '',
       subCategory: {
@@ -126,7 +119,7 @@ const RepairCost = () => {
     setSelectedCategory(categoryId);
     setSelectedSubCategory("");
     setSelectedProductPart("");
-    setSelectedModalNumber("");
+    setSelectedModalNumber(0);
 
     if (categoryId) {
       dispatch(GetAllSubCategoryById(Number(categoryId)));
@@ -142,7 +135,7 @@ const RepairCost = () => {
   const handleSubCategorySelect = (subCategoryId: string) => {
     setSelectedSubCategory(subCategoryId);
     setSelectedProductPart("");
-    setSelectedModalNumber("");
+    setSelectedModalNumber(0);
 
     if (subCategoryId) {
       dispatch(GetRepairCostBySubCategoryId({ subCategoryId: Number(subCategoryId) }));
@@ -168,9 +161,8 @@ const RepairCost = () => {
     setSelectedCategory("");
     setSelectedSubCategory("");
     setSelectedProductPart("");
-    setSelectedModalNumber("");
+    setSelectedModalNumber(0);
     setIsFiltered(false);
-    setFilteredSubCategories([]);
     dispatch(GetAllRepairCost());
     setCurrentPage(1);
   };
@@ -224,7 +216,7 @@ const RepairCost = () => {
     if (selectedProductPartData) {
       setFormData(prev => ({
         ...prev,
-        productPart: selectedProductPartData,
+        productPartLabel: selectedProductPartData,
         modalIssueTitle: selectedProductPartData
       }));
     }
@@ -274,8 +266,6 @@ const RepairCost = () => {
     setFormSubCategory("");
     setFormProductPart("");
     setFormModalNumber("");
-    setFormFilteredSubCategories([]);
-    setFormFilteredProductParts([]);
   };
 
   // 5. Add this debug console.log in handleSaveClick to check if it's being called
@@ -306,7 +296,7 @@ const RepairCost = () => {
           message: formData.message,
           category: formData.category,
           subCategory: formData.subCategory,
-          productPart: formData.productPart,
+          productPartLabel: formData.productPartLabel,
           productModelNumber: formData.productModelNumber
         };
 
@@ -336,13 +326,23 @@ const RepairCost = () => {
   // 6. Add this debug console.log in handleConfirmSave
   const handleConfirmSave = async () => {
     console.log("Confirm save called");
+
+      // Validate all required fields
+  if (!formData.price || !formData.message || !formData.category?.id || 
+      !formData.subCategory?.id || !formData.productModelNumber?.id || 
+      !formData.productPartLabel?.id) {
+    toast.error("Please fill all required fields!");
+    return;
+  }
+
+  
     try {
       const requestData = {
         price: formData.price,
         message: formData.message,
         category: formData.category,
         subCategory: formData.subCategory,
-        productPart: formData.productPart,
+        productPartLabel: formData.productPartLabel,
         productModelNumber: formData.productModelNumber,
       };
 
@@ -373,77 +373,100 @@ const RepairCost = () => {
     setShowModal(true);
   };
 
+
   const handleEditUser = async (user: any) => {
-    console.log("Edit Data", user);
+  console.log("🟢 Edit Data:", user);
 
-    const subCategory = user?.productPart?.subCategory || {};
-    const category = subCategory?.category || {};
+  // --- Extract nested objects safely ---
+  const category = user?.productModelNumber?.subCategory?.category || 
+                   user?.productPartLabel?.subCategory?.category || {};
 
-    // Populate dropdowns
+  const subCategory = user?.productModelNumber?.subCategory || 
+                      user?.productPartLabel?.subCategory || {};
+
+  const productPart = user?.productPartLabel || {};
+  const productModel = user?.productModelNumber || {};
+
+  try {
+    // --- Fetch subcategories for selected category ---
     if (category?.id) {
-      await dispatch(GetAllSubCategoryById(category.id));
+      const subAction: any = await dispatch(GetAllSubCategoryById(category.id));
+      const subList = subAction?.payload ?? [];
+      setFormSubCategory(Array.isArray(subList) ? subList : []);
+    } else {
+      setFormSubCategory('')
     }
 
+    // --- Fetch modal numbers for selected subcategory ---
+if (subCategory?.id) {
+  const modalAction: any = await dispatch(FetchModalBySubCategory(subCategory.id));
+  const modalList = modalAction?.payload ?? [];
+  setFormModalNumber(Array.isArray(modalList) ? modalList : []);
+} else {
+  setFormModalNumber('');
+}
+
+
+    // --- Fetch product parts for selected subcategory ---
     if (subCategory?.id) {
-      await dispatch(GetAllProductPartsBySubCategory(subCategory.id));
+      const partsAction: any = await dispatch(GetAllProductPartsBySubCategory(subCategory.id));
+      const partsList = partsAction?.payload ?? [];
+      setFormProductPart(Array.isArray(partsList) ? partsList : []);
+    } else {
+      setFormProductPart('')
     }
 
-    // ✅ Pre-fill formData (local form state)
+    // --- Pre-fill the form ---
+    setFormData({
+      price: user?.price || "",
+      message: user?.message || "",
+      category: category,
+      subCategory: subCategory,
+      productPartLabel: productPart,
+      productModelNumber: productModel
+    });
+
+    // --- Set selected dropdown values ---
+    setFormCategory(category?.id?.toString() || "");
+    setFormSubCategory(subCategory?.id?.toString() || "");
+    setFormProductPart(productPart?.id?.toString() || "");
+    setFormModalNumber(productModel?.id?.toString() || "");
+
+    // --- Set edit mode and open modal ---
+    setIsEditMode(true);
+    setShowModal(true);
+
+    // --- Store edit data globally ---
+    dispatch(setEditRepairCost(user));
+
+    console.log("✅ Form Pre-Filled Successfully");
+  } catch (err) {
+    console.error("❌ Error while preparing edit form:", err);
+
+    // fallback: still set available data
     setFormData({
       price: user?.price || "",
       message: user?.message || "",
       category,
       subCategory,
-      productPart: user?.productPart || {},
-      productModelNumber: user?.productModelNumber || {}
+      productPartLabel: productPart,
+      productModelNumber: productModel,
     });
 
-    // ✅ Set dropdown values
     setFormCategory(category?.id?.toString() || "");
     setFormSubCategory(subCategory?.id?.toString() || "");
-    setFormProductPart(user?.productPart?.id?.toString() || "");
-    setFormModalNumber(user?.productModelNumber?.id?.toString() || "");
+    setFormProductPart(productPart?.id?.toString() || "");
+    setFormModalNumber(productModel?.id?.toString() || "");
 
-    // ✅ Set edit mode
     setIsEditMode(true);
     setShowModal(true);
-
-    // ✅ Store edit data in Redux
     dispatch(setEditRepairCost(user));
-  };
+  }
+};
 
   const handleDeleteUser = (userId: number) => {
     console.log("Delete Id", userId);
   };
-
-  // Filter subcategories based on selected category
-  useEffect(() => {
-    if (selectedCategory && SubCategoriesData) {
-      const filtered = SubCategoriesData.filter(sub => sub?.category?.id == selectedCategory);
-      setFilteredSubCategories(filtered);
-    } else {
-      setFilteredSubCategories([]);
-    }
-  }, [selectedCategory, SubCategoriesData]);
-
-  // Filter subcategories for form
-  useEffect(() => {
-    if (formCategory && SubCategoriesData) {
-      const filtered = SubCategoriesData.filter(sub => sub?.category?.id == formCategory);
-      setFormFilteredSubCategories(filtered);
-    } else {
-      setFormFilteredSubCategories([]);
-    }
-  }, [formCategory, SubCategoriesData]);
-
-  // Filter product parts for form
-  useEffect(() => {
-    if (formSubCategory && ModalIssuesData) {
-      setFormFilteredProductParts(ModalIssuesData);
-    } else {
-      setFormFilteredProductParts([]);
-    }
-  }, [formSubCategory, ModalIssuesData]);
 
   // Initialize data on component mount
   useEffect(() => {
@@ -452,9 +475,6 @@ const RepairCost = () => {
       dispatch(GetAllRepairCost());
     }
     dispatch(GetAllCategory());
-    // dispatch(FetchAllModalNumber());
-    // dispatch(GetAllModalIssues());
-    // dispatch(GetAllSubCategory());
   }, [dispatch]);
 
   { isLoading && <Loading overlay={true} /> }
@@ -490,7 +510,7 @@ const RepairCost = () => {
                 disabled={!selectedCategory}
               >
                 <option value="">Select Sub-Category</option>
-                {filteredSubCategories?.map((subCategory) => (
+                {SubCategoriesData?.map((subCategory) => (
                   <option key={subCategory.id} value={subCategory.id}>
                     {subCategory.name}
                   </option>
@@ -522,7 +542,7 @@ const RepairCost = () => {
                   onClick={handleClearFilter}
                   className={ClearFilter}
                 >
-                  Clear_Filter
+                  Clear Filter
                 </button>
               )}
             </div>
@@ -594,12 +614,12 @@ const RepairCost = () => {
                             </td>
                             <td className={TableDataClass}>
                               <div className="text-sm font-medium text-gray-600">
-                                {user?.productPart?.name || 'N/A'}
+                                {user?.productPartLabel?.name || 'N/A'}
                               </div>
                             </td>
                             <td className={TableDataClass}>
                               <div className="text-sm font-medium text-gray-600">
-                                {user?.productPart?.subCategory?.name || 'N/A'}
+                                {user?.productPartLabel?.subCategory?.name || 'N/A'}
                               </div>
                             </td>
                             <td className={TableDataClass}>
@@ -689,7 +709,7 @@ const RepairCost = () => {
                     disabled={!formCategory}
                   >
                     <option value="">Choose Sub-Category</option>
-                    {formFilteredSubCategories?.map((item) => (
+                    {SubCategoriesData?.map((item) => (
                       <option key={item?.id} value={item?.id}>{item?.name}</option>
                     ))}
                   </select>
@@ -723,7 +743,7 @@ const RepairCost = () => {
                     disabled={!formModalNumber}
                   >
                     <option value="">Choose Product Part</option>
-                    {formFilteredProductParts?.map((item) => (
+                    {ModalIssuesData?.map((item) => (
                       <option key={item?.id} value={item?.id}>{item?.name}</option>
                     ))}
                   </select>
