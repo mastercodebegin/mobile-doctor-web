@@ -80,7 +80,6 @@ if (isOffline && isCancelled) {
             }
     ];
 } else {
-    // your existing logic for normal online orders
     allSteps = [
         {
             name: 'ORDERED',
@@ -130,55 +129,7 @@ if (isOffline && isCancelled) {
     ];
 }
 
-// Filter only steps with date (keep this line)
-// const filteredSteps = allSteps.filter(step => step.date);
 const filteredSteps = allSteps;
-
-    // // Define all steps and filter out those without dates
-    // const allSteps = [
-    //     {
-    //         name: 'ORDERED',
-    //         label: 'Order Placed',
-    //         date: firstOrder.orderOn,
-    //         completed: !!firstOrder.orderOn
-    //     },
-    //     {
-    //         name: 'PICKUP_SCHEDULED',
-    //         label: 'Pickup Scheduled',
-    //         date: firstOrder.pickupScheduleOn,
-    //         completed: !!firstOrder.pickupScheduleOn
-    //     },
-    //     {
-    //         name: 'PICKED_UP',
-    //         label: 'Picked up',
-    //         date: firstOrder.pickedupUnitFromUserOn,
-    //         completed: !!firstOrder.pickedupUnitFromUserOn
-    //     },
-    //     {
-    //         name: 'RECEIVED_FROM_PARTNER',
-    //         label: 'In Progress',
-    //         date: firstOrder.unitRecievedFromPartnerOn,
-    //         completed: !!firstOrder.unitRecievedFromPartnerOn
-    //     },
-    //     {
-    //         name: 'COMPLETED',
-    //         label: 'Completed',
-    //         date: firstOrder.completedByEngineerOn,
-    //         completed: !!firstOrder.completedByEngineerOn || firstOrder.unitRepairStatus === 'COMPLETED'
-    //     },
-    //     {
-    //         name: 'DELIVERED',
-    //         label: 'Delivered',
-    //         date: firstOrder.deliveredOn,
-    //         completed: !!firstOrder.deliveredOn
-    //     },
-    //     ...(firstOrder.unitRepairStatus === 'CANCELLED' ? [{
-    //         name: 'CANCELLED',
-    //         label: 'Cancelled',
-    //         date: firstOrder.cancelledOn,
-    //         completed: true
-    //     }] : [])
-    // ].filter(step => step.date); // Only show steps that have dates
 
     // Calculate completed steps
     const completedSteps = allSteps.filter(step => step.completed);
@@ -187,7 +138,6 @@ const filteredSteps = allSteps;
 
     // Calculate progress percentage
     const progressPercentage = totalSteps > 1 ? ((completedCount - 1) / (totalSteps - 1)) * 100 : 0;
-    // const animatedWidth = Math.min(animationProgress, progressPercentage);
     const animatedWidth = (animationProgress / 100) * progressPercentage;
 
     return (
